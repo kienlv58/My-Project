@@ -19,6 +19,8 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -26,10 +28,11 @@ import java.security.NoSuchAlgorithmException;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import vn.k2t.traficjam.adapter.TabAdapter;
+import vn.k2t.traficjam.user.ActivityUserProfile;
 import vn.k2t.traficjam.user.LoginUserActivity;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
     @Bind(R.id.toolbar)
     Toolbar toolbar;
     @Bind(R.id.drawer_layout)
@@ -40,6 +43,8 @@ public class MainActivity extends AppCompatActivity
     ViewPager viewPager;
     @Bind(R.id.tabLayout)
     TabLayout tabLayout;
+    @Bind(R.id.imageView)
+    ImageView imgUser;
 
     private FragmentManager manager;
     private TabAdapter tabAdapter;
@@ -84,7 +89,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initObject() {
-
+        imgUser.setOnClickListener(this);
     }
 
     private void setTabFragment() {
@@ -154,5 +159,11 @@ public class MainActivity extends AppCompatActivity
 
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onClick(View view) {
+        startActivity(new Intent(this, ActivityUserProfile.class));
+        overridePendingTransition(android.R.anim.slide_in_left,android.R.anim.slide_out_right);
     }
 }
