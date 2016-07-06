@@ -5,4 +5,7 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+
+    <string name="NotConnect">Lỗi kết nối. Nhấn thử lại</string>
+    <string name="msg_connect_error">LỖI KẾT NỐI</string>
 </resources>
