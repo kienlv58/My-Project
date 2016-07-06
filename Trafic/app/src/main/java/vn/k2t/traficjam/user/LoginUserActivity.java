@@ -74,7 +74,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
 
     @Override
     public void onClick(View v) {
-        int i = v.get
+        //int i = v.get
 
     }
 }
