@@ -1,0 +1,86 @@
+{
+  "project_info": {
+    "project_number": "958934924397",
+    "firebase_url": "https://trafficjam-825b7.firebaseio.com",
+    "project_id": "trafficjam-825b7",
+    "storage_bucket": "trafficjam-825b7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:958934924397:android:89138fcbad8d5bee",
+        "android_client_info": {
+          "package_name": "vn.devk2t.com"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "958934924397-650ldnqui83rbvmb2sqdgeggeitpv42c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCilrqrB3As7tSXuvCvCpa3iEusKNCrqVg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:958934924397:android:3448b853cb4f1def",
+        "android_client_info": {
+          "package_name": "vn.k2t.traficjam"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "958934924397-pmpeailgfe5jdjalrn5blfr1il8iplgn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "vn.k2t.traficjam",
+            "certificate_hash": "790DD516B1CF6D328AC4F7C8BA778D8D74DFBCB2"
+          }
+        },
+        {
+          "client_id": "958934924397-650ldnqui83rbvmb2sqdgeggeitpv42c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCilrqrB3As7tSXuvCvCpa3iEusKNCrqVg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "958934924397-650ldnqui83rbvmb2sqdgeggeitpv42c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
