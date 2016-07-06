@@ -8,4 +8,16 @@
 
     <string name="NotConnect">Lỗi kết nối. Nhấn thử lại</string>
     <string name="msg_connect_error">LỖI KẾT NỐI</string>
+    <string name="input_email">Nhập email hoặc tên đăng nhập</string>
+    <string name="input_pass">nhập mật khẩu</string>
+    <string name="btn_login">Đăng nhập</string>
+    <string name="txtv_forgot_pass">Quên mật khẩu</string>
+    <string name="txtv_register">Đăng ký</string>
+    <string name="btn_login_fb">Facebook</string>
+    <string name="btn_login_google">Google+</string>
+    <string name="erro_network">Lỗi kết nối.Vui lòng kiểm tra mạng</string>
+    <string name="erro_connect_server">Kết nối máy chủ không thành công.Vui lòng thử lại</string>
+    <string name="erro_response">Dữ liệu không đúng</string>
+    <string name="erro_validate_account">Tài khoản hoặc mật khẩu không đúng</string>
+    <string name="ask_charge_card">Xu của bạn không đủ để đăng ký gói này.Bạn có muốn nạp thêm xu ?</string>
 </resources>
