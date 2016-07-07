@@ -36,7 +36,7 @@ public class FrgNews extends FrgBase {
         if (utilities.isConnected()) {
             rootView = inflater.inflate(R.layout.frg_news, container, false);
         } else {
-            super.newInstance("", mContext);
+            super.newInstance( mContext);
             return super.onCreateView(inflater, container, savedInstanceState);
         }
 
