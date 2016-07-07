@@ -21,12 +21,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import de.hdodenhof.circleimageview.CircleImageView;
 import vn.k2t.traficjam.adapter.TabAdapter;
 import vn.k2t.traficjam.maps.MapsActivity;
 import vn.k2t.traficjam.user.ActivityUserProfile;
@@ -46,11 +48,12 @@ public class MainActivity extends AppCompatActivity
     ViewPager viewPager;
     @Bind(R.id.tabLayout)
     TabLayout tabLayout;
-    @Bind(R.id.imageView)
-    ImageView imgUser;
+
 
     private FragmentManager manager;
     private TabAdapter tabAdapter;
+    private CircleImageView imgUserProfile;
+    private TextView tvNavUserName, tvNavEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +96,8 @@ public class MainActivity extends AppCompatActivity
 
     private void initObject() {
 
-        imgUser.setOnClickListener(this);
+        imgUserProfile= (CircleImageView) findViewById(R.id.profile_image_user);
+        imgUserProfile.setOnClickListener(this);
 
     }
 
@@ -151,7 +155,8 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(MainActivity.this, MapsActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_slideshow) {
-
+            startActivity(new Intent(MainActivity.this, ActivityUserProfile.class));
+            // overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
         } else if (id == R.id.nav_manage) {
 
         } else if (id == R.id.nav_share) {
@@ -168,7 +173,11 @@ public class MainActivity extends AppCompatActivity
     @Override
 
     public void onClick(View view) {
-        startActivity(new Intent(this, ActivityUserProfile.class));
-        overridePendingTransition(android.R.anim.slide_in_left,android.R.anim.slide_out_right);
+        switch (view.getId()) {
+            case R.id.profile_image_user:
+                startActivity(new Intent(this, ActivityUserProfile.class));
+                break;
+        }
+
     }
 }
