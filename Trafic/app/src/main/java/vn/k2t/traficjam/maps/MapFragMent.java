@@ -34,7 +34,7 @@ import java.io.IOException;
 import vn.k2t.traficjam.R;
 
 /**
- * Created by root on 06/07/2016.
+ * Created by Paul on 8/11/15.
  */
 public class MapFragMent extends SupportMapFragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         GoogleMap.OnInfoWindowClickListener,
@@ -50,7 +50,7 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
             GoogleMap.MAP_TYPE_HYBRID,
             GoogleMap.MAP_TYPE_TERRAIN,
             GoogleMap.MAP_TYPE_NONE};
-    private int curMapTypeIndex = 1;
+    private int curMapTypeIndex = 0;
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -91,13 +91,14 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
 
     private void initCamera(Location location) {
         CameraPosition position = CameraPosition.builder()
-                .target(new LatLng(37.422535, -122.084804))
+                .target(new LatLng(location.getLatitude(), location.getLongitude()))
                 .zoom(16f)
                 .bearing(0.0f)
                 .tilt(0.0f)
                 .build();
 
         getMap().animateCamera(CameraUpdateFactory.newCameraPosition(position), null);
+
         getMap().setMapType(MAP_TYPES[curMapTypeIndex]);
         getMap().setTrafficEnabled(true);
         getMap().setMyLocationEnabled(true);
@@ -133,7 +134,6 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         //Create a default location if the Google API Client fails. Placing location at Googleplex
-        Toast.makeText(getActivity(), "onConnectionFailed", Toast.LENGTH_LONG).show();
         mCurrentLocation = new Location("");
         mCurrentLocation.setLatitude(37.422535);
         mCurrentLocation.setLongitude(-122.084804);
@@ -233,4 +233,42 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
         getMap().setMapType(MAP_TYPES[curMapTypeIndex]);
     }
 
+    @Override
+    public void onCreateOptionsMenu(
+            Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.main_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_clear: {
+                getMap().clear();
+                return true;
+            }
+            case R.id.action_circle: {
+                drawCircle(new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()));
+                return true;
+            }
+            case R.id.action_polygon: {
+                drawPolygon(new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()));
+                return true;
+            }
+            case R.id.action_overlay: {
+                drawOverlay(new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()), 250, 250);
+                return true;
+            }
+            case R.id.action_traffic: {
+                toggleTraffic();
+                return true;
+            }
+            case R.id.action_cycle_map_type: {
+                cycleMapType();
+                return true;
+            }
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+    }
 }
