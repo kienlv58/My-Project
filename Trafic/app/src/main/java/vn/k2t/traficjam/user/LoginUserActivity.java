@@ -132,6 +132,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
 
     @Override
     public void onClick(View v) {
+
         int i = v.getId();
         switch (i){
             case R.id.btn_loginFB:
