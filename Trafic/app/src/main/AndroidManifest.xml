@@ -59,6 +59,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".user.LoginUserActivity" />
+        <activity
+            android:name=".user.RegisterActivity"
+            android:theme="@style/AppDialogTheme"
+
+            />
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -83,8 +89,6 @@
         <activity android:name=".user.ActivityUserProfile">
 
         </activity>
-        <activity android:name=".user.LoginUserActivity"></activity>
-
     </application>
 
 </manifest>

@@ -1,10 +1,15 @@
 package vn.k2t.traficjam.user;
 
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -36,12 +41,13 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
 import java.util.Arrays;
+import java.util.zip.Inflater;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import vn.k2t.traficjam.R;
 
-public class LoginUserActivity extends AppCompatActivity implements View.OnClickListener,GoogleApiClient.OnConnectionFailedListener,GoogleApiClient.ConnectionCallbacks{
+public class LoginUserActivity extends AppCompatActivity implements View.OnClickListener, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
     @Bind(R.id.edt_email)
     EditText edt_email;
@@ -57,6 +63,10 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
     TextView txtv_forgotpass;
     @Bind(R.id.txtv_register)
     TextView txtv_register;
+    String email, password;
+    ProgressDialog progressDialog;
+    boolean sendl = false;
+
     //firebase
     FirebaseAuth mAuth;
     FirebaseAuth.AuthStateListener mAuthStateListener;
@@ -65,7 +75,6 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
     CallbackManager callbackManager;
     //login google
     GoogleApiClient mGoogleApiClient;
-
 
 
     @Override
@@ -83,20 +92,22 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
         btn_loginGG.setOnClickListener(this);
         txtv_forgotpass.setOnClickListener(this);
         txtv_register.setOnClickListener(this);
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage("Đang gửi...");
 
-        mAuthStateListener = new FirebaseAuth.AuthStateListener(){
+        mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-                if (firebaseUser != null){
+                if (firebaseUser != null) {
                     String uid = firebaseUser.getUid();
                     String email = firebaseUser.getEmail();
                     String name = firebaseUser.getDisplayName();
                     String avatar = String.valueOf(firebaseUser.getPhotoUrl());
-                    Toast.makeText(LoginUserActivity.this,email+"===="+name,Toast.LENGTH_SHORT).show();
-                }
-                else
-                    Toast.makeText(LoginUserActivity.this,"user null",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginUserActivity.this, email + "====" + name, Toast.LENGTH_SHORT).show();
+                } else
+                    Toast.makeText(LoginUserActivity.this, "user null", Toast.LENGTH_SHORT).show();
             }
         };
 
@@ -134,7 +145,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
     public void onClick(View v) {
 
         int i = v.getId();
-        switch (i){
+        switch (i) {
             case R.id.btn_loginFB:
                 LoginManager.getInstance().logInWithReadPermissions(LoginUserActivity.this, Arrays.asList("public_profile", "email", "user_friends"));
                 break;
@@ -142,20 +153,52 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                 Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
                 startActivityForResult(signInIntent, 100);
                 break;
+            case R.id.btn_loginAccount:
+                email = edt_email.getText().toString();
+                password = edt_pass.getText().toString();
+                if (email.isEmpty() || !isValidEmail(email) || password.isEmpty() || password.length() < 6) {
+                    Toast.makeText(LoginUserActivity.this, "email hoac mat khau khong dung dinh dang", Toast.LENGTH_SHORT).show();
+                } else {
+                    singInAccount(email, password);
+                }
+                break;
+            case R.id.txtv_register:
+                Intent intent = new Intent(this, RegisterActivity.class);
+                startActivityForResult(intent, 111);
+                break;
+            case R.id.txtv_forgotpass:
+                forgotPass();
+                break;
         }
 
     }
-//fb + firebase
-    public void handeFBaccesstoken(AccessToken accessToken){
+
+    //acount + firebase
+    public void singInAccount(String email, String pass) {
+        progressDialog.show();
+        mAuth.signInWithEmailAndPassword(email, pass).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(LoginUserActivity.this, task + "", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(LoginUserActivity.this, "Tài khoản hoặc mật khẩu không đúng", Toast.LENGTH_SHORT).show();
+                }
+                progressDialog.dismiss();
+            }
+        });
+    }
+
+    //fb + firebase
+    public void handeFBaccesstoken(AccessToken accessToken) {
         AuthCredential credential = FacebookAuthProvider.getCredential(accessToken.getToken());
         mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()){
-                    Toast.makeText(LoginUserActivity.this,task+"",Toast.LENGTH_SHORT).show();
-                }
-                else {
-                    Toast.makeText(LoginUserActivity.this,"login fail",Toast.LENGTH_SHORT).show();
+                if (task.isSuccessful()) {
+                    Toast.makeText(LoginUserActivity.this, task + "", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(LoginUserActivity.this, "login fail", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -163,20 +206,20 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
     }
 
     //google + firebase
-    public void firebaseAuthWithGoogle(GoogleSignInAccount account){
-        AuthCredential authCredential = GoogleAuthProvider.getCredential(account.getIdToken(),null);
+    public void firebaseAuthWithGoogle(GoogleSignInAccount account) {
+        AuthCredential authCredential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
         mAuth.signInWithCredential(authCredential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()){
-                    Toast.makeText(LoginUserActivity.this,task+"",Toast.LENGTH_SHORT).show();
-                }
-                else {
-                    Toast.makeText(LoginUserActivity.this,"login fail",Toast.LENGTH_SHORT).show();
+                if (task.isSuccessful()) {
+                    Toast.makeText(LoginUserActivity.this, task + "", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(LoginUserActivity.this, "login fail", Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
+
 
     @Override
     protected void onStart() {
@@ -187,21 +230,68 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
     @Override
     protected void onStop() {
         super.onStop();
-        if (mAuthStateListener != null )
-        mAuth.removeAuthStateListener(mAuthStateListener);
+        if (mAuthStateListener != null)
+            mAuth.removeAuthStateListener(mAuthStateListener);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        callbackManager.onActivityResult(requestCode,resultCode,data);
-        if (requestCode == 100){
+        callbackManager.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 100) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            if (result.isSuccess()){
+            if (result.isSuccess()) {
                 GoogleSignInAccount account = result.getSignInAccount();
                 firebaseAuthWithGoogle(account);
             }
         }
+        if (requestCode == 111) {
+            edt_email.setText(data.getStringExtra("email"));
+            edt_pass.setText(data.getStringExtra("pass"));
+        }
+    }
+
+    public final static boolean isValidEmail(CharSequence target) {
+        return !TextUtils.isEmpty(target) && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
+    }
+
+    public void forgotPass() {
+        View v = LayoutInflater.from(this).inflate(R.layout.dialog_forgotpass, null);
+        final EditText edt_ForgotPass = (EditText) v.findViewById(R.id.edt_forgotpass);
+        new AlertDialog.Builder(this).setTitle("Quên mật khẩu").setView(v).setCancelable(false).setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String _email = edt_ForgotPass.getText().toString();
+                if (_email.isEmpty() || !isValidEmail(_email)) {
+                    Toast.makeText(LoginUserActivity.this, "email khong dung dinh dang", Toast.LENGTH_SHORT).show();
+                    forgotPass();
+                } else
+                    aa(_email,dialog);
+            }
+        }).setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        }).create().show();
+
+    }
+
+
+    public void aa(String _email, final DialogInterface dialogInterface) {
+        progressDialog.show();
+        mAuth.sendPasswordResetEmail(_email).addOnCompleteListener(this, new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                progressDialog.dismiss();
+                dialogInterface.dismiss();
+                if (task.isSuccessful()) {
+                    Toast.makeText(LoginUserActivity.this, "check email", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(LoginUserActivity.this, "fail", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     @Override
