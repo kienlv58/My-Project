@@ -31,9 +31,8 @@ public class FrgBase extends Fragment {
         // TODO Auto-generated constructor stub
     }
 
-    public static FrgBase newInstance(String key, Context context) {
+    public static FrgBase newInstance(Context context) {
         f = new FrgBase();
-        mKey = key;
        // mItem = item;
         mContext = context;
         return f;
@@ -57,7 +56,7 @@ public class FrgBase extends Fragment {
             @Override
             public void onClick(View arg0) {
                 if(utilities.isConnected())
-                    addFragment(mKey);
+                    addFragment();
             }
         });
         return view;
@@ -67,7 +66,7 @@ public class FrgBase extends Fragment {
      *
      * Replace Fragment
      */
-    public void addFragment(String key) {
+    public void addFragment() {
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.detach(this).attach(this).commit();
     }

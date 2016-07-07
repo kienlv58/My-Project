@@ -28,11 +28,14 @@ import java.security.NoSuchAlgorithmException;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import vn.k2t.traficjam.adapter.TabAdapter;
+import vn.k2t.traficjam.maps.MapsActivity;
 import vn.k2t.traficjam.user.ActivityUserProfile;
 import vn.k2t.traficjam.user.LoginUserActivity;
 
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
+
     @Bind(R.id.toolbar)
     Toolbar toolbar;
     @Bind(R.id.drawer_layout)
@@ -89,12 +92,14 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initObject() {
+
         imgUser.setOnClickListener(this);
+
     }
 
     private void setTabFragment() {
         FragmentTransaction transaction = manager.beginTransaction();
-        transaction.replace(R.id.viewPager, FrgBase.newInstance("", getApplicationContext())).commit();
+        transaction.replace(R.id.viewPager, FrgBase.newInstance(getApplicationContext())).commit();
         tabAdapter = new TabAdapter(manager, this);
         viewPager.setAdapter(tabAdapter);
         tabLayout.setupWithViewPager(viewPager);
@@ -143,16 +148,15 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent);
             // Handle the camera action
         } else if (id == R.id.nav_gallery) {
-
+            Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
 
-        } else if (id == R.id.nav_share)
-        {
+        } else if (id == R.id.nav_share) {
 
-        } else if (id == R.id.nav_send)
-        {
+        } else if (id == R.id.nav_send) {
 
         }
 
@@ -162,6 +166,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+
     public void onClick(View view) {
         startActivity(new Intent(this, ActivityUserProfile.class));
         overridePendingTransition(android.R.anim.slide_in_left,android.R.anim.slide_out_right);
