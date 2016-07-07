@@ -10,17 +10,21 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <meta-data android:name="com.facebook.sdk.ApplicationId"
-            android:value="@string/facebook_app_id"/>
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
 
-        <activity android:name="com.facebook.FacebookActivity"
-            android:configChanges= "keyboard|keyboardHidden|screenLayout|screenSize|orientation"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:label="@string/app_name" />
+        <activity
+            android:name="com.facebook.FacebookActivity"
+            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
-        <provider android:authorities="com.facebook.app.FacebookContentProvider488728064646819"
-        android:name="com.facebook.FacebookContentProvider"
-        android:exported="true" />
+        <provider
+            android:name="com.facebook.FacebookContentProvider"
+            android:authorities="com.facebook.app.FacebookContentProvider488728064646819"
+            android:exported="true" />
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
@@ -31,7 +35,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".user.LoginUserActivity"></activity>
+        <activity android:name=".user.LoginUserActivity" />
+        <activity
+            android:name=".user.RegisterActivity"
+            android:theme="@style/AppDialogTheme"
+
+            />
     </application>
 
 </manifest>

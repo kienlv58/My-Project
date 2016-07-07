@@ -10,9 +10,12 @@
 
     <string name="NotConnect">Lỗi kết nối. Nhấn thử lại</string>
     <string name="msg_connect_error">LỖI KẾT NỐI</string>
-    <string name="input_email">Nhập email hoặc tên đăng nhập</string>
+    <string name="input_email">Nhập emai</string>
+    <string name="input_forgotpass">Nhập email để lấy lại mật khẩu</string>
+    <string name="input_repass">nhập lại mật khẩu</string>
     <string name="input_pass">nhập mật khẩu</string>
     <string name="btn_login">Đăng nhập</string>
+    <string name="btn_register">Đăng ký</string>
     <string name="txtv_forgot_pass">Quên mật khẩu</string>
     <string name="txtv_register">Đăng ký</string>
     <string name="btn_login_fb">Facebook</string>

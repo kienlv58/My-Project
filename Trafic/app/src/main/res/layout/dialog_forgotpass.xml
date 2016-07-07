@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/inputlayout_Email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="20dp"
+        android:focusable="false"
+        android:textColorHint="@color/Brown">
+
+    <EditText
+        android:id="@+id/edt_forgotpass"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/input_forgotpass"
+        android:inputType="textEmailAddress"
+        android:singleLine="true"
+        android:textColor="@color/BlackColor"
+        android:textColorHint="@color/Brown"
+        android:textSize="15sp"
+
+        />
+    </android.support.design.widget.TextInputLayout>
+
+
+</LinearLayout>
