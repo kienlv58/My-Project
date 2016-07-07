@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -51,7 +52,6 @@ public class MainActivity extends AppCompatActivity
     ViewPager viewPager;
     @Bind(R.id.tabLayout)
     TabLayout tabLayout;
-    @Bind(R.id.imageView)
     ImageView imgUser;
 
     private FragmentManager manager;
@@ -75,7 +75,13 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         initToolbar();
+
+        imgUser = (ImageView)findViewById(R.id.imageView);
+        if (mUser != null){
+        imgUser.setImageURI(Uri.parse(mUser.getAvatar()));
+        }
         initObject();
+
 
 
         /**
