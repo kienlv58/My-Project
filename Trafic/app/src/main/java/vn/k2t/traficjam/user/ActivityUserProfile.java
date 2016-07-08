@@ -12,6 +12,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 import vn.k2t.traficjam.R;
 
 /**
@@ -66,7 +68,12 @@ public class ActivityUserProfile extends AppCompatActivity{
             case android.R.id.home:
                 onBackPressed();
                 return true;
+            case R.id.item_logout:
+                FirebaseAuth.getInstance().signOut();
+                finish();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
+
 }

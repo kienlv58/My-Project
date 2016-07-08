@@ -111,7 +111,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                     String name = firebaseUser.getDisplayName();
                     String avatar = String.valueOf(firebaseUser.getPhotoUrl());
                     String uidProvider = firebaseUser.getProviderId();
-                    UserTraffic mUser = new UserTraffic(uid,name,avatar,email,uidProvider,"","");
+                    UserTraffic mUser = new UserTraffic(uid,name,avatar,email,uidProvider,"","","");
                     mDatabase.child(uid).child("uid").setValue(uid);
                     mDatabase.child(uid).child("email").setValue(email);
                     mDatabase.child(uid).child("name").setValue(name);
