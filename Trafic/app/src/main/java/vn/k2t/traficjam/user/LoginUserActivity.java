@@ -185,6 +185,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                     Toast.makeText(LoginUserActivity.this, "Tài khoản hoặc mật khẩu không đúng", Toast.LENGTH_SHORT).show();
                 }
                 progressDialog.dismiss();
+                finish();
             }
         });
     }
@@ -200,6 +201,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                 } else {
                     Toast.makeText(LoginUserActivity.this, "login fail", Toast.LENGTH_SHORT).show();
                 }
+                finish();
             }
         });
 
@@ -216,6 +218,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                 } else {
                     Toast.makeText(LoginUserActivity.this, "login fail", Toast.LENGTH_SHORT).show();
                 }
+                finish();
             }
         });
     }
