@@ -112,8 +112,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initObject() {
-
-        imgUserProfile= (CircleImageView) findViewById(R.id.profile_image_user);
+        imgUserProfile = (CircleImageView) navigationView.getHeaderView(0).findViewById(R.id.profile_image_user);
         imgUserProfile.setOnClickListener(this);
 
     }
@@ -193,33 +192,26 @@ public class MainActivity extends AppCompatActivity
 
         switch (view.getId()) {
             case R.id.profile_image_user:
-                startActivity(new Intent(this, ActivityUserProfile.class));
+                if (mUser != null) {
+                    startActivity(new Intent(this, ActivityUserProfile.class));
+                    overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+                } else {
+                    Intent intent = new Intent(MainActivity.this, LoginUserActivity.class);
+                    startActivity(intent);
+                }
                 break;
         }
 
 
-        int id = view.getId();
-        switch (id){
-            case R.id.imageView:
-                if (mUser!=null){
-                    startActivity(new Intent(this, ActivityUserProfile.class));
-                    overridePendingTransition(android.R.anim.slide_in_left,android.R.anim.slide_out_right);
-                }
-                else {
-                    Intent intent = new Intent(MainActivity.this, LoginUserActivity.class);
-                    startActivity(intent);
-                }
-
-        }
-
     }
-    public void getUserFirebaase(){
+
+    public void getUserFirebaase() {
         mAuth = FirebaseAuth.getInstance();
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-                if (firebaseUser != null){
+                if (firebaseUser != null) {
                     mUser = new UserTraffic();
                     mUser.setUid(firebaseUser.getUid());
                     mUser.setName(firebaseUser.getDisplayName());
@@ -227,8 +219,7 @@ public class MainActivity extends AppCompatActivity
                     mUser.setAvatar(String.valueOf(firebaseUser.getPhotoUrl()));
                     mUser.setUidProvider(firebaseUser.getProviderId());
 
-                }
-                else {
+                } else {
                     Intent intent = new Intent(MainActivity.this, LoginUserActivity.class);
                     startActivity(intent);
                 }
