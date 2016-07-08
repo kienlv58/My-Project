@@ -147,8 +147,12 @@ public class MainActivity extends AppCompatActivity
 
     private void initObject() {
 
+     //   imgUserProfile= (CircleImageView) findViewById(R.id.profile_image_user);
+      //  imgUserProfile.setOnClickListener(this);
+
         imgUserProfile = (CircleImageView) navigationView.getHeaderView(0).findViewById(R.id.profile_image_user);
         imgUserProfile.setOnClickListener(this);
+
 
     }
 
@@ -257,6 +261,7 @@ public class MainActivity extends AppCompatActivity
 //                    mUser.setAvatar(String.valueOf(firebaseUser.getPhotoUrl()));
 //                    mUser.setUidProvider(firebaseUser.getProviderId());
 //                    imgUserProfile.setImageURI(Uri.parse(mUser.getAvatar()));
+
 
                 } else {
                     Intent intent = new Intent(MainActivity.this, LoginUserActivity.class);
