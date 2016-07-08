@@ -10,17 +10,37 @@ public class UserTraffic {
     private String email;
     private String uidProvider;
     private String rank;
+    private String latitude;
+    private String longitude;
 
-    public UserTraffic(String uid, String name, String avatar, String email, String uidProvider,String rank) {
+    public UserTraffic() {
+    }
+
+    public UserTraffic(String uid, String name, String avatar, String email, String uidProvider, String rank, String latitude, String longitude) {
         this.uid = uid;
         this.name = name;
         this.avatar = avatar;
         this.email = email;
         this.uidProvider = uidProvider;
         this.rank = rank;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
-    public UserTraffic() {
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
+    }
+
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
+    }
+
+    public String getLatitude() {
+        return latitude;
+    }
+
+    public String getLongitude() {
+        return longitude;
     }
 
     public String getUid() {

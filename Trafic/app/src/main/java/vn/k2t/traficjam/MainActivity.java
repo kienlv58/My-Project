@@ -112,8 +112,8 @@ public class MainActivity extends AppCompatActivity
 
     private void initObject() {
 
-        //imgUserProfile= (CircleImageView) findViewById(R.id.profile_image_user);
-//        imgUserProfile.setOnClickListener(this);
+     //   imgUserProfile= (CircleImageView) findViewById(R.id.profile_image_user);
+      //  imgUserProfile.setOnClickListener(this);
 
     }
 
@@ -224,6 +224,7 @@ public class MainActivity extends AppCompatActivity
                     mUser.setName(firebaseUser.getDisplayName());
                     mUser.setEmail(firebaseUser.getEmail());
                     mUser.setAvatar(String.valueOf(firebaseUser.getPhotoUrl()));
+                    mUser.setUidProvider(firebaseUser.getProviderId());
                     mUser.setUidProvider(firebaseUser.getProviderId());
 
                 }

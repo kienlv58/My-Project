@@ -4,32 +4,39 @@ package vn.k2t.traficjam.maps;
  * Created by root on 07/07/2016.
  */
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.CircleOptions;
-import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolygonOptions;
 
 import java.io.IOException;
 
+import vn.k2t.traficjam.MainActivity;
 import vn.k2t.traficjam.R;
+import vn.k2t.traficjam.model.UserTraffic;
 
 /**
  * Created by Paul on 8/11/15.
@@ -38,30 +45,33 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
         GoogleMap.OnInfoWindowClickListener,
         GoogleMap.OnMapLongClickListener,
         GoogleMap.OnMapClickListener,
-        GoogleMap.OnMarkerClickListener {
+        GoogleMap.OnMarkerClickListener, android.location.LocationListener {
 
     private GoogleApiClient mGoogleApiClient;
     private Location mCurrentLocation;
-
     private final int[] MAP_TYPES = {GoogleMap.MAP_TYPE_SATELLITE,
             GoogleMap.MAP_TYPE_NORMAL,
             GoogleMap.MAP_TYPE_HYBRID,
             GoogleMap.MAP_TYPE_TERRAIN,
             GoogleMap.MAP_TYPE_NONE};
     private int curMapTypeIndex = 1;
+    private UserTraffic mUser;
+    protected LocationManager locationManager;
+    private GoogleMap mMap;
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         setHasOptionsMenu(true);
-
+        mUser = MainActivity.mUser;
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
-
+        mMap = getMap();
+        initObject();
         initListeners();
     }
 
@@ -70,6 +80,11 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
         getMap().setOnMapLongClickListener(this);
         getMap().setOnInfoWindowClickListener(this);
         getMap().setOnMapClickListener(this);
+    }
+
+    private void initObject() {
+        locationManager = (LocationManager) getActivity()
+                .getSystemService(getActivity().LOCATION_SERVICE);
     }
 
     private void removeListeners() {
@@ -88,26 +103,98 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     }
 
     private void initCamera(Location location) {
-        CameraPosition position = CameraPosition.builder()
-                .target(new LatLng(location.getLatitude(), location.getLongitude()))
-                .zoom(16f)
-                .bearing(0.0f)
-                .tilt(0.0f)
-                .build();
+        if (!checkGPS()) {
+            showSettingsAlert();
+        } else {
+            if (location != null) {
+                CameraPosition position = CameraPosition.builder()
+                        .target(new LatLng(location.getLatitude(), location.getLongitude()))
+                        .zoom(15.2f)
+                        .bearing(0.0f)
+                        .tilt(0.0f)
+                        .build();
 
-        getMap().animateCamera(CameraUpdateFactory.newCameraPosition(position), null);
+                mMap.setMapType(MAP_TYPES[curMapTypeIndex]);
+                mMap.setTrafficEnabled(true);
+                mMap.setMyLocationEnabled(true);
 
-        getMap().setMapType(MAP_TYPES[curMapTypeIndex]);
-        getMap().setTrafficEnabled(true);
-        getMap().setMyLocationEnabled(true);
-        //getMap().getUiSettings().setZoomControlsEnabled(true);
+
+                //getMap().getUiSettings().setZoomControlsEnabled(true);
+                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                MarkerOptions options = new MarkerOptions().position(latLng);
+                options.title(getAddressFromLatLng(latLng));
+                if (mUser != null) {
+                    if (mUser.getAvatar() != "") {
+                    } else {
+                        options.icon(BitmapDescriptorFactory
+                                .fromBitmap(BitmapFactory
+                                        .decodeResource(getResources(), R.mipmap.ic_launcher)));
+                    }
+                } else {
+                    options.icon(BitmapDescriptorFactory
+                            .fromBitmap(BitmapFactory
+                                    .decodeResource(getResources(), R.mipmap.ic_launcher)));
+                }
+                getMap().addMarker(options);
+
+                //getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), null);
+
+                 drawCircle(location);
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
+            } else {
+                Toast.makeText(getActivity(), getActivity().getString(R.string.can_not_get_location_of_you), Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private void drawCircle(Location location) {
         getMap().addCircle(new CircleOptions()
                 .center(new LatLng(location.getLatitude(), location.getLongitude()))
                 .radius(200).strokeWidth(2)
                 .strokeColor(Color.GRAY)
                 .fillColor(0x30ff0000));
+    }
 
-        Toast.makeText(getActivity(), location.getLatitude() + "", Toast.LENGTH_LONG).show();
+
+    private boolean checkGPS() {
+
+
+        // getting GPS status
+        boolean isGPSEnabled = locationManager
+                .isProviderEnabled(LocationManager.GPS_PROVIDER);
+        return isGPSEnabled;
+    }
+
+    private void showSettingsAlert() {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
+
+        // Setting Dialog Title
+        alertDialog.setTitle("GPS is settings");
+
+        // Setting Dialog Message
+        alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?");
+
+        // Setting Icon to Dialog
+        //alertDialog.setIcon(R.drawable.delete);
+
+        // On pressing Settings button
+        alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                getActivity().startActivity(intent);
+            }
+        });
+
+        // on pressing cancel button
+        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        // Showing Alert Message
+        alertDialog.show();
     }
 
     @Override
@@ -127,8 +214,11 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     @Override
     public void onConnected(Bundle bundle) {
         mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-
         initCamera(mCurrentLocation);
+//        if (mUser.getAvatar() == "") {
+        // LatLng latLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+        //  Resources res = getActivity().getResources();
+        // }
     }
 
     @Override
@@ -138,11 +228,7 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        //Create a default location if the Google API Client fails. Placing location at Googleplex
-        mCurrentLocation = new Location("");
-        mCurrentLocation.setLatitude(37.422535);
-        mCurrentLocation.setLongitude(-122.084804);
-        initCamera(mCurrentLocation);
+        Toast.makeText(getActivity(), getActivity().getString(R.string.can_not_get_location_of_you), Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -189,52 +275,28 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
         return address;
     }
 
-    private void drawCircle(LatLng location) {
-        CircleOptions options = new CircleOptions();
-        options.center(location);
-        //Radius in meters
-        options.radius(10);
-        options.fillColor(getResources().getColor(R.color.BlackColor));
-        options.strokeColor(getResources().getColor(R.color.BlueZing));
-        options.strokeWidth(10);
-        getMap().addCircle(options);
+    @Override
+    public void onLocationChanged(Location location) {
+        double latitude = location.getLatitude();
+        double longitude = location.getLongitude();
+        LatLng latLng = new LatLng(latitude, longitude);
+        getMap().addMarker(new MarkerOptions().position(latLng));
+        getMap().moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        getMap().animateCamera(CameraUpdateFactory.zoomTo(15));
     }
 
-    private void drawPolygon(LatLng startingLocation) {
-        LatLng point2 = new LatLng(startingLocation.latitude + .001, startingLocation.longitude);
-        LatLng point3 = new LatLng(startingLocation.latitude, startingLocation.longitude + .001);
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
 
-        PolygonOptions options = new PolygonOptions();
-        options.add(startingLocation, point2, point3);
-
-        options.fillColor(getResources().getColor(R.color.BlackColor));
-        options.strokeColor(getResources().getColor(R.color.BlueZing));
-        options.strokeWidth(10);
-
-        getMap().addPolygon(options);
     }
 
-    private void drawOverlay(LatLng location, int width, int height) {
-        GroundOverlayOptions options = new GroundOverlayOptions();
-        options.position(location, width, height);
+    @Override
+    public void onProviderEnabled(String provider) {
 
-        options.image(BitmapDescriptorFactory
-                .fromBitmap(BitmapFactory
-                        .decodeResource(getResources(), R.mipmap.ic_launcher)));
-        getMap().addGroundOverlay(options);
     }
 
-    private void toggleTraffic() {
-        getMap().setTrafficEnabled(!getMap().isTrafficEnabled());
-    }
+    @Override
+    public void onProviderDisabled(String provider) {
 
-    private void cycleMapType() {
-        if (curMapTypeIndex < MAP_TYPES.length - 1) {
-            curMapTypeIndex++;
-        } else {
-            curMapTypeIndex = 0;
-        }
-
-        getMap().setMapType(MAP_TYPES[curMapTypeIndex]);
     }
 }

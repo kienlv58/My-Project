@@ -37,4 +37,6 @@
     <string name="dialog_play_services_unavailable">Google Play Services are unavailable.</string>
     <string name="dialog_download_play_services">Download Play Services</string>
     <string name="dialog_close_program">Close Program</string>
+    <!--tuan-->
+    <string name="can_not_get_location_of_you">Chúng tôi không thể lấy vị trí hiện tại của bạn. Vui lòng kiểm tra lại GPS</string>
 </resources>
