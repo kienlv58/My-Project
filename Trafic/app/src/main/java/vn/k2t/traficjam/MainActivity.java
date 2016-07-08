@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -23,9 +22,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.facebook.FacebookSdk;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -33,7 +30,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.squareup.picasso.Picasso;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -74,10 +70,7 @@ public class MainActivity extends AppCompatActivity
     FirebaseAuth.AuthStateListener mAuthStateListener;
     DatabaseReference mDatabases;
 
-    public static UserTraffic mUser;
-    SQLUser sqlUser;
-    UserTraffic userSer;
-    String uid;
+    public UserTraffic mUser;
     FirebaseUser user;
 
     @Override
@@ -85,7 +78,6 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        //getUserFirebaase();
         ButterKnife.bind(this);
         initToolbar();
         initObject();
@@ -97,7 +89,7 @@ public class MainActivity extends AppCompatActivity
             ValueEventListener eventListener = new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    userSer = dataSnapshot.getValue(UserTraffic.class);
+                    mUser = dataSnapshot.getValue(UserTraffic.class);
                 }
 
                 @Override
@@ -146,9 +138,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initObject() {
-
-     //   imgUserProfile= (CircleImageView) findViewById(R.id.profile_image_user);
-      //  imgUserProfile.setOnClickListener(this);
 
         imgUserProfile = (CircleImageView) navigationView.getHeaderView(0).findViewById(R.id.profile_image_user);
         imgUserProfile.setOnClickListener(this);
@@ -245,37 +234,4 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    public void getUserFirebaase() {
-        mAuth = FirebaseAuth.getInstance();
-        mAuthStateListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-                if (firebaseUser != null) {
-                    uid = firebaseUser.getUid();
-
-//                    mUser = new UserTraffic();
-//                    mUser.setUid(firebaseUser.getUid());
-//                    mUser.setName(firebaseUser.getDisplayName());
-//                    mUser.setEmail(firebaseUser.getEmail());
-//                    mUser.setAvatar(String.valueOf(firebaseUser.getPhotoUrl()));
-//                    mUser.setUidProvider(firebaseUser.getProviderId());
-//                    imgUserProfile.setImageURI(Uri.parse(mUser.getAvatar()));
-
-
-                } else {
-                    Intent intent = new Intent(MainActivity.this, LoginUserActivity.class);
-                    startActivity(intent);
-                }
-
-            }
-        };
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        getUserFirebaase();
-
-    }
 }
