@@ -10,14 +10,16 @@ public class UserTraffic {
     private String email;
     private String uidProvider;
     private String rank;
+    private String location;
 
-    public UserTraffic(String uid, String name, String avatar, String email, String uidProvider,String rank) {
+    public UserTraffic(String uid, String name, String avatar, String email, String uidProvider, String rank, String location) {
         this.uid = uid;
         this.name = name;
         this.avatar = avatar;
         this.email = email;
         this.uidProvider = uidProvider;
         this.rank = rank;
+        this.location = location;
     }
 
     public UserTraffic() {
@@ -69,5 +71,13 @@ public class UserTraffic {
 
     public void setUidProvider(String uidProvider) {
         this.uidProvider = uidProvider;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 }

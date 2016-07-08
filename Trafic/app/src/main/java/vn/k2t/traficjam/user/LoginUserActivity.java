@@ -39,6 +39,8 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Arrays;
 import java.util.zip.Inflater;
@@ -46,6 +48,8 @@ import java.util.zip.Inflater;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import vn.k2t.traficjam.R;
+import vn.k2t.traficjam.database.queries.SQLUser;
+import vn.k2t.traficjam.model.UserTraffic;
 
 public class LoginUserActivity extends AppCompatActivity implements View.OnClickListener, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
@@ -65,11 +69,13 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
     TextView txtv_register;
     String email, password;
     ProgressDialog progressDialog;
-    boolean sendl = false;
+    SQLUser sqlUser;
+
 
     //firebase
     FirebaseAuth mAuth;
     FirebaseAuth.AuthStateListener mAuthStateListener;
+    DatabaseReference mDatabase;
 
     //login facebook
     CallbackManager callbackManager;
@@ -84,7 +90,8 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
         setContentView(R.layout.activity_login_user);
         ButterKnife.bind(this);
         mAuth = FirebaseAuth.getInstance();
-
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        sqlUser = new SQLUser(this);
 
         callbackManager = CallbackManager.Factory.create();
         btn_loginAccount.setOnClickListener(this);
@@ -105,6 +112,16 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                     String email = firebaseUser.getEmail();
                     String name = firebaseUser.getDisplayName();
                     String avatar = String.valueOf(firebaseUser.getPhotoUrl());
+                    String uidProvider = firebaseUser.getProviderId();
+                    UserTraffic mUser = new UserTraffic(uid,name,avatar,email,uidProvider,"","");
+                    mDatabase.child(uid).child("uid").setValue(uid);
+                    mDatabase.child(uid).child("email").setValue(email);
+                    mDatabase.child(uid).child("name").setValue(name);
+                    mDatabase.child(uid).child("avatar").setValue(avatar);
+                    mDatabase.child(uid).child("uidProvider").setValue(uidProvider);
+                    mDatabase.child(uid).child("rank").setValue("");
+                    mDatabase.child(uid).child("location").setValue("");
+                    sqlUser.insertUser(mUser);
                     Toast.makeText(LoginUserActivity.this, email + "====" + name, Toast.LENGTH_SHORT).show();
                 } else
                     Toast.makeText(LoginUserActivity.this, "user null", Toast.LENGTH_SHORT).show();

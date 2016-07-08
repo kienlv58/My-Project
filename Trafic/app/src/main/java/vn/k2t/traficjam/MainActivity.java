@@ -23,9 +23,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.facebook.FacebookSdk;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -34,6 +42,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 import vn.k2t.traficjam.adapter.TabAdapter;
+import vn.k2t.traficjam.database.queries.SQLUser;
 import vn.k2t.traficjam.maps.MapsActivity;
 import vn.k2t.traficjam.model.UserTraffic;
 import vn.k2t.traficjam.user.ActivityUserProfile;
@@ -63,26 +72,46 @@ public class MainActivity extends AppCompatActivity
     //firebase
     FirebaseAuth mAuth;
     FirebaseAuth.AuthStateListener mAuthStateListener;
+    DatabaseReference mDatabases;
 
     public static UserTraffic mUser;
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-    }
+    SQLUser sqlUser;
+    UserTraffic userSer;
+    String uid;
+    FirebaseUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
-        getUserFirebaase();
+        //getUserFirebaase();
         ButterKnife.bind(this);
         initToolbar();
         initObject();
 
-        if (mUser != null) {
-            imgUserProfile.setImageURI(Uri.parse(mUser.getAvatar()));
+        user =FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user!= null) {
+            mDatabases = FirebaseDatabase.getInstance().getReference().child(user.getUid());
+            ValueEventListener eventListener = new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    userSer = dataSnapshot.getValue(UserTraffic.class);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            };
+            mDatabases.addValueEventListener(eventListener);
+            if (user != null) {
+
+                user.getPhotoUrl().getEncodedPath();
+                user.getPhotoUrl().getPath();
+                //imgUserProfile.setImageURI(uri);
+            }
         }
 
 
@@ -199,9 +228,9 @@ public class MainActivity extends AppCompatActivity
         int id = view.getId();
         switch (id) {
             case R.id.profile_image_user:
-                if (mUser != null) {
+                if (user != null) {
                     startActivity(new Intent(this, ActivityUserProfile.class));
-                    overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+                    overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_in_left);
                 } else {
                     Intent intent = new Intent(MainActivity.this, LoginUserActivity.class);
                     startActivity(intent);
@@ -219,13 +248,15 @@ public class MainActivity extends AppCompatActivity
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
                 if (firebaseUser != null) {
-                    mUser = new UserTraffic();
-                    mUser.setUid(firebaseUser.getUid());
-                    mUser.setName(firebaseUser.getDisplayName());
-                    mUser.setEmail(firebaseUser.getEmail());
-                    mUser.setAvatar(String.valueOf(firebaseUser.getPhotoUrl()));
-                    mUser.setUidProvider(firebaseUser.getProviderId());
-                    imgUserProfile.setImageURI(Uri.parse(mUser.getAvatar()));
+                    uid = firebaseUser.getUid();
+
+//                    mUser = new UserTraffic();
+//                    mUser.setUid(firebaseUser.getUid());
+//                    mUser.setName(firebaseUser.getDisplayName());
+//                    mUser.setEmail(firebaseUser.getEmail());
+//                    mUser.setAvatar(String.valueOf(firebaseUser.getPhotoUrl()));
+//                    mUser.setUidProvider(firebaseUser.getProviderId());
+//                    imgUserProfile.setImageURI(Uri.parse(mUser.getAvatar()));
 
                 } else {
                     Intent intent = new Intent(MainActivity.this, LoginUserActivity.class);
