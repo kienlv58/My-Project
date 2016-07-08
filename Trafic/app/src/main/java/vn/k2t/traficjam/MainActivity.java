@@ -22,7 +22,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -120,8 +119,8 @@ public class MainActivity extends AppCompatActivity
 
     private void initObject() {
 
-        imgUserProfile= (CircleImageView) findViewById(R.id.profile_image_user);
-        imgUserProfile.setOnClickListener(this);
+        //imgUserProfile= (CircleImageView) findViewById(R.id.profile_image_user);
+//        imgUserProfile.setOnClickListener(this);
 
     }
 
