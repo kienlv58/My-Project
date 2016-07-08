@@ -70,18 +70,12 @@ public class MainActivity extends AppCompatActivity
     FirebaseAuth.AuthStateListener mAuthStateListener;
     DatabaseReference mDatabases;
 
-    public UserTraffic mUser;
+    public static UserTraffic mUser;
     FirebaseUser user;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
-        initToolbar();
-        initObject();
-
+    protected void onStart() {
+        super.onStart();
         user =FirebaseAuth.getInstance().getCurrentUser();
 
         if (user!= null) {
@@ -98,13 +92,26 @@ public class MainActivity extends AppCompatActivity
                 }
             };
             mDatabases.addValueEventListener(eventListener);
+        }
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
+        initToolbar();
+        initObject();
+
+
             if (user != null) {
 
                 user.getPhotoUrl().getEncodedPath();
                 user.getPhotoUrl().getPath();
                 //imgUserProfile.setImageURI(uri);
             }
-        }
+
 
 
         /**
