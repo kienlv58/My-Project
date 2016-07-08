@@ -21,7 +21,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -112,6 +111,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initObject() {
+
         imgUserProfile = (CircleImageView) navigationView.getHeaderView(0).findViewById(R.id.profile_image_user);
         imgUserProfile.setOnClickListener(this);
 
@@ -189,10 +189,10 @@ public class MainActivity extends AppCompatActivity
     @Override
 
     public void onClick(View view) {
-
-        switch (view.getId()) {
+        int id = view.getId();
+        switch (id){
             case R.id.profile_image_user:
-                if (mUser != null) {
+                if (mUser!=null){
                     startActivity(new Intent(this, ActivityUserProfile.class));
                     overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
                 } else {

@@ -5,12 +5,10 @@ package vn.k2t.traficjam.maps;
  */
 
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -34,7 +32,7 @@ import java.io.IOException;
 import vn.k2t.traficjam.R;
 
 /**
- * Created by root on 06/07/2016.
+ * Created by Paul on 8/11/15.
  */
 public class MapFragMent extends SupportMapFragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         GoogleMap.OnInfoWindowClickListener,
@@ -91,17 +89,25 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
 
     private void initCamera(Location location) {
         CameraPosition position = CameraPosition.builder()
-                .target(new LatLng(37.422535, -122.084804))
+                .target(new LatLng(location.getLatitude(), location.getLongitude()))
                 .zoom(16f)
                 .bearing(0.0f)
                 .tilt(0.0f)
                 .build();
 
         getMap().animateCamera(CameraUpdateFactory.newCameraPosition(position), null);
+
         getMap().setMapType(MAP_TYPES[curMapTypeIndex]);
         getMap().setTrafficEnabled(true);
         getMap().setMyLocationEnabled(true);
-        getMap().getUiSettings().setZoomControlsEnabled(true);
+        //getMap().getUiSettings().setZoomControlsEnabled(true);
+        getMap().addCircle(new CircleOptions()
+                .center(new LatLng(location.getLatitude(), location.getLongitude()))
+                .radius(200).strokeWidth(2)
+                .strokeColor(Color.GRAY)
+                .fillColor(0x30ff0000));
+
+        Toast.makeText(getActivity(), location.getLatitude() + "", Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -133,7 +139,6 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         //Create a default location if the Google API Client fails. Placing location at Googleplex
-        Toast.makeText(getActivity(), "onConnectionFailed", Toast.LENGTH_LONG).show();
         mCurrentLocation = new Location("");
         mCurrentLocation.setLatitude(37.422535);
         mCurrentLocation.setLongitude(-122.084804);
@@ -232,5 +237,4 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
 
         getMap().setMapType(MAP_TYPES[curMapTypeIndex]);
     }
-
 }
