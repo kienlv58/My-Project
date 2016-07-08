@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -68,16 +69,21 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
-        getUserFirebaase();
+
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getUserFirebaase();
         ButterKnife.bind(this);
         initToolbar();
         initObject();
+
+        if (mUser != null) {
+            imgUserProfile.setImageURI(Uri.parse(mUser.getAvatar()));
+        }
 
 
         /**
@@ -114,6 +120,10 @@ public class MainActivity extends AppCompatActivity
 
      //   imgUserProfile= (CircleImageView) findViewById(R.id.profile_image_user);
       //  imgUserProfile.setOnClickListener(this);
+
+        imgUserProfile = (CircleImageView) navigationView.getHeaderView(0).findViewById(R.id.profile_image_user);
+        imgUserProfile.setOnClickListener(this);
+
 
     }
 
@@ -190,45 +200,39 @@ public class MainActivity extends AppCompatActivity
 
     public void onClick(View view) {
 
-        switch (view.getId()) {
+        int id = view.getId();
+        switch (id) {
             case R.id.profile_image_user:
-                startActivity(new Intent(this, ActivityUserProfile.class));
+                if (mUser != null) {
+                    startActivity(new Intent(this, ActivityUserProfile.class));
+                    overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+                } else {
+                    Intent intent = new Intent(MainActivity.this, LoginUserActivity.class);
+                    startActivity(intent);
+                }
                 break;
         }
 
 
-        int id = view.getId();
-        switch (id){
-            case R.id.profile_image_user:
-                if (mUser!=null){
-                    startActivity(new Intent(this, ActivityUserProfile.class));
-                    overridePendingTransition(android.R.anim.slide_in_left,android.R.anim.slide_out_right);
-                }
-                else {
-                    Intent intent = new Intent(MainActivity.this, LoginUserActivity.class);
-                    startActivity(intent);
-                }
-
-        }
-
     }
-    public void getUserFirebaase(){
+
+    public void getUserFirebaase() {
         mAuth = FirebaseAuth.getInstance();
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-                if (firebaseUser != null){
+                if (firebaseUser != null) {
                     mUser = new UserTraffic();
                     mUser.setUid(firebaseUser.getUid());
                     mUser.setName(firebaseUser.getDisplayName());
                     mUser.setEmail(firebaseUser.getEmail());
                     mUser.setAvatar(String.valueOf(firebaseUser.getPhotoUrl()));
                     mUser.setUidProvider(firebaseUser.getProviderId());
-                    mUser.setUidProvider(firebaseUser.getProviderId());
+                    imgUserProfile.setImageURI(Uri.parse(mUser.getAvatar()));
 
-                }
-                else {
+
+                } else {
                     Intent intent = new Intent(MainActivity.this, LoginUserActivity.class);
                     startActivity(intent);
                 }
