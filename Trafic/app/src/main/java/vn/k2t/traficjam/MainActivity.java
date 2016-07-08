@@ -5,6 +5,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
@@ -20,15 +21,20 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import de.hdodenhof.circleimageview.CircleImageView;
 import vn.k2t.traficjam.adapter.TabAdapter;
 import vn.k2t.traficjam.maps.MapsActivity;
+import vn.k2t.traficjam.model.UserTraffic;
 import vn.k2t.traficjam.user.ActivityUserProfile;
 import vn.k2t.traficjam.user.LoginUserActivity;
 
@@ -46,11 +52,24 @@ public class MainActivity extends AppCompatActivity
     ViewPager viewPager;
     @Bind(R.id.tabLayout)
     TabLayout tabLayout;
-    @Bind(R.id.imageView)
-    ImageView imgUser;
+
 
     private FragmentManager manager;
     private TabAdapter tabAdapter;
+    private CircleImageView imgUserProfile;
+    private TextView tvNavUserName, tvNavEmail;
+
+    //firebase
+    FirebaseAuth mAuth;
+    FirebaseAuth.AuthStateListener mAuthStateListener;
+
+    public static UserTraffic mUser;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        getUserFirebaase();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +112,8 @@ public class MainActivity extends AppCompatActivity
 
     private void initObject() {
 
-        imgUser.setOnClickListener(this);
+        //imgUserProfile= (CircleImageView) findViewById(R.id.profile_image_user);
+//        imgUserProfile.setOnClickListener(this);
 
     }
 
@@ -151,7 +171,8 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(MainActivity.this, MapsActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_slideshow) {
-
+            startActivity(new Intent(MainActivity.this, ActivityUserProfile.class));
+            // overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
         } else if (id == R.id.nav_manage) {
 
         } else if (id == R.id.nav_share) {
@@ -168,7 +189,57 @@ public class MainActivity extends AppCompatActivity
     @Override
 
     public void onClick(View view) {
-        startActivity(new Intent(this, ActivityUserProfile.class));
-        overridePendingTransition(android.R.anim.slide_in_left,android.R.anim.slide_out_right);
+
+        switch (view.getId()) {
+            case R.id.profile_image_user:
+                startActivity(new Intent(this, ActivityUserProfile.class));
+                break;
+        }
+
+
+        int id = view.getId();
+        switch (id){
+            case R.id.profile_image_user:
+                if (mUser!=null){
+                    startActivity(new Intent(this, ActivityUserProfile.class));
+                    overridePendingTransition(android.R.anim.slide_in_left,android.R.anim.slide_out_right);
+                }
+                else {
+                    Intent intent = new Intent(MainActivity.this, LoginUserActivity.class);
+                    startActivity(intent);
+                }
+
+        }
+
+    }
+    public void getUserFirebaase(){
+        mAuth = FirebaseAuth.getInstance();
+        mAuthStateListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+                if (firebaseUser != null){
+                    mUser = new UserTraffic();
+                    mUser.setUid(firebaseUser.getUid());
+                    mUser.setName(firebaseUser.getDisplayName());
+                    mUser.setEmail(firebaseUser.getEmail());
+                    mUser.setAvatar(String.valueOf(firebaseUser.getPhotoUrl()));
+                    mUser.setUidProvider(firebaseUser.getProviderId());
+
+                }
+                else {
+                    Intent intent = new Intent(MainActivity.this, LoginUserActivity.class);
+                    startActivity(intent);
+                }
+
+            }
+        };
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getUserFirebaase();
+
     }
 }

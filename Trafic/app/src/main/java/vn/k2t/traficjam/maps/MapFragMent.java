@@ -5,12 +5,10 @@ package vn.k2t.traficjam.maps;
  */
 
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -50,7 +48,7 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
             GoogleMap.MAP_TYPE_HYBRID,
             GoogleMap.MAP_TYPE_TERRAIN,
             GoogleMap.MAP_TYPE_NONE};
-    private int curMapTypeIndex = 0;
+    private int curMapTypeIndex = 1;
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -102,7 +100,14 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
         getMap().setMapType(MAP_TYPES[curMapTypeIndex]);
         getMap().setTrafficEnabled(true);
         getMap().setMyLocationEnabled(true);
-        getMap().getUiSettings().setZoomControlsEnabled(true);
+        //getMap().getUiSettings().setZoomControlsEnabled(true);
+        getMap().addCircle(new CircleOptions()
+                .center(new LatLng(location.getLatitude(), location.getLongitude()))
+                .radius(200).strokeWidth(2)
+                .strokeColor(Color.GRAY)
+                .fillColor(0x30ff0000));
+
+        Toast.makeText(getActivity(), location.getLatitude() + "", Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -231,44 +236,5 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
         }
 
         getMap().setMapType(MAP_TYPES[curMapTypeIndex]);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(
-            Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.main_menu, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_clear: {
-                getMap().clear();
-                return true;
-            }
-            case R.id.action_circle: {
-                drawCircle(new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()));
-                return true;
-            }
-            case R.id.action_polygon: {
-                drawPolygon(new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()));
-                return true;
-            }
-            case R.id.action_overlay: {
-                drawOverlay(new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()), 250, 250);
-                return true;
-            }
-            case R.id.action_traffic: {
-                toggleTraffic();
-                return true;
-            }
-            case R.id.action_cycle_map_type: {
-                cycleMapType();
-                return true;
-            }
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-
     }
 }
