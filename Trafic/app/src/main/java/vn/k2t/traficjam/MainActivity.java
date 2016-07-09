@@ -74,41 +74,23 @@ public class MainActivity extends AppCompatActivity
     FirebaseUser user;
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        user =FirebaseAuth.getInstance().getCurrentUser();
-
-        if (user!= null) {
-            mDatabases = FirebaseDatabase.getInstance().getReference().child(user.getUid());
-            ValueEventListener eventListener = new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    mUser = dataSnapshot.getValue(UserTraffic.class);
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            };
-            mDatabases.addValueEventListener(eventListener);
-        }
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         initToolbar();
         initObject();
+        getUserFirebase();
 
 
             if (user != null) {
+                try {
 
-                user.getPhotoUrl().getEncodedPath();
-                user.getPhotoUrl().getPath();
+                    user.getPhotoUrl().getEncodedPath();
+                    user.getPhotoUrl().getPath();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
                 //imgUserProfile.setImageURI(uri);
             }
 
@@ -228,12 +210,12 @@ public class MainActivity extends AppCompatActivity
         int id = view.getId();
         switch (id) {
             case R.id.profile_image_user:
-                if (user != null) {
-                    startActivity(new Intent(this, ActivityUserProfile.class));
+                if (mUser != null) {
+                    startActivityForResult(new Intent(this, ActivityUserProfile.class),300);
                     overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_in_left);
                 } else {
                     Intent intent = new Intent(MainActivity.this, LoginUserActivity.class);
-                    startActivity(intent);
+                    startActivityForResult(intent,200);
                 }
                 break;
         }
@@ -241,4 +223,32 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 200)
+            getUserFirebase();
+        if (requestCode == 300){
+            mUser = null;
+        }
+    }
+    public void getUserFirebase(){
+        user =FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user!= null) {
+            mDatabases = FirebaseDatabase.getInstance().getReference().child(user.getUid());
+            ValueEventListener eventListener = new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    mUser = dataSnapshot.getValue(UserTraffic.class);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            };
+            mDatabases.addValueEventListener(eventListener);
+        }
+    }
 }

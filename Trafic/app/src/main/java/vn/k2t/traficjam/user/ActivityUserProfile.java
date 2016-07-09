@@ -1,5 +1,6 @@
 package vn.k2t.traficjam.user;
 
+import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -70,6 +71,8 @@ public class ActivityUserProfile extends AppCompatActivity{
                 return true;
             case R.id.item_logout:
                 FirebaseAuth.getInstance().signOut();
+                Intent intent = new Intent();
+                setResult(300,intent);
                 finish();
                 break;
         }
