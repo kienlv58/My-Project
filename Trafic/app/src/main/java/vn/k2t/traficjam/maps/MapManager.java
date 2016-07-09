@@ -38,19 +38,17 @@ public class MapManager implements GoogleMap.OnMyLocationChangeListener, Locatio
         initMap();
     }
 
-    public void addMarker(String title, Location location) {
+    public void addMarker(String title, LatLng position) {
         MarkerOptions markerOptions = new MarkerOptions();
-        MarkerOptions options=new MarkerOptions();
-        LatLng latLng=new LatLng(location.getLatitude(),location.getLongitude());
-        options.position(latLng);
-        options.title(title);
+        markerOptions.position(position);
         markerOptions.title(title);
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 
         gMap.addMarker(markerOptions);
 
 
-        gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+        gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
+
     }
 
 //    private GoogleMap.InfoWindowAdapter viewInfo = new GoogleMap.InfoWindowAdapter() {
@@ -114,7 +112,7 @@ public class MapManager implements GoogleMap.OnMyLocationChangeListener, Locatio
         LatLng latLng = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
         if (myMarker == null) {
             //  myLocationName = getAddressName(mLocation);
-            addMarker("My location",mLocation);
+            addMarker("My location", latLng);
             CameraPosition cameraPosition = new CameraPosition(latLng, 17, 0, 0);
             gMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
         } else {

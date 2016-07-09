@@ -39,4 +39,6 @@
     <string name="dialog_close_program">Close Program</string>
     <!--tuan-->
     <string name="can_not_get_location_of_you">Chúng tôi không thể lấy vị trí hiện tại của bạn. Vui lòng kiểm tra lại GPS</string>
+    <string name="Traffic_jam">Tắc đường</string>
+    <string name="Accident">Tai nạn</string>
 </resources>

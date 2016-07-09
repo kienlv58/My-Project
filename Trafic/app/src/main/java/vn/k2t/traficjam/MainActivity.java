@@ -5,7 +5,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
@@ -38,9 +37,9 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 import vn.k2t.traficjam.adapter.TabAdapter;
-import vn.k2t.traficjam.database.queries.SQLUser;
 import vn.k2t.traficjam.maps.MapsActivity;
 import vn.k2t.traficjam.model.UserTraffic;
+import vn.k2t.traficjam.untilitis.CommonMethod;
 import vn.k2t.traficjam.user.ActivityUserProfile;
 import vn.k2t.traficjam.user.LoginUserActivity;
 
@@ -76,9 +75,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
-        user =FirebaseAuth.getInstance().getCurrentUser();
+        user = FirebaseAuth.getInstance().getCurrentUser();
 
-        if (user!= null) {
+        if (user != null) {
             mDatabases = FirebaseDatabase.getInstance().getReference().child(user.getUid());
             ValueEventListener eventListener = new ValueEventListener() {
                 @Override
@@ -98,20 +97,18 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         initToolbar();
         initObject();
 
+        if (user != null) {
 
-            if (user != null) {
-
-                user.getPhotoUrl().getEncodedPath();
-                user.getPhotoUrl().getPath();
-                //imgUserProfile.setImageURI(uri);
-            }
-
+            // user.getPhotoUrl().getEncodedPath();
+            // user.getPhotoUrl().getPath();
+            CommonMethod.getInstance().loadImage(user.getPhotoUrl().getEncodedPath(), imgUserProfile);
+            //imgUserProfile.setImageURI(uri);
+        }
 
 
         /**
@@ -237,8 +234,6 @@ public class MainActivity extends AppCompatActivity
                 }
                 break;
         }
-
-
     }
 
 }
