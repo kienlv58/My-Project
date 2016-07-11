@@ -22,6 +22,7 @@ import android.content.Context;
 import android.os.Build;
 import android.os.StrictMode;
 
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -43,7 +44,7 @@ public class MyApplication extends Application {
             StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().detectAll().penaltyDialog().build());
             StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyDeath().build());
         }
-
+        GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
         super.onCreate();
         mInstance = this;
 

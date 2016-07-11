@@ -76,7 +76,6 @@ public class MainActivity extends AppCompatActivity
     protected void onStart() {
         super.onStart();
         user = FirebaseAuth.getInstance().getCurrentUser();
-
         if (user != null) {
             mDatabases = FirebaseDatabase.getInstance().getReference().child(user.getUid());
             ValueEventListener eventListener = new ValueEventListener() {

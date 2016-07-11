@@ -14,14 +14,13 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -29,18 +28,20 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import vn.k2t.traficjam.MainActivity;
 import vn.k2t.traficjam.R;
-import vn.k2t.traficjam.frgmanager.FrgMaps;
 import vn.k2t.traficjam.model.UserTraffic;
-import vn.k2t.traficjam.onclick.ItemClick;
-import vn.k2t.traficjam.onclick.OnClickFrg;
 
 /**
  * Created by Paul on 8/11/15.
@@ -62,6 +63,8 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     private UserTraffic mUser;
     protected LocationManager locationManager;
     public static GoogleMap mMap;
+    DatabaseReference mDatabase;
+    FirebaseUser user;
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -79,6 +82,7 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     }
 
     private void initListeners() {
+
         getMap().setOnMarkerClickListener(this);
         getMap().setOnMapLongClickListener(this);
         getMap().setOnInfoWindowClickListener(this);
@@ -88,6 +92,9 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     private void initObject() {
         locationManager = (LocationManager) getActivity()
                 .getSystemService(getActivity().LOCATION_SERVICE);
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
     }
 
     private void removeListeners() {
@@ -123,28 +130,28 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
 
 
                 //getMap().getUiSettings().setZoomControlsEnabled(true);
-                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                MarkerOptions options = new MarkerOptions().position(latLng);
-                options.title(getAddressFromLatLng(latLng));
-                if (mUser != null) {
-                    if (mUser.getAvatar() != "") {
-                    } else {
-                        options.icon(BitmapDescriptorFactory
-                                .fromBitmap(BitmapFactory
-                                        .decodeResource(getResources(), R.mipmap.ic_launcher)));
-                    }
-                } else {
-                    options.icon(BitmapDescriptorFactory
-                            .fromBitmap(BitmapFactory
-                                    .decodeResource(getResources(), R.mipmap.ic_launcher)));
-                }
-                getMap().addMarker(options);
+                // LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                //MarkerOptions options = new MarkerOptions().position(latLng);
+                //options.title(getAddressFromLatLng(latLng));
+//                if (mUser != null) {
+//                    if (mUser.getAvatar() != "") {
+//                    } else {
+//                        options.icon(BitmapDescriptorFactory
+//                                .fromBitmap(BitmapFactory
+//                                        .decodeResource(getResources(), R.mipmap.ic_launcher)));
+//                    }
+//                } else {
+//                    options.icon(BitmapDescriptorFactory
+//                            .fromBitmap(BitmapFactory
+//                                    .decodeResource(getResources(), R.mipmap.ic_launcher)));
+//                }
+                //getMap().addMarker(options);
 
                 //getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
                 mMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), null);
 
-                drawCircle(location);
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
+                //  drawCircle(location);
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, this);
             } else {
                 Toast.makeText(getActivity(), getActivity().getString(R.string.can_not_get_location_of_you), Toast.LENGTH_LONG).show();
             }
@@ -227,6 +234,7 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     public void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
+
     }
 
     @Override
@@ -241,10 +249,25 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     public void onConnected(Bundle bundle) {
         mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         initCamera(mCurrentLocation);
+        saveLocationUserFromFireBase(mCurrentLocation);
 //        if (mUser.getAvatar() == "") {
         // LatLng latLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
         //  Resources res = getActivity().getResources();
         // }
+    }
+
+    private void saveLocationUserFromFireBase(final double laitude, final double longitude) {
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put("latitude", laitude + "");
+        childUpdates.put("longitude", longitude + "");
+        mDatabase.child(user.getUid()).updateChildren(childUpdates);
+    }
+
+    private void saveLocationUserFromFireBase(final Location location) {
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put("latitude", location.getLatitude() + "");
+        childUpdates.put("longitude", location.getLongitude() + "");
+        mDatabase.child(user.getUid()).updateChildren(childUpdates);
     }
 
     @Override
@@ -280,13 +303,14 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
 
     @Override
     public void onMapLongClick(LatLng latLng) {
+
         MarkerOptions options = new MarkerOptions().position(latLng);
         options.title(getAddressFromLatLng(latLng));
 
         options.icon(BitmapDescriptorFactory.fromBitmap(
                 BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher)));
-
         getMap().addMarker(options);
+
     }
 
     private String getAddressFromLatLng(LatLng latLng) {
@@ -303,7 +327,8 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
 
     @Override
     public void onLocationChanged(Location location) {
-        initCamera(location);
+        saveLocationUserFromFireBase(location);
+        // initCamera(location);
     }
 
     @Override

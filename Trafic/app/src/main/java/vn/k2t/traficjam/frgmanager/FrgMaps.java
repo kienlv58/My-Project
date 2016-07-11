@@ -1,12 +1,14 @@
 package vn.k2t.traficjam.frgmanager;
 
 import android.content.Context;
+import android.location.Geocoder;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -15,6 +17,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.gordonwong.materialsheetfab.MaterialSheetFab;
 import com.gordonwong.materialsheetfab.MaterialSheetFabEventListener;
+
+import java.io.IOException;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -137,17 +141,38 @@ public class FrgMaps extends FrgBase implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fab_sheet_item_traffic_jam:
-                MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.position(new LatLng(21.029435, 105.851846));
-                markerOptions.title("aa");
-                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-                MapFragMent.mMap.addMarker(markerOptions);
+                if (MapFragMent.mMap != null) {
+                    double latitude = MapFragMent.mMap.getMyLocation().getLatitude();
+                    double longitude = MapFragMent.mMap.getMyLocation().getLongitude();
+                    MarkerOptions markerOptions = new MarkerOptions();
+                    LatLng latlng = new LatLng(latitude, longitude);
+                    markerOptions.position(latlng);
+                    markerOptions.title(getAddressFromLatLng(latlng));
+                    markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                    //MapFragMent.mMap.clear();
+                    MapFragMent.mMap.addMarker(markerOptions);
+
+                } else {
+                    Toast.makeText(getActivity(), getActivity().getString(R.string.can_not_get_location_of_you), Toast.LENGTH_LONG).show();
+                }
+                materialSheetFab.hideSheet();
                 break;
             case R.id.fab_sheet_item_accident:
-
+                materialSheetFab.hideSheet();
                 break;
         }
 
     }
 
+    private String getAddressFromLatLng(LatLng latLng) {
+        Geocoder geocoder = new Geocoder(getActivity());
+
+        String address = "";
+        try {
+            address = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1).get(0).getAddressLine(0);
+        } catch (IOException e) {
+        }
+
+        return address;
+    }
 }

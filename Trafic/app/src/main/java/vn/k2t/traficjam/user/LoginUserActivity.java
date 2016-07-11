@@ -41,6 +41,7 @@ import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import butterknife.Bind;
@@ -99,7 +100,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
         txtv_register.setOnClickListener(this);
         progressDialog = new ProgressDialog(this);
         progressDialog.setCancelable(false);
-        progressDialog.setMessage("Đang gửi...");
+        progressDialog.setMessage(getString(R.string.is_send));
 
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -112,14 +113,17 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                     String avatar = String.valueOf(firebaseUser.getPhotoUrl());
                     String uidProvider = firebaseUser.getProviderId();
 
-                    UserTraffic mUser = new UserTraffic(uid, name, avatar, email, uidProvider, "", "", "");
+                    ArrayList<String> list_friend = new ArrayList<>();
+                    UserTraffic mUser = new UserTraffic(uid, name, avatar, email, uidProvider, "", "", "", list_friend);
                     mDatabase.child(uid).child("uid").setValue(uid);
                     mDatabase.child(uid).child("email").setValue(email);
                     mDatabase.child(uid).child("name").setValue(name);
                     mDatabase.child(uid).child("avatar").setValue(avatar);
                     mDatabase.child(uid).child("uidProvider").setValue(uidProvider);
                     mDatabase.child(uid).child("rank").setValue("");
-                    mDatabase.child(uid).child("location").setValue("");
+                    mDatabase.child(uid).child("latitude").setValue("");
+                    mDatabase.child(uid).child("longitude").setValue("");
+                    mDatabase.child(uid).child("list_friend").setValue(list_friend);
                     sqlUser.insertUser(mUser);
                     Toast.makeText(LoginUserActivity.this, email + "====" + name, Toast.LENGTH_SHORT).show();
                 } else
@@ -173,7 +177,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                 email = edt_email.getText().toString();
                 password = edt_pass.getText().toString();
                 if (email.isEmpty() || !isValidEmail(email) || password.isEmpty() || password.length() < 6) {
-                    Toast.makeText(LoginUserActivity.this, "email hoac mat khau khong dung dinh dang", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginUserActivity.this, R.string.Email_or_password_is_malformed, Toast.LENGTH_SHORT).show();
                 } else {
                     singInAccount(email, password);
                 }
@@ -198,7 +202,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                 if (task.isSuccessful()) {
                     Toast.makeText(LoginUserActivity.this, task + "", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(LoginUserActivity.this, "Tài khoản hoặc mật khẩu không đúng", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginUserActivity.this, R.string.acoount, Toast.LENGTH_SHORT).show();
                 }
                 progressDialog.dismiss();
                 finish();
@@ -215,7 +219,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                 if (task.isSuccessful()) {
                     Toast.makeText(LoginUserActivity.this, task + "", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(LoginUserActivity.this, "login fail", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginUserActivity.this, R.string.login_fail, Toast.LENGTH_SHORT).show();
                 }
                 finish();
             }
@@ -232,7 +236,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                 if (task.isSuccessful()) {
                     Toast.makeText(LoginUserActivity.this, task + "", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(LoginUserActivity.this, "login fail", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginUserActivity.this, R.string.login_fail, Toast.LENGTH_SHORT).show();
                 }
                 finish();
             }
