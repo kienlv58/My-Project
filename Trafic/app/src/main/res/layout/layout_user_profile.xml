@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+
+        <ImageView
+            android:id="@+id/imgProfile"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:src="@drawable/bg_profile"
+            android:scaleType="centerCrop"
+            />
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:layout_centerHorizontal="true"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="150dp"
+            android:id="@+id/profile_image"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/ic_user_profile" />
+
+        <TextView
+            android:layout_marginTop="10dp"
+            android:id="@+id/tvUserName"
+            android:gravity="center"
+            android:layout_below="@+id/profile_image"
+            android:textColor="@android:color/black"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:text="Van Truong"/>
+        <TextView
+            android:id="@+id/tvEmail"
+            android:gravity="center"
+           android:layout_centerHorizontal="true"
+            android:layout_below="@+id/tvUserName"
+            android:textColor="@android:color/black"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceListItem"
+            android:text="truongcvbk@gmail.com"/>
+
+        <include layout="@layout/layout_toolbar"/>
+    </RelativeLayout>
+
+
+
+
+
+
+</LinearLayout>
