@@ -70,7 +70,7 @@ public class SQLUser {
         int indexRank = cursor.getColumnIndex(COLUMN_RANK);
         int indexLocation = cursor.getColumnIndex(COLUMN_LOCATION);
         while (!cursor.isAfterLast()) {
-            users = new UserTraffic(cursor.getString(indexUserID),cursor.getString(indexUserName),cursor.getString(indexAvatar),cursor.getString(indexEmail),cursor.getString(indeUidProvider),cursor.getString(indexRank),cursor.getString(indexLocation),"");
+          //  users = new UserTraffic(cursor.getString(indexUserID),cursor.getString(indexUserName),cursor.getString(indexAvatar),cursor.getString(indexEmail),cursor.getString(indeUidProvider),cursor.getString(indexRank),cursor.getString(indexLocation),"");
             cursor.moveToNext();
         }
         cursor.close();

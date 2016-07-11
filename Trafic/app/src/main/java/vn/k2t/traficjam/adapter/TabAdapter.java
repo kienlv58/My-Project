@@ -13,7 +13,8 @@ import vn.k2t.traficjam.frgmanager.FrgNews;
  * Created by nguyennm on 5/11/16.
  */
 public class TabAdapter extends FragmentPagerAdapter {
-    private static final String[] TYPES = new String[]{"MAP", "NEWS","FRIENDS"};
+    private static final String[] TYPES = new String[]{"MAP", "NEWS", "FRIENDS"};
+
     ///private ItemData item;
     private Context mContext;
     private Fragment frg = new Fragment();
