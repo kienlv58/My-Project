@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentActivity;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
 
 import vn.k2t.traficjam.R;
 
@@ -37,6 +38,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mapMgr = new MapManager(googleMap, MapsActivity.this);
-        mapMgr.addMarker("Ho Guom", googleMap.getMyLocation());
+        mapMgr.addMarker("Ho Guom", new LatLng(21.029435, 105.851846));
     }
 }

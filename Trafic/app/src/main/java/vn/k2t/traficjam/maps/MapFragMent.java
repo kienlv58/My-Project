@@ -15,6 +15,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -36,7 +37,10 @@ import java.io.IOException;
 
 import vn.k2t.traficjam.MainActivity;
 import vn.k2t.traficjam.R;
+import vn.k2t.traficjam.frgmanager.FrgMaps;
 import vn.k2t.traficjam.model.UserTraffic;
+import vn.k2t.traficjam.onclick.ItemClick;
+import vn.k2t.traficjam.onclick.OnClickFrg;
 
 /**
  * Created by Paul on 8/11/15.
@@ -57,12 +61,11 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     private int curMapTypeIndex = 1;
     private UserTraffic mUser;
     protected LocationManager locationManager;
-    private GoogleMap mMap;
+    public static GoogleMap mMap;
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         setHasOptionsMenu(true);
         mUser = MainActivity.mUser;
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
@@ -102,7 +105,7 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
         removeListeners();
     }
 
-    private void initCamera(Location location) {
+    public void initCamera(Location location) {
         if (!checkGPS()) {
             showSettingsAlert();
         } else {
@@ -140,7 +143,7 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
                 //getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
                 mMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), null);
 
-                 drawCircle(location);
+                drawCircle(location);
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
             } else {
                 Toast.makeText(getActivity(), getActivity().getString(R.string.can_not_get_location_of_you), Toast.LENGTH_LONG).show();
@@ -156,6 +159,29 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
                 .fillColor(0x30ff0000));
     }
 
+//    public void addMarker(String title, Location location) {
+//        MarkerOptions markerOptions = new MarkerOptions();
+//        MarkerOptions options = new MarkerOptions();
+//        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+//        options.position(latLng);
+//        options.title(title);
+//        markerOptions.title(title);
+//        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+//
+//        mMap.addMarker(markerOptions);
+//        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+//    }
+
+    public void addMarker(String title, LatLng position) {
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(position);
+        markerOptions.title(title);
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+
+        mMap.addMarker(markerOptions);
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
+
+    }
 
     private boolean checkGPS() {
 
@@ -166,7 +192,7 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
         return isGPSEnabled;
     }
 
-    private void showSettingsAlert() {
+    public void showSettingsAlert() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
 
         // Setting Dialog Title
@@ -277,12 +303,7 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
 
     @Override
     public void onLocationChanged(Location location) {
-        double latitude = location.getLatitude();
-        double longitude = location.getLongitude();
-        LatLng latLng = new LatLng(latitude, longitude);
-        getMap().addMarker(new MarkerOptions().position(latLng));
-        getMap().moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        getMap().animateCamera(CameraUpdateFactory.zoomTo(15));
+        initCamera(location);
     }
 
     @Override
@@ -299,4 +320,6 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     public void onProviderDisabled(String provider) {
 
     }
+
+
 }

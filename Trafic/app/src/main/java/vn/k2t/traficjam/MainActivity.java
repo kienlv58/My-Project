@@ -5,7 +5,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
@@ -38,9 +37,9 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 import vn.k2t.traficjam.adapter.TabAdapter;
-import vn.k2t.traficjam.database.queries.SQLUser;
 import vn.k2t.traficjam.maps.MapsActivity;
 import vn.k2t.traficjam.model.UserTraffic;
+import vn.k2t.traficjam.untilitis.CommonMethod;
 import vn.k2t.traficjam.user.ActivityUserProfile;
 import vn.k2t.traficjam.user.LoginUserActivity;
 
@@ -73,6 +72,7 @@ public class MainActivity extends AppCompatActivity
     public static UserTraffic mUser;
     FirebaseUser user;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,19 +80,21 @@ public class MainActivity extends AppCompatActivity
         ButterKnife.bind(this);
         initToolbar();
         initObject();
+        mAuth = FirebaseAuth.getInstance();
         getUserFirebase();
-
 
             if (user != null) {
                 try {
-
+                    CommonMethod.getInstance().loadImage(user.getPhotoUrl().getEncodedPath(), imgUserProfile);
                     user.getPhotoUrl().getEncodedPath();
                     user.getPhotoUrl().getPath();
                 }catch (Exception e){
                     e.printStackTrace();
                 }
-                //imgUserProfile.setImageURI(uri);
             }
+
+
+
 
 
 
@@ -219,8 +221,6 @@ public class MainActivity extends AppCompatActivity
                 }
                 break;
         }
-
-
     }
 
     @Override
