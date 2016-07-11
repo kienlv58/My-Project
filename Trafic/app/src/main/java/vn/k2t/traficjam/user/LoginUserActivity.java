@@ -23,6 +23,7 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+import com.facebook.Profile;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.google.android.gms.auth.GoogleAuthException;
@@ -50,6 +51,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import butterknife.Bind;
@@ -79,6 +81,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
     SQLUser sqlUser;
     String tokenGG;
     String emailGG;
+    String avatar;
 
 
     //firebase
@@ -101,7 +104,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
         ButterKnife.bind(this);
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
-        sqlUser = new SQLUser(this);
+
 
         callbackManager = CallbackManager.Factory.create();
         btn_loginAccount.setOnClickListener(this);
@@ -112,19 +115,22 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
         progressDialog = new ProgressDialog(this);
         progressDialog.setCancelable(false);
         progressDialog.setMessage("Đang gửi...");
+        progressDialog.setMessage(getString(R.string.is_send));
 
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
                 if (firebaseUser != null) {
+                    progressDialog.setMessage(getString(R.string.loging));
+                    progressDialog.show();
                     String uid = firebaseUser.getUid();
                     String email = firebaseUser.getEmail();
                     String name = firebaseUser.getDisplayName();
-                    String avatar = String.valueOf(firebaseUser.getPhotoUrl());
+                    //String avatar = String.valueOf(firebaseUser.getPhotoUrl());
                     String uidProvider = firebaseUser.getProviderId();
-
-                    UserTraffic mUser = new UserTraffic(uid, name, avatar, email, uidProvider, "", "", "");
+                    ArrayList<String> list_friend = new ArrayList<>();
+                    UserTraffic mUser = new UserTraffic(uid, name, avatar, email, uidProvider, "", "", "", list_friend);
                     mDatabase.child(uid).child("uid").setValue(uid);
                     mDatabase.child(uid).child("email").setValue(email);
                     mDatabase.child(uid).child("name").setValue(name);
@@ -132,9 +138,17 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                     mDatabase.child(uid).child("uidProvider").setValue(uidProvider);
                     mDatabase.child(uid).child("rank").setValue("");
                     mDatabase.child(uid).child("location").setValue("");
+
+
+                    mDatabase.child(uid).child("latitude").setValue("");
+                    mDatabase.child(uid).child("longitude").setValue("");
+                    mDatabase.child(uid).child("list_friend").setValue(list_friend);
+
+                    sqlUser = new SQLUser(getApplicationContext());
+                    sqlUser.insertUser(mUser);
                     Intent intent = new Intent();
                     setResult(200,intent);
-                    //sqlUser.insertUser(mUser);
+                    progressDialog.dismiss();
                     Toast.makeText(LoginUserActivity.this, email + "====" + name, Toast.LENGTH_SHORT).show();
                 } else
                     Toast.makeText(LoginUserActivity.this, "user null", Toast.LENGTH_SHORT).show();
@@ -144,6 +158,10 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
         LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
+                Profile profile = Profile.getCurrentProfile();
+                String uid_fb = profile.getId();
+                avatar = "http://graph.facebook.com/"+uid_fb+"/picture?type=large";
+                //avatar = String.valueOf(profile.getProfilePictureUri(400,800));
                 handeFBaccesstoken(loginResult.getAccessToken());
             }
 
@@ -194,6 +212,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                 password = edt_pass.getText().toString();
                 if (email.isEmpty() || !isValidEmail(email) || password.isEmpty() || password.length() < 6) {
                     Toast.makeText(LoginUserActivity.this, "email hoac mat khau khong dung dinh dang", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginUserActivity.this, R.string.Email_or_password_is_malformed, Toast.LENGTH_SHORT).show();
                 } else {
                     singInAccount(email, password);
                 }
@@ -228,15 +247,19 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
 
     //fb + firebase
     public void handeFBaccesstoken(AccessToken accessToken) {
+        progressDialog.setMessage(getString(R.string.loging));
+        progressDialog.show();
         AuthCredential credential = FacebookAuthProvider.getCredential(accessToken.getToken());
         mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
+
                     Toast.makeText(LoginUserActivity.this, task + "", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(LoginUserActivity.this, "login fail", Toast.LENGTH_SHORT).show();
                 }
+                progressDialog.dismiss();
                 finish();
             }
         });
@@ -254,7 +277,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                     Toast.makeText(LoginUserActivity.this, task + "", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(LoginUserActivity.this, "login fail", Toast.LENGTH_SHORT).show();
-                }
+                    Toast.makeText(LoginUserActivity.this, R.string.login_fail, Toast.LENGTH_SHORT).show();}
                 finish();
             }
         });

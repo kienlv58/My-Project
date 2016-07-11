@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
+import vn.k2t.traficjam.frgmanager.FrgFriends;
 import vn.k2t.traficjam.frgmanager.FrgMaps;
 import vn.k2t.traficjam.frgmanager.FrgNews;
 
@@ -12,7 +13,8 @@ import vn.k2t.traficjam.frgmanager.FrgNews;
  * Created by nguyennm on 5/11/16.
  */
 public class TabAdapter extends FragmentPagerAdapter {
-    private static final String[] TYPES = new String[]{"MAP", "NEWS"};
+    private static final String[] TYPES = new String[]{"MAP", "NEWS", "FRIENDS"};
+
     ///private ItemData item;
     private Context mContext;
     private Fragment frg = new Fragment();
@@ -38,6 +40,9 @@ public class TabAdapter extends FragmentPagerAdapter {
                 break;
             case 1:
                 frg = FrgNews.newInstance(mContext);
+                break;
+            case 2:
+                frg = FrgFriends.newInstance(mContext);
                 break;
             default:
                 frg = FrgMaps.newInstance(mContext);

@@ -1,5 +1,9 @@
 package vn.k2t.traficjam.user;
 
+import android.app.ProgressDialog;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;

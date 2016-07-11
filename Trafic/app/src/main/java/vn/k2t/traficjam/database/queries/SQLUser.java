@@ -70,7 +70,7 @@ public class SQLUser {
         int indexRank = cursor.getColumnIndex(COLUMN_RANK);
         int indexLocation = cursor.getColumnIndex(COLUMN_LOCATION);
         while (!cursor.isAfterLast()) {
-            users = new UserTraffic(cursor.getString(indexUserID),cursor.getString(indexUserName),cursor.getString(indexAvatar),cursor.getString(indexEmail),cursor.getString(indeUidProvider),cursor.getString(indexRank),cursor.getString(indexLocation),"");
+            users = new UserTraffic(cursor.getString(indexUserID),cursor.getString(indexUserName),cursor.getString(indexAvatar),cursor.getString(indexEmail),cursor.getString(indeUidProvider),cursor.getString(indexRank),cursor.getString(indexLocation),"",null);
             cursor.moveToNext();
         }
         cursor.close();
@@ -99,9 +99,6 @@ public class SQLUser {
         long result = databaseHelper.getWritableDatabase().delete(TABLE_USER, null, null);
     }
 
-    public void deleteVideoFree(String id) {
-        long result = databaseHelper.getWritableDatabase().delete(TABLE_USER_VIDEO, "uid" + " =?", new String[]{String.valueOf(id)});
-    }
     public void deleteShare(String id) {
         long result = databaseHelper.getWritableDatabase().delete(TABLE_USER_SHARE, "uid" + " =?", new String[]{String.valueOf(id)});
     }

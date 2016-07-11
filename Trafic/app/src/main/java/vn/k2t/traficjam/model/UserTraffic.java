@@ -1,5 +1,9 @@
 package vn.k2t.traficjam.model;
 
+import java.util.ArrayList;
+
+import java.util.ArrayList;
+
 /**
  * Created by root on 7/7/16.
  */
@@ -12,12 +16,12 @@ public class UserTraffic {
     private String rank;
     private String location;
     private String longitude;
-
+    private ArrayList<String> list_friend = new ArrayList<>();
 
     public UserTraffic() {
     }
 
-    public UserTraffic(String uid, String name, String avatar, String email, String uidProvider, String rank, String location, String longitude) {
+    public UserTraffic(String uid, String name, String avatar, String email, String uidProvider, String rank, String location, String longitude, ArrayList<String> list_friend) {
 
         this.uid = uid;
         this.name = name;
@@ -28,8 +32,15 @@ public class UserTraffic {
         this.location = location;
         this.longitude = longitude;
 
+
+
+        this.list_friend = list_friend;
+
     }
 
+    public ArrayList<String> getList_friend() {
+        return list_friend;
+    }
 
     public void setLongitude(String longitude) {
         this.longitude = longitude;
@@ -94,5 +105,19 @@ public class UserTraffic {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    @Override
+    public String toString() {
+        return "UserTraffic{" +
+                "uid='" + uid + '\'' +
+                ", name='" + name + '\'' +
+                ", avatar='" + avatar + '\'' +
+                ", email='" + email + '\'' +
+                ", uidProvider='" + uidProvider + '\'' +
+                ", rank='" + rank + '\'' +
+                ", location='" + location + '\'' +
+                ", longitude='" + longitude + '\'' +
+                '}';
     }
 }

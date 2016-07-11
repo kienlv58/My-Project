@@ -1,6 +1,7 @@
 package vn.k2t.traficjam.frgmanager;
 
 import android.content.Context;
+import android.location.Geocoder;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -16,6 +17,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.gordonwong.materialsheetfab.MaterialSheetFab;
 import com.gordonwong.materialsheetfab.MaterialSheetFabEventListener;
 
+import java.io.IOException;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import vn.k2t.traficjam.FrgBase;
@@ -143,11 +145,23 @@ public class FrgMaps extends FrgBase implements View.OnClickListener {
                 markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
                 MapFragMent.mMap.addMarker(markerOptions);
                 break;
-            case R.id.fab_sheet_item_accident:
 
+            case R.id.fab_sheet_item_accident:
+                materialSheetFab.hideSheet();
                 break;
         }
 
     }
 
+    private String getAddressFromLatLng(LatLng latLng) {
+        Geocoder geocoder = new Geocoder(getActivity());
+
+        String address = "";
+        try {
+            address = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1).get(0).getAddressLine(0);
+        } catch (IOException e) {
+        }
+
+        return address;
+    }
 }
