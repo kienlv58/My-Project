@@ -3,8 +3,6 @@ package vn.k2t.traficjam.database.queries;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.util.Log;
-import android.provider.SyncStateContract;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,8 +26,8 @@ public class SQLUser {
     private static final String COLUMN_AVATAR = "avatar";
     private static final String COLUMN_UIDPROVIDER = "uidProvider";
     private static final String COLUMN_RANK = "rank";
-    private static final String COLUMN_LOCATION = "location";
-
+    private static final String COLUMN_LATITUDE = "latitude";
+    private static final String COLUMN_LONGITUDE = "longitude";
 
 
     private static String sqlUsers = "SELECT * " + "FROM " + TABLE_USER;
@@ -68,26 +66,28 @@ public class SQLUser {
         int indexAvatar = cursor.getColumnIndex(COLUMN_AVATAR);
         int indeUidProvider = cursor.getColumnIndex(COLUMN_UIDPROVIDER);
         int indexRank = cursor.getColumnIndex(COLUMN_RANK);
-        int indexLocation = cursor.getColumnIndex(COLUMN_LOCATION);
+        int indexLacation = cursor.getColumnIndex(COLUMN_LATITUDE);
+        int indexLongcation = cursor.getColumnIndex(COLUMN_LONGITUDE);
         while (!cursor.isAfterLast()) {
-            users = new UserTraffic(cursor.getString(indexUserID),cursor.getString(indexUserName),cursor.getString(indexAvatar),cursor.getString(indexEmail),cursor.getString(indeUidProvider),cursor.getString(indexRank),cursor.getString(indexLocation),"",null);
+            users = new UserTraffic(cursor.getString(indexUserID), cursor.getString(indexUserName), cursor.getString(indexAvatar), cursor.getString(indexEmail), cursor.getString(indeUidProvider), cursor.getString(indexRank), cursor.getString(indexLacation), cursor.getString(indexLongcation), null);
             cursor.moveToNext();
         }
         cursor.close();
         return users;
     }
 
-    public long insertUser( UserTraffic mUser) {
+    public long insertUser(UserTraffic mUser) {
         //myDataBase=myContext.openOrCreateDatabase(DATABASE_PATH + "/" + DATABASE_NAME, Context.MODE_PRIVATE, null);
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(COLUMN_UID,mUser.getUid());
+        contentValues.put(COLUMN_UID, mUser.getUid());
         contentValues.put(COLUMN_NAME, mUser.getName());
         contentValues.put(COLUMN_EMAIL, mUser.getEmail());
         contentValues.put(COLUMN_AVATAR, mUser.getAvatar());
         contentValues.put(COLUMN_UIDPROVIDER, mUser.getUidProvider());
         contentValues.put(COLUMN_RANK, mUser.getRank());
-        contentValues.put(COLUMN_LOCATION, mUser.getLocation());
+        contentValues.put(COLUMN_LATITUDE, mUser.getLatitude());
+        contentValues.put(COLUMN_LONGITUDE, mUser.getLongitude());
         long result = databaseHelper.getWritableDatabase().insert(TABLE_USER, null, contentValues);
 
         return result;

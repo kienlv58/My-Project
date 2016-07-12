@@ -18,12 +18,17 @@ import com.gordonwong.materialsheetfab.MaterialSheetFab;
 import com.gordonwong.materialsheetfab.MaterialSheetFabEventListener;
 
 import java.io.IOException;
+import java.util.HashMap;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import vn.k2t.traficjam.FrgBase;
 import vn.k2t.traficjam.R;
 import vn.k2t.traficjam.libs.Fab;
 import vn.k2t.traficjam.maps.MapFragMent;
+import vn.k2t.traficjam.model.ItemData;
+import vn.k2t.traficjam.onclick.ItemClick;
+import vn.k2t.traficjam.untilitis.AppConstants;
 import vn.k2t.traficjam.untilitis.Utilities;
 
 /**
@@ -48,6 +53,7 @@ public class FrgMaps extends FrgBase implements View.OnClickListener {
     private Utilities utilities;
     private MaterialSheetFab materialSheetFab;
     private int statusBarColor;
+    private static ItemClick click;
 
     public FrgMaps() {
         super();
@@ -57,7 +63,7 @@ public class FrgMaps extends FrgBase implements View.OnClickListener {
     public static FrgMaps newInstance(Context context) {
         f = new FrgMaps();
         mContext = context;
-
+        click = (ItemClick) mContext;
         return f;
     }
 
@@ -69,7 +75,6 @@ public class FrgMaps extends FrgBase implements View.OnClickListener {
         if (utilities.isConnected()) {
             rootView = inflater.inflate(R.layout.frg_maps, container, false);
             ButterKnife.bind(this, rootView);
-
             setupFab();
         } else {
             super.newInstance(mContext);
@@ -137,20 +142,39 @@ public class FrgMaps extends FrgBase implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
+        ItemData data = new ItemData();
+        double latitude = MapFragMent.mMap.getMyLocation().getLatitude();
+        double longtitude = MapFragMent.mMap.getMyLocation().getLongitude();
+        HashMap<String, String> hashMap = new HashMap<>();
+        hashMap.put(AppConstants.KEY_LATITUDE, latitude + "");
+        hashMap.put(AppConstants.KEY_LONGTITUDE, longtitude + "");
+        data.setmItemData(hashMap);
         switch (v.getId()) {
             case R.id.fab_sheet_item_traffic_jam:
-                MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.position(new LatLng(21.029435, 105.851846));
-                markerOptions.title("aa");
-                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-                MapFragMent.mMap.addMarker(markerOptions);
+                //tickLocation(BitmapDescriptorFactory.HUE_RED);
+                click.selectedItem(data, AppConstants.TYPE_TRAFFIC_JAM);
+                materialSheetFab.hideSheet();
                 break;
 
             case R.id.fab_sheet_item_accident:
+                //tickLocation(BitmapDescriptorFactory.HUE_GREEN);
+                click.selectedItem(data, AppConstants.TYPE_ACCIDENT);
                 materialSheetFab.hideSheet();
                 break;
         }
 
+    }
+
+
+    private void tickLocation(float a) {
+        MarkerOptions markerOptions = new MarkerOptions();
+        double latitude = MapFragMent.mMap.getMyLocation().getLatitude();
+        double longtitude = MapFragMent.mMap.getMyLocation().getLongitude();
+        LatLng latLng = new LatLng(latitude, longtitude);
+        markerOptions.position(latLng);
+        markerOptions.title(getAddressFromLatLng(latLng));
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(a));
+        MapFragMent.mMap.addMarker(markerOptions);
     }
 
     private String getAddressFromLatLng(LatLng latLng) {

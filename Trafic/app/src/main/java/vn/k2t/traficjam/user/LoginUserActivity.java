@@ -34,9 +34,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -59,6 +57,7 @@ import butterknife.ButterKnife;
 import vn.k2t.traficjam.R;
 import vn.k2t.traficjam.database.queries.SQLUser;
 import vn.k2t.traficjam.model.UserTraffic;
+import vn.k2t.traficjam.untilitis.AppConstants;
 
 public class LoginUserActivity extends AppCompatActivity implements View.OnClickListener, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
@@ -82,6 +81,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
     String tokenGG;
     String emailGG;
     String avatar;
+    UserTraffic user;
 
 
     //firebase
@@ -129,25 +129,19 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                     String name = firebaseUser.getDisplayName();
                     //String avatar = String.valueOf(firebaseUser.getPhotoUrl());
                     String uidProvider = firebaseUser.getProviderId();
-                    ArrayList<String> list_friend = new ArrayList<>();
-                    UserTraffic mUser = new UserTraffic(uid, name, avatar, email, uidProvider, "", "", "", list_friend);
-                    mDatabase.child(uid).child("uid").setValue(uid);
-                    mDatabase.child(uid).child("email").setValue(email);
-                    mDatabase.child(uid).child("name").setValue(name);
-                    mDatabase.child(uid).child("avatar").setValue(avatar);
-                    mDatabase.child(uid).child("uidProvider").setValue(uidProvider);
-                    mDatabase.child(uid).child("rank").setValue("");
-                    mDatabase.child(uid).child("location").setValue("");
-
-
-                    mDatabase.child(uid).child("latitude").setValue("");
-                    mDatabase.child(uid).child("longitude").setValue("");
-                    mDatabase.child(uid).child("list_friend").setValue(list_friend);
+                    UserTraffic mUser = new UserTraffic(uid, name, avatar, email, uidProvider, "", "", "");
+                    mDatabase.child(AppConstants.USER).child(uid).child("uid").setValue(uid);
+                    mDatabase.child(AppConstants.USER).child(uid).child("email").setValue(email);
+                    mDatabase.child(AppConstants.USER).child(uid).child("name").setValue(name);
+                    mDatabase.child(AppConstants.USER).child(uid).child("avatar").setValue(avatar);
+                    mDatabase.child(AppConstants.USER).child(uid).child("uidProvider").setValue(uidProvider);
+                    mDatabase.child(AppConstants.USER).child(uid).child("latitude").setValue("");
+                    mDatabase.child(AppConstants.USER).child(uid).child("longitude").setValue("");
 
                     sqlUser = new SQLUser(getApplicationContext());
                     sqlUser.insertUser(mUser);
                     Intent intent = new Intent();
-                    setResult(200,intent);
+                    setResult(200, intent);
                     progressDialog.dismiss();
                     Toast.makeText(LoginUserActivity.this, email + "====" + name, Toast.LENGTH_SHORT).show();
                 } else
@@ -160,7 +154,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
             public void onSuccess(LoginResult loginResult) {
                 Profile profile = Profile.getCurrentProfile();
                 String uid_fb = profile.getId();
-                avatar = "http://graph.facebook.com/"+uid_fb+"/picture?type=large";
+                avatar = "http://graph.facebook.com/" + uid_fb + "/picture?type=large";
                 //avatar = String.valueOf(profile.getProfilePictureUri(400,800));
                 handeFBaccesstoken(loginResult.getAccessToken());
             }
@@ -178,7 +172,6 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
 
         //login google
 //        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-//                .requestIdToken(getString(R.string.web_app))
 //                .requestEmail()
 //                .build();
 //        mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -186,7 +179,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
 //                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
 //                .addApi(Plus.API)
 //                .build();
-        googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestScopes(new Scope(Scopes.PLUS_LOGIN)).requestEmail().build();
+        googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestIdToken(getString(R.string.web_app)).requestEmail().build();
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, googleSignInOptions)
@@ -212,7 +205,6 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                 password = edt_pass.getText().toString();
                 if (email.isEmpty() || !isValidEmail(email) || password.isEmpty() || password.length() < 6) {
                     Toast.makeText(LoginUserActivity.this, "email hoac mat khau khong dung dinh dang", Toast.LENGTH_SHORT).show();
-                    Toast.makeText(LoginUserActivity.this, R.string.Email_or_password_is_malformed, Toast.LENGTH_SHORT).show();
                 } else {
                     singInAccount(email, password);
                 }
@@ -267,22 +259,20 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
     }
 
     //google + firebase
-    public void firebaseAuthWithGoogle( String tokenID) {
-        mAuth = FirebaseAuth.getInstance();
-        AuthCredential authCredential = GoogleAuthProvider.getCredential(tokenID, null);
+    public void firebaseAuthWithGoogle(GoogleSignInAccount account) {
+        avatar = String.valueOf(account.getPhotoUrl());
+        AuthCredential authCredential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
         mAuth.signInWithCredential(authCredential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
                     Toast.makeText(LoginUserActivity.this, task + "", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(LoginUserActivity.this, "login fail", Toast.LENGTH_SHORT).show();
-                    Toast.makeText(LoginUserActivity.this, R.string.login_fail, Toast.LENGTH_SHORT).show();}
-                finish();
+                    Toast.makeText(LoginUserActivity.this, R.string.login_fail, Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
-
 
 
     @Override
@@ -305,28 +295,18 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
         if (requestCode == 1000) {
             if (resultCode == RESULT_OK) {
                 GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-                if (result.isSuccess()) {
-                    GoogleSignInAccount account = result.getSignInAccount();
-                   emailGG = account.getEmail().toString();
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            new RetrieveTokenTask().execute(emailGG);
-                        }
-                    });
-                }else
-                Toast.makeText(LoginUserActivity.this, "khong dang nhap dk", Toast.LENGTH_SHORT).show();
+                GoogleSignInAccount account = result.getSignInAccount();
+                firebaseAuthWithGoogle(account);
+                }
+
             }
-        }
+
         if (requestCode == 111) {
             edt_email.setText(data.getStringExtra("email"));
             edt_pass.setText(data.getStringExtra("pass"));
         }
-        if (requestCode == 1221 && resultCode == RESULT_OK) {
-            // We had to sign in - now we can finish off the token request.
-            new RetrieveTokenTask().execute(tokenGG);
-        }
     }
+
 
     public final static boolean isValidEmail(CharSequence target) {
         return !TextUtils.isEmpty(target) && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
@@ -353,31 +333,6 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
         }).create().show();
 
     }
-    private class RetrieveTokenTask extends AsyncTask<String, Void, String> {
-
-        @Override
-        protected String doInBackground(String... params) {
-            String accountName = params[0];
-            String scopes = "oauth2:profile email";
-
-            try {
-                tokenGG = GoogleAuthUtil.getToken(getApplicationContext(), accountName, scopes).toString();
-            } catch (IOException e) {
-                Log.e("mes", e.getMessage());
-            } catch (UserRecoverableAuthException e) {
-                startActivityForResult(e.getIntent(), 1221);
-            } catch (GoogleAuthException e) {
-                Log.e("mes", e.getMessage());
-            }
-            return tokenGG;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            firebaseAuthWithGoogle(s);
-        }
-    }
 
 
     public void aa(String _email, final DialogInterface dialogInterface) {
@@ -401,7 +356,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
         Person currentUser = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
 
 
-        AsyncTask<Void, Void, String > task = new AsyncTask<Void, Void, String>() {
+        AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
             @Override
             protected String doInBackground(Void... params) {
                 String token = null;
