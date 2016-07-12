@@ -82,6 +82,7 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     DatabaseReference mDatabase;
     UserTraffic user;
     SQLUser sqlUser;
+    private UserTraffic mUser;
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {

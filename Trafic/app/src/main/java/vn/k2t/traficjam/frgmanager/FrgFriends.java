@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import vn.k2t.traficjam.FrgBase;
+import vn.k2t.traficjam.MainActivity;
 import vn.k2t.traficjam.R;
 import vn.k2t.traficjam.adapter.ListFriendAdapter;
 import vn.k2t.traficjam.model.UserTraffic;
@@ -37,8 +39,10 @@ public class FrgFriends extends FrgBase {
     private DatabaseReference mDatabase;
     private ArrayList<UserTraffic> list;
     private MaterialSheetFab materialSheetFab;
-    @Bind(R.id.rv_listfriend)
-    RecyclerView rv_listfriends;
+    @Bind(R.id.lv_listfriend)
+    ListView lv_listfriends;
+    private RecyclerView.LayoutManager layoutManager;
+    private String user_uid;
 
     public static FrgFriends newInstance(Context context) {
         f = new FrgFriends();
@@ -65,16 +69,21 @@ public class FrgFriends extends FrgBase {
         return rootView;
     }
 
-    private void initView() {
-
-        list = new ArrayList<>();
+    @Override
+    public void onStart() {
+        super.onStart();
         mDatabase.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                list.clear();
                 Log.e(TAG, dataSnapshot.getValue().toString());
-//                String name = dataSnapshot.child("name").getValue().toString();
-//                String avatar = dataSnapshot.child("avatar").getValue().toString();
                 UserTraffic userTraffic = dataSnapshot.getValue(UserTraffic.class);
+                list.add(userTraffic);
+                if (list != null) {
+                    listFriendAdapter = new ListFriendAdapter(getActivity(), list);
+                    lv_listfriends.setAdapter(listFriendAdapter);
+                    listFriendAdapter.notifyDataSetChanged();
+                }
                 Log.e(TAG, userTraffic.toString());
             }
 
@@ -98,7 +107,10 @@ public class FrgFriends extends FrgBase {
 
             }
         });
+        user_uid = ((MainActivity) getActivity()).getUser_uid();
+    }
 
-
+    private void initView() {
+        list = new ArrayList<>();
     }
 }

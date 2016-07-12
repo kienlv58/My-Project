@@ -2,8 +2,6 @@ package vn.k2t.traficjam.model;
 
 import java.util.ArrayList;
 
-import java.util.ArrayList;
-
 /**
  * Created by root on 7/7/16.
  */
@@ -14,14 +12,14 @@ public class UserTraffic {
     private String email;
     private String uidProvider;
     private String rank;
-    private String location;
+    private String latitude;
     private String longitude;
     private ArrayList<String> list_friend = new ArrayList<>();
 
     public UserTraffic() {
     }
 
-    public UserTraffic(String uid, String name, String avatar, String email, String uidProvider, String rank, String location, String longitude, ArrayList<String> list_friend) {
+    public UserTraffic(String uid, String name, String avatar, String email, String uidProvider, String rank, String latitude, String longitude, ArrayList<String> list_friend) {
 
         this.uid = uid;
         this.name = name;
@@ -29,9 +27,8 @@ public class UserTraffic {
         this.email = email;
         this.uidProvider = uidProvider;
         this.rank = rank;
-        this.location = location;
+        this.latitude = latitude;
         this.longitude = longitude;
-
 
 
         this.list_friend = list_friend;
@@ -99,12 +96,16 @@ public class UserTraffic {
         this.uidProvider = uidProvider;
     }
 
-    public String getLocation() {
-        return location;
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setList_friend(ArrayList<String> list_friend) {
+        this.list_friend = list_friend;
+    }
+
+    public String getLatitude() {
+        return latitude;
     }
 
     @Override
@@ -116,7 +117,7 @@ public class UserTraffic {
                 ", email='" + email + '\'' +
                 ", uidProvider='" + uidProvider + '\'' +
                 ", rank='" + rank + '\'' +
-                ", location='" + location + '\'' +
+                ", latitude='" + latitude + '\'' +
                 ", longitude='" + longitude + '\'' +
                 '}';
     }
