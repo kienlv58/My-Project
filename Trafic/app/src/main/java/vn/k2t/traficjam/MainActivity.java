@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -24,12 +23,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -73,6 +67,7 @@ public class MainActivity extends AppCompatActivity
 
     public static UserTraffic mUser;
     SQLUser sqlUser;
+    private String user_uid;
     //FirebaseUser user;
 
 
@@ -85,12 +80,6 @@ public class MainActivity extends AppCompatActivity
         initObject();
         mAuth = FirebaseAuth.getInstance();
         getUserFromDB();
-
-
-
-
-
-
         /**
          * generate keyhas facebook
          */
@@ -119,6 +108,14 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
         setTabFragment();
+    }
+
+    public String getUser_uid() {
+        return user_uid;
+    }
+
+    public void setUser_uid(String user_uid) {
+        this.user_uid = user_uid;
     }
 
     private void initObject() {
@@ -240,6 +237,7 @@ public class MainActivity extends AppCompatActivity
             CommonMethod.getInstance().loadImage(mUser.getAvatar(),imgUserProfile);
             tvNavUserName.setText(mUser.getName());
             tvNavEmail.setText(mUser.getEmail());
+            user_uid = mUser.getUid();
         }
         else {
             imgUserProfile.setImageResource(R.drawable.bg_profile);

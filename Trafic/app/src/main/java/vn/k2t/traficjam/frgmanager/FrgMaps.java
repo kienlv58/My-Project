@@ -69,7 +69,6 @@ public class FrgMaps extends FrgBase implements View.OnClickListener {
         if (utilities.isConnected()) {
             rootView = inflater.inflate(R.layout.frg_maps, container, false);
             ButterKnife.bind(this, rootView);
-
             setupFab();
         } else {
             super.newInstance(mContext);
