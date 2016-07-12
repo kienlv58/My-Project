@@ -57,6 +57,7 @@ import butterknife.ButterKnife;
 import vn.k2t.traficjam.R;
 import vn.k2t.traficjam.database.queries.SQLUser;
 import vn.k2t.traficjam.model.UserTraffic;
+import vn.k2t.traficjam.untilitis.AppConstants;
 
 public class LoginUserActivity extends AppCompatActivity implements View.OnClickListener, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
@@ -128,6 +129,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                     //String avatar = String.valueOf(firebaseUser.getPhotoUrl());
                     String uidProvider = firebaseUser.getProviderId();
                     ArrayList<String> list_friend = new ArrayList<>();
+
                     UserTraffic mUser = new UserTraffic(uid, name, avatar, email, uidProvider, "", "", "", 1, "");
                     mDatabase.child(uid).setValue(mUser);
 //                    mDatabase.child(uid).child("email").setValue(email);
@@ -138,6 +140,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
 //                    mDatabase.child(uid).child("latitude").setValue("");
 //                    mDatabase.child(uid).child("longitude").setValue("");
 //                    mDatabase.child(uid).child("list_friend").setValue(list_friend);
+
 
                     sqlUser = new SQLUser(getApplicationContext());
                     sqlUser.insertUser(mUser);

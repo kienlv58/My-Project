@@ -3,15 +3,19 @@ package vn.k2t.traficjam.untilitis;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Geocoder;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.telephony.TelephonyManager;
 
+import com.google.android.gms.maps.model.LatLng;
+
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -85,9 +89,11 @@ public class Utilities {
      * *********************************************************************************************************
      */
     //Canculate Date
-    public static Date currentDate() {
+    public static String currentDate() {
         Calendar calendar = Calendar.getInstance();
-        return calendar.getTime();
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String formattedDate = df.format(calendar.getTime());
+        return formattedDate;
     }
 
     /**
@@ -174,5 +180,16 @@ public class Utilities {
         return m.find();
     }
 
+    public String getAddressFromLatLng(LatLng latLng) {
+        Geocoder geocoder = new Geocoder(mContext);
+
+        String address = "";
+        try {
+            address = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1).get(0).getAddressLine(0);
+        } catch (IOException e) {
+        }
+
+        return address;
+    }
 
 }

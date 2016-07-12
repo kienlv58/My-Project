@@ -59,6 +59,7 @@ import java.util.Map;
 import vn.k2t.traficjam.MainActivity;
 import vn.k2t.traficjam.R;
 import vn.k2t.traficjam.model.UserTraffic;
+import vn.k2t.traficjam.untilitis.AppConstants;
 
 /**
  * Created by Paul on 8/11/15.
@@ -82,7 +83,6 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     DatabaseReference mDatabase;
     UserTraffic user;
     SQLUser sqlUser;
-    private UserTraffic mUser;
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -152,19 +152,19 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
                 LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                 MarkerOptions options = new MarkerOptions().position(latLng);
                 options.title(getAddressFromLatLng(latLng));
-                if (mUser != null) {
-                    if (mUser.getAvatar() != "") {
-                    } else {
-                        options.icon(BitmapDescriptorFactory
-                                .fromBitmap(BitmapFactory
-                                        .decodeResource(getResources(), R.mipmap.ic_launcher)));
-                    }
-                } else {
-                    options.icon(BitmapDescriptorFactory
-                            .fromBitmap(BitmapFactory
-                                    .decodeResource(getResources(), R.mipmap.ic_launcher)));
-                }
-                getMap().addMarker(options);
+//                if (user != null) {
+//                    if (user.getAvatar() != "") {
+//                    } else {
+//                        options.icon(BitmapDescriptorFactory
+//                                .fromBitmap(BitmapFactory
+//                                        .decodeResource(getResources(), R.mipmap.ic_launcher)));
+//                    }
+//                } else {
+//                    options.icon(BitmapDescriptorFactory
+//                            .fromBitmap(BitmapFactory
+//                                    .decodeResource(getResources(), R.mipmap.ic_launcher)));
+//                }
+//                getMap().addMarker(options);
                 // LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                 //MarkerOptions options = new MarkerOptions().position(latLng);
                 //options.title(getAddressFromLatLng(latLng));
@@ -301,12 +301,12 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     }
 
     private void saveLocationUserFromFireBase(final Location location) {
-        
+
         Map<String, Object> childUpdates = new HashMap<>();
         childUpdates.put("latitude", location.getLatitude() + "");
         childUpdates.put("longitude", location.getLongitude() + "");
         if (user != null) {
-            mDatabase.child(user.getUid()).updateChildren(childUpdates);
+            mDatabase.child(AppConstants.USER).child(user.getUid()).updateChildren(childUpdates);
         }
     }
 
