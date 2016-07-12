@@ -4,9 +4,11 @@ package vn.k2t.traficjam.maps;
  * Created by root on 07/07/2016.
  */
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Geocoder;
@@ -14,16 +16,13 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.view.View;
-import android.widget.TextView;
-import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -31,18 +30,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-
-import java.io.IOException;
-
-import vn.k2t.traficjam.MainActivity;
-import vn.k2t.traficjam.R;
-import vn.k2t.traficjam.frgmanager.FrgMaps;
-import vn.k2t.traficjam.model.UserTraffic;
-import vn.k2t.traficjam.onclick.ItemClick;
-import vn.k2t.traficjam.onclick.OnClickFrg;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
@@ -181,6 +168,7 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
                 //getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
                 mMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), null);
                 //  drawCircle(location);
+
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, this);
             } else {
                 Toast.makeText(getActivity(), getActivity().getString(R.string.can_not_get_location_of_you), Toast.LENGTH_LONG).show();
@@ -276,6 +264,7 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
 
     @Override
     public void onConnected(Bundle bundle) {
+
         mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         initCamera(mCurrentLocation);
         saveLocationUserFromFireBase(mCurrentLocation);
@@ -287,8 +276,8 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
 
     private void saveLocationUserFromFireBase(final double laitude, final double longitude) {
         Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("latitude", laitude + "");
-        childUpdates.put("longitude", longitude + "");
+//        childUpdates.put("latitude", laitude + "");
+//        childUpdates.put("longitude", longitude + "");
         mDatabase.child(user.getUid()).updateChildren(childUpdates);
     }
 

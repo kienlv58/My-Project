@@ -3,15 +3,16 @@ package vn.k2t.traficjam.frgmanager;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.FirebaseDatabase;
 import com.gordonwong.materialsheetfab.MaterialSheetFab;
 
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import vn.k2t.traficjam.untilitis.Utilities;
  * Created by chung on 7/11/16.
  */
 public class FrgFriends extends FrgBase {
+    private static final String TAG = "FrgFriends";
     private Utilities utilities;
     private static FrgFriends f;
     private static Context mContext;
@@ -51,7 +53,7 @@ public class FrgFriends extends FrgBase {
 
         if (utilities.isConnected()) {
             rootView = inflater.inflate(R.layout.frg_friends, container, false);
-         //   mDatabase = FirebaseDatabase.getInstance().getReference("trafficjam-edd7e");
+            mDatabase = FirebaseDatabase.getInstance().getReference();
             ButterKnife.bind(this, rootView);
             initView();
 //            setupFab();
@@ -64,20 +66,39 @@ public class FrgFriends extends FrgBase {
     }
 
     private void initView() {
-        Toast.makeText(getActivity(),"onfriends",Toast.LENGTH_SHORT).show();
 
         list = new ArrayList<>();
-        mDatabase.addValueEventListener(new ValueEventListener() {
+        mDatabase.addChildEventListener(new ChildEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                UserTraffic result = dataSnapshot.getValue(UserTraffic.class);
-                Toast.makeText(getActivity(),result+ "",Toast.LENGTH_SHORT).show();
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Log.e(TAG, dataSnapshot.getValue().toString());
+//                String name = dataSnapshot.child("name").getValue().toString();
+//                String avatar = dataSnapshot.child("avatar").getValue().toString();
+                UserTraffic userTraffic = dataSnapshot.getValue(UserTraffic.class);
+                Log.e(TAG, userTraffic.toString());
             }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(getActivity(),databaseError.getMessage(),Toast.LENGTH_SHORT).show();
 
             }
         });
+
+
     }
 }
