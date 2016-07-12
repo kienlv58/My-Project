@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -37,6 +38,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 import vn.k2t.traficjam.adapter.TabAdapter;
+import vn.k2t.traficjam.database.queries.SQLUser;
 import vn.k2t.traficjam.maps.MapsActivity;
 import vn.k2t.traficjam.model.UserTraffic;
 import vn.k2t.traficjam.untilitis.CommonMethod;
@@ -70,29 +72,9 @@ public class MainActivity extends AppCompatActivity
     DatabaseReference mDatabases;
 
     public static UserTraffic mUser;
-    FirebaseUser user;
+    SQLUser sqlUser;
+    //FirebaseUser user;
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        user = FirebaseAuth.getInstance().getCurrentUser();
-
-        if (user != null) {
-            mDatabases = FirebaseDatabase.getInstance().getReference().child(user.getUid());
-            ValueEventListener eventListener = new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    mUser = dataSnapshot.getValue(UserTraffic.class);
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            };
-            mDatabases.addValueEventListener(eventListener);
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,14 +83,12 @@ public class MainActivity extends AppCompatActivity
         ButterKnife.bind(this);
         initToolbar();
         initObject();
+        mAuth = FirebaseAuth.getInstance();
+        getUserFromDB();
 
-        if (user != null) {
 
-            // user.getPhotoUrl().getEncodedPath();
-            // user.getPhotoUrl().getPath();
-            CommonMethod.getInstance().loadImage(user.getPhotoUrl().getEncodedPath(), imgUserProfile);
-            //imgUserProfile.setImageURI(uri);
-        }
+
+
 
 
         /**
@@ -144,7 +124,11 @@ public class MainActivity extends AppCompatActivity
     private void initObject() {
 
         imgUserProfile = (CircleImageView) navigationView.getHeaderView(0).findViewById(R.id.profile_image_user);
+        tvNavUserName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.tv_nav_Name);
+        tvNavEmail = (TextView)navigationView.getHeaderView(0).findViewById(R.id.tv_nav_email);
         imgUserProfile.setOnClickListener(this);
+        tvNavUserName.setOnClickListener(this);
+        tvNavEmail.setOnClickListener(this);
 
 
     }
@@ -225,15 +209,60 @@ public class MainActivity extends AppCompatActivity
         int id = view.getId();
         switch (id) {
             case R.id.profile_image_user:
-                if (user != null) {
-                    startActivity(new Intent(this, ActivityUserProfile.class));
+            case R.id.tv_nav_Name:
+            case R.id.tv_nav_email:
+
+                if (mUser != null) {
+                    startActivityForResult(new Intent(this, ActivityUserProfile.class),300);
                     overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_in_left);
                 } else {
                     Intent intent = new Intent(MainActivity.this, LoginUserActivity.class);
-                    startActivity(intent);
+                    startActivityForResult(intent,200);
                 }
                 break;
+
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 200)
+            getUserFromDB();
+        if (requestCode == 300){
+            getUserFromDB();
+        }
+    }
+    public void getUserFromDB(){
+        sqlUser = new SQLUser(this);
+        mUser = sqlUser.getUser();
+        if (mUser != null){
+            CommonMethod.getInstance().loadImage(mUser.getAvatar(),imgUserProfile);
+            tvNavUserName.setText(mUser.getName());
+            tvNavEmail.setText(mUser.getEmail());
+        }
+        else {
+            imgUserProfile.setImageResource(R.drawable.bg_profile);
+            tvNavUserName.setText("Đăng nhập");
+            tvNavEmail.setText("");
+        }
+
+//        user =FirebaseAuth.getInstance().getCurrentUser();
+//
+//        if (user!= null) {
+//            mDatabases = FirebaseDatabase.getInstance().getReference().child(user.getUid());
+//            ValueEventListener eventListener = new ValueEventListener() {
+//                @Override
+//                public void onDataChange(DataSnapshot dataSnapshot) {
+//                    mUser = dataSnapshot.getValue(UserTraffic.class);
+//                }
+//
+//                @Override
+//                public void onCancelled(DatabaseError databaseError) {
+//
+//                }
+//            };
+//            mDatabases.addValueEventListener(eventListener);
+//        }
+    }
 }
