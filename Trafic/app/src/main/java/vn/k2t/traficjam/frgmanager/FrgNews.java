@@ -32,13 +32,13 @@ public class FrgNews extends FrgBase {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = null;
-        utilities = new Utilities(mContext);
-        if (utilities.isConnected()) {
-            rootView = inflater.inflate(R.layout.frg_news, container, false);
-        } else {
-            super.newInstance( mContext);
-            return super.onCreateView(inflater, container, savedInstanceState);
-        }
+//        utilities = new Utilities(mContext);
+//        if (utilities.isConnected()) {
+//            rootView = inflater.inflate(R.layout.frg_news, container, false);
+//        } else {
+//            super.newInstance( mContext);
+//            return super.onCreateView(inflater, container, savedInstanceState);
+//        }
 
         return rootView;
     }

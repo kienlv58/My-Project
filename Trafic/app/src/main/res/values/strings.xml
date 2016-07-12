@@ -43,6 +43,7 @@
     <string name="Accident">Tai nạn</string>
 
     <string name="is_send">Đang gửi...</string>
+    <string name="loging">Đang đăng nhập...</string>
     <string name="Email_or_password_is_malformed">Email hoặc mật khẩu không đúng định dạng</string>
     <string name="acoount">Tài khoản hoặc mật khẩu không đúng</string>
     <string name="login_fail">login fail</string>

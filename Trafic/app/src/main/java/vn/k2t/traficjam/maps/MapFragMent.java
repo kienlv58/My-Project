@@ -30,6 +30,20 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.IOException;
+
+import vn.k2t.traficjam.MainActivity;
+import vn.k2t.traficjam.R;
+import vn.k2t.traficjam.database.queries.SQLUser;
+import vn.k2t.traficjam.frgmanager.FrgMaps;
+import vn.k2t.traficjam.model.UserTraffic;
+import vn.k2t.traficjam.onclick.ItemClick;
+import vn.k2t.traficjam.onclick.OnClickFrg;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
@@ -66,7 +80,8 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     protected LocationManager locationManager;
     public static GoogleMap mMap;
     DatabaseReference mDatabase;
-    FirebaseUser user;
+    UserTraffic user;
+    SQLUser sqlUser;
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -94,7 +109,9 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     private void initObject() {
         locationManager = (LocationManager) getActivity()
                 .getSystemService(getActivity().LOCATION_SERVICE);
-        user = FirebaseAuth.getInstance().getCurrentUser();
+        sqlUser = new SQLUser(getContext());
+        user = sqlUser.getUser();
+        //user = FirebaseAuth.getInstance().getCurrentUser();
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
     }
@@ -285,7 +302,9 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
         Map<String, Object> childUpdates = new HashMap<>();
         childUpdates.put("latitude", location.getLatitude() + "");
         childUpdates.put("longitude", location.getLongitude() + "");
-        mDatabase.child(user.getUid()).updateChildren(childUpdates);
+        if (user != null) {
+            mDatabase.child(user.getUid()).updateChildren(childUpdates);
+        }
     }
 
     @Override

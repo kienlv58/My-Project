@@ -3,12 +3,14 @@ package vn.k2t.traficjam.user;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -21,15 +23,22 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+import com.facebook.Profile;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
+import com.google.android.gms.auth.GoogleAuthException;
+import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.plus.Plus;
+import com.google.android.gms.plus.model.people.Person;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -41,6 +50,7 @@ import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -69,6 +79,9 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
     String email, password;
     ProgressDialog progressDialog;
     SQLUser sqlUser;
+    String tokenGG;
+    String emailGG;
+    String avatar;
 
 
     //firebase
@@ -80,6 +93,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
     CallbackManager callbackManager;
     //login google
     GoogleApiClient mGoogleApiClient;
+    GoogleSignInOptions googleSignInOptions;
 
 
     @Override
@@ -90,7 +104,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
         ButterKnife.bind(this);
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
-        sqlUser = new SQLUser(this);
+
 
         callbackManager = CallbackManager.Factory.create();
         btn_loginAccount.setOnClickListener(this);
@@ -108,10 +122,12 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
                 if (firebaseUser != null) {
+                    progressDialog.setMessage(getString(R.string.loging));
+                    progressDialog.show();
                     String uid = firebaseUser.getUid();
                     String email = firebaseUser.getEmail();
                     String name = firebaseUser.getDisplayName();
-                    String avatar = String.valueOf(firebaseUser.getPhotoUrl());
+                    //String avatar = String.valueOf(firebaseUser.getPhotoUrl());
                     String uidProvider = firebaseUser.getProviderId();
                     ArrayList<String> list_friend = new ArrayList<>();
                     UserTraffic mUser = new UserTraffic(uid, name, avatar, email, uidProvider, "", "", "", list_friend);
@@ -122,10 +138,17 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                     mDatabase.child(uid).child("uidProvider").setValue(uidProvider);
                     mDatabase.child(uid).child("rank").setValue("");
                     mDatabase.child(uid).child("location").setValue("");
+
+
                     mDatabase.child(uid).child("latitude").setValue("");
                     mDatabase.child(uid).child("longitude").setValue("");
                     mDatabase.child(uid).child("list_friend").setValue(list_friend);
+
+                    sqlUser = new SQLUser(getApplicationContext());
                     sqlUser.insertUser(mUser);
+                    Intent intent = new Intent();
+                    setResult(200,intent);
+                    progressDialog.dismiss();
                     Toast.makeText(LoginUserActivity.this, email + "====" + name, Toast.LENGTH_SHORT).show();
                 } else
                     Toast.makeText(LoginUserActivity.this, "user null", Toast.LENGTH_SHORT).show();
@@ -135,6 +158,10 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
         LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
+                Profile profile = Profile.getCurrentProfile();
+                String uid_fb = profile.getId();
+                avatar = "http://graph.facebook.com/"+uid_fb+"/picture?type=large";
+                //avatar = String.valueOf(profile.getProfilePictureUri(400,800));
                 handeFBaccesstoken(loginResult.getAccessToken());
             }
 
@@ -150,13 +177,19 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
         });
 
         //login google
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.web_app))
-                .requestEmail()
-                .build();
+//        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+//                .requestIdToken(getString(R.string.web_app))
+//                .requestEmail()
+//                .build();
+//        mGoogleApiClient = new GoogleApiClient.Builder(this)
+//                .enableAutoManage(this /* FragmentActivity */, (GoogleApiClient.OnConnectionFailedListener) this /* OnConnectionFailedListener */)
+//                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+//                .addApi(Plus.API)
+//                .build();
+        googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestScopes(new Scope(Scopes.PLUS_LOGIN)).requestEmail().build();
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this /* FragmentActivity */, (GoogleApiClient.OnConnectionFailedListener) this /* OnConnectionFailedListener */)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, googleSignInOptions)
                 .addApi(Plus.API)
                 .build();
 
@@ -172,7 +205,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                 break;
             case R.id.btn_loginGoogle:
                 Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-                startActivityForResult(signInIntent, 100);
+                startActivityForResult(signInIntent, 1000);
                 break;
             case R.id.btn_loginAccount:
                 email = edt_email.getText().toString();
@@ -214,16 +247,19 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
 
     //fb + firebase
     public void handeFBaccesstoken(AccessToken accessToken) {
+        progressDialog.setMessage(getString(R.string.loging));
+        progressDialog.show();
         AuthCredential credential = FacebookAuthProvider.getCredential(accessToken.getToken());
         mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
+
                     Toast.makeText(LoginUserActivity.this, task + "", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(LoginUserActivity.this, "login fail", Toast.LENGTH_SHORT).show();
-                    Toast.makeText(LoginUserActivity.this, R.string.login_fail, Toast.LENGTH_SHORT).show();
                 }
+                progressDialog.dismiss();
                 finish();
             }
         });
@@ -231,8 +267,9 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
     }
 
     //google + firebase
-    public void firebaseAuthWithGoogle(GoogleSignInAccount account) {
-        AuthCredential authCredential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+    public void firebaseAuthWithGoogle( String tokenID) {
+        mAuth = FirebaseAuth.getInstance();
+        AuthCredential authCredential = GoogleAuthProvider.getCredential(tokenID, null);
         mAuth.signInWithCredential(authCredential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
@@ -245,6 +282,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
             }
         });
     }
+
 
 
     @Override
@@ -264,16 +302,29 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 100) {
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            if (result.isSuccess()) {
-                GoogleSignInAccount account = result.getSignInAccount();
-                firebaseAuthWithGoogle(account);
+        if (requestCode == 1000) {
+            if (resultCode == RESULT_OK) {
+                GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+                if (result.isSuccess()) {
+                    GoogleSignInAccount account = result.getSignInAccount();
+                   emailGG = account.getEmail().toString();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            new RetrieveTokenTask().execute(emailGG);
+                        }
+                    });
+                }else
+                Toast.makeText(LoginUserActivity.this, "khong dang nhap dk", Toast.LENGTH_SHORT).show();
             }
         }
         if (requestCode == 111) {
             edt_email.setText(data.getStringExtra("email"));
             edt_pass.setText(data.getStringExtra("pass"));
+        }
+        if (requestCode == 1221 && resultCode == RESULT_OK) {
+            // We had to sign in - now we can finish off the token request.
+            new RetrieveTokenTask().execute(tokenGG);
         }
     }
 
@@ -302,6 +353,31 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
         }).create().show();
 
     }
+    private class RetrieveTokenTask extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            String accountName = params[0];
+            String scopes = "oauth2:profile email";
+
+            try {
+                tokenGG = GoogleAuthUtil.getToken(getApplicationContext(), accountName, scopes).toString();
+            } catch (IOException e) {
+                Log.e("mes", e.getMessage());
+            } catch (UserRecoverableAuthException e) {
+                startActivityForResult(e.getIntent(), 1221);
+            } catch (GoogleAuthException e) {
+                Log.e("mes", e.getMessage());
+            }
+            return tokenGG;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            firebaseAuthWithGoogle(s);
+        }
+    }
 
 
     public void aa(String _email, final DialogInterface dialogInterface) {
@@ -322,6 +398,39 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
+        Person currentUser = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
+
+
+        AsyncTask<Void, Void, String > task = new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... params) {
+                String token = null;
+                final String SCOPES = "https://www.googleapis.com/auth/plus.login ";
+
+                try {
+                    token = GoogleAuthUtil.getToken(
+                            getApplicationContext(),
+                            Plus.AccountApi.getAccountName(mGoogleApiClient),
+                            "oauth2:" + SCOPES);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (GoogleAuthException e) {
+                    e.printStackTrace();
+                }
+
+
+                return token;
+
+            }
+
+            @Override
+            protected void onPostExecute(String token) {
+                tokenGG = token;
+                Log.i("token", "Access token retrieved:" + token);
+            }
+
+        };
+        task.execute();
 
     }
 
@@ -334,4 +443,5 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
+
 }
