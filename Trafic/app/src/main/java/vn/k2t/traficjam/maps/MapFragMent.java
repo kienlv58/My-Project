@@ -151,8 +151,8 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
                 LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                 MarkerOptions options = new MarkerOptions().position(latLng);
                 options.title(getAddressFromLatLng(latLng));
-                if (mUser != null) {
-                    if (mUser.getAvatar() != "") {
+                if (user != null) {
+                    if (user.getAvatar() != "") {
                     } else {
                         options.icon(BitmapDescriptorFactory
                                 .fromBitmap(BitmapFactory
