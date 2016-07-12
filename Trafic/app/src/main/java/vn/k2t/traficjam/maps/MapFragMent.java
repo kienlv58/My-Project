@@ -77,7 +77,6 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
             GoogleMap.MAP_TYPE_TERRAIN,
             GoogleMap.MAP_TYPE_NONE};
     private int curMapTypeIndex = 1;
-    private UserTraffic mUser;
     protected LocationManager locationManager;
     public static GoogleMap mMap;
     DatabaseReference mDatabase;
@@ -88,7 +87,6 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setHasOptionsMenu(true);
-        mUser = MainActivity.mUser;
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
