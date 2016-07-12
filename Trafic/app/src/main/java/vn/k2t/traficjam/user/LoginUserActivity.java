@@ -81,7 +81,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
     String tokenGG;
     String emailGG;
     String avatar;
-    UserTraffic user;
+    UserTraffic mUser;
 
 
     //firebase
@@ -120,30 +120,43 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+                final FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
                 if (firebaseUser != null) {
-                    progressDialog.setMessage(getString(R.string.loging));
-                    progressDialog.show();
-                    String uid = firebaseUser.getUid();
-                    String email = firebaseUser.getEmail();
-                    String name = firebaseUser.getDisplayName();
-                    //String avatar = String.valueOf(firebaseUser.getPhotoUrl());
-                    String uidProvider = firebaseUser.getProviderId();
-                    UserTraffic mUser = new UserTraffic(uid, name, avatar, email, uidProvider, "", "", "");
-                    mDatabase.child(AppConstants.USER).child(uid).child("uid").setValue(uid);
-                    mDatabase.child(AppConstants.USER).child(uid).child("email").setValue(email);
-                    mDatabase.child(AppConstants.USER).child(uid).child("name").setValue(name);
-                    mDatabase.child(AppConstants.USER).child(uid).child("avatar").setValue(avatar);
-                    mDatabase.child(AppConstants.USER).child(uid).child("uidProvider").setValue(uidProvider);
-                    mDatabase.child(AppConstants.USER).child(uid).child("latitude").setValue("");
-                    mDatabase.child(AppConstants.USER).child(uid).child("longitude").setValue("");
+                    new AsyncTask<Void,Void,Void>(){
+                        @Override
+                        protected void onPreExecute() {
+                            super.onPreExecute();
+                            progressDialog.setMessage(getString(R.string.loging));
+                            progressDialog.show();
+                        }
 
-                    sqlUser = new SQLUser(getApplicationContext());
-                    sqlUser.insertUser(mUser);
-                    Intent intent = new Intent();
-                    setResult(200, intent);
-                    progressDialog.dismiss();
-                    Toast.makeText(LoginUserActivity.this, email + "====" + name, Toast.LENGTH_SHORT).show();
+                        @Override
+                        protected void onPostExecute(Void aVoid) {
+                            super.onPostExecute(aVoid);
+                            sqlUser = new SQLUser(getApplicationContext());
+                            sqlUser.insertUser(mUser);
+                            Intent intent = new Intent();
+                            setResult(200, intent);
+                            progressDialog.dismiss();
+                            Toast.makeText(LoginUserActivity.this, mUser.getEmail() + "====" + mUser.getName(), Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
+
+                        @Override
+                        protected Void doInBackground(Void... params) {
+                            String uid = firebaseUser.getUid();
+                            String email = firebaseUser.getEmail();
+                            String name = firebaseUser.getDisplayName();
+                            //String avatar = String.valueOf(firebaseUser.getPhotoUrl());
+                            String uidProvider = firebaseUser.getProviderId();
+
+                            mUser = new UserTraffic(uid, name, avatar, email, uidProvider, "", "", "", 1, "");
+                            mDatabase.child(AppConstants.USER).child(uid).setValue(mUser);
+
+                            return null;
+                        }
+                    }.execute();
+
                 } else
                     Toast.makeText(LoginUserActivity.this, "user null", Toast.LENGTH_SHORT).show();
             }
@@ -152,6 +165,8 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
         LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
+                progressDialog.setMessage(getString(R.string.loging));
+                progressDialog.show();
                 Profile profile = Profile.getCurrentProfile();
                 String uid_fb = profile.getId();
                 avatar = "http://graph.facebook.com/" + uid_fb + "/picture?type=large";
@@ -232,15 +247,12 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                     Toast.makeText(LoginUserActivity.this, "Tài khoản hoặc mật khẩu không đúng", Toast.LENGTH_SHORT).show();
                 }
                 progressDialog.dismiss();
-                finish();
             }
         });
     }
 
     //fb + firebase
     public void handeFBaccesstoken(AccessToken accessToken) {
-        progressDialog.setMessage(getString(R.string.loging));
-        progressDialog.show();
         AuthCredential credential = FacebookAuthProvider.getCredential(accessToken.getToken());
         mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
@@ -251,8 +263,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                 } else {
                     Toast.makeText(LoginUserActivity.this, "login fail", Toast.LENGTH_SHORT).show();
                 }
-                progressDialog.dismiss();
-                finish();
+
             }
         });
 
@@ -294,6 +305,8 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
         callbackManager.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1000) {
             if (resultCode == RESULT_OK) {
+                progressDialog.setMessage(getString(R.string.loging));
+                progressDialog.show();
                 GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
                 GoogleSignInAccount account = result.getSignInAccount();
                 firebaseAuthWithGoogle(account);
@@ -353,39 +366,6 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        Person currentUser = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
-
-
-        AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
-            @Override
-            protected String doInBackground(Void... params) {
-                String token = null;
-                final String SCOPES = "https://www.googleapis.com/auth/plus.login ";
-
-                try {
-                    token = GoogleAuthUtil.getToken(
-                            getApplicationContext(),
-                            Plus.AccountApi.getAccountName(mGoogleApiClient),
-                            "oauth2:" + SCOPES);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (GoogleAuthException e) {
-                    e.printStackTrace();
-                }
-
-
-                return token;
-
-            }
-
-            @Override
-            protected void onPostExecute(String token) {
-                tokenGG = token;
-                Log.i("token", "Access token retrieved:" + token);
-            }
-
-        };
-        task.execute();
 
     }
 

@@ -303,15 +303,20 @@ public class MainActivity extends AppCompatActivity
     public void getUserFromDB() {
         sqlUser = new SQLUser(this);
         mUser = sqlUser.getUser();
-        if (mUser != null) {
-            CommonMethod.getInstance().loadImage(mUser.getAvatar(), imgUserProfile);
-            tvNavUserName.setText(mUser.getName());
-            tvNavEmail.setText(mUser.getEmail());
-            user_uid = mUser.getUid();
-        } else {
-            imgUserProfile.setImageResource(R.drawable.bg_profile);
-            tvNavUserName.setText("Đăng nhập");
-            tvNavEmail.setText("");
+        try {
+            if (mUser != null) {
+
+                CommonMethod.getInstance().loadImage(mUser.getAvatar(), imgUserProfile);
+                tvNavUserName.setText(mUser.getName());
+                tvNavEmail.setText(mUser.getEmail());
+                user_uid = mUser.getUid();
+            } else {
+                imgUserProfile.setImageResource(R.drawable.bg_profile);
+                tvNavUserName.setText("Đăng nhập");
+                tvNavEmail.setText("");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
 //        user =FirebaseAuth.getInstance().getCurrentUser();

@@ -2,7 +2,6 @@ package vn.k2t.traficjam.frgmanager;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +13,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.gordonwong.materialsheetfab.MaterialSheetFab;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -24,6 +23,8 @@ import vn.k2t.traficjam.FrgBase;
 import vn.k2t.traficjam.MainActivity;
 import vn.k2t.traficjam.R;
 import vn.k2t.traficjam.adapter.ListFriendAdapter;
+import vn.k2t.traficjam.database.queries.SQLUser;
+import vn.k2t.traficjam.model.Friends;
 import vn.k2t.traficjam.model.UserTraffic;
 import vn.k2t.traficjam.untilitis.Utilities;
 
@@ -36,12 +37,12 @@ public class FrgFriends extends FrgBase {
     private static FrgFriends f;
     private static Context mContext;
     private ListFriendAdapter listFriendAdapter;
-    private DatabaseReference mDatabase;
+    private static DatabaseReference mDatabase;
     private ArrayList<UserTraffic> list;
-    private MaterialSheetFab materialSheetFab;
+    private SQLUser sqlUser;
     @Bind(R.id.lv_listfriend)
     ListView lv_listfriends;
-    private RecyclerView.LayoutManager layoutManager;
+
     private String user_uid;
 
     public static FrgFriends newInstance(Context context) {
@@ -61,7 +62,6 @@ public class FrgFriends extends FrgBase {
             mDatabase = FirebaseDatabase.getInstance().getReference();
             ButterKnife.bind(this, rootView);
             initView();
-//            setupFab();
         } else {
             super.newInstance(mContext);
             return super.onCreateView(inflater, container, savedInstanceState);
@@ -73,19 +73,45 @@ public class FrgFriends extends FrgBase {
     @Override
     public void onStart() {
         super.onStart();
-        mDatabase.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                list.clear();
-                Log.e(TAG, dataSnapshot.getValue().toString());
-                UserTraffic userTraffic = dataSnapshot.getValue(UserTraffic.class);
-                list.add(userTraffic);
-                if (list != null) {
+        user_uid = ((MainActivity) getActivity()).getUser_uid();
+        insertFriends(user_uid);
+        for (Friends f : sqlUser.getAllFriends()) {
+            mDatabase.child(f.getFriend_uid()).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    String name = dataSnapshot.child("name").getValue().toString();
+                    String avatar = dataSnapshot.child("avatar").getValue().toString();
+                    String email = dataSnapshot.child("email").getValue().toString();
+                    list.add(new UserTraffic(name,avatar,email));
                     listFriendAdapter = new ListFriendAdapter(getActivity(), list);
                     lv_listfriends.setAdapter(listFriendAdapter);
                     listFriendAdapter.notifyDataSetChanged();
                 }
-                Log.e(TAG, userTraffic.toString());
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+
+    }
+
+    private void initView() {
+        sqlUser = new SQLUser(getActivity());
+        list = new ArrayList<>();
+
+    }
+
+    public void insertFriends(String _uid) {
+        mDatabase.child(_uid).child("friends").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                String item = dataSnapshot.getValue().toString();
+                long result = sqlUser.insertFriends(item);
+                Log.e(TAG, "user: " + user_uid);
+                Log.e(TAG, item);
+                Log.e(TAG, result + " row");
             }
 
             @Override
@@ -108,10 +134,78 @@ public class FrgFriends extends FrgBase {
 
             }
         });
-        user_uid = ((MainActivity) getActivity()).getUser_uid();
     }
 
-    private void initView() {
-        list = new ArrayList<>();
+    public ArrayList<UserTraffic> getAllUser() {
+        final ArrayList<UserTraffic> userTraffics = new ArrayList<>();
+        mDatabase.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                UserTraffic userTraffic = dataSnapshot.getValue(UserTraffic.class);
+                userTraffics.add(userTraffic);
+
+                Log.e(TAG, userTraffics.size() + "");
+                listFriendAdapter = new ListFriendAdapter(getActivity(), userTraffics);
+                lv_listfriends.setAdapter(listFriendAdapter);
+                listFriendAdapter.notifyDataSetChanged();
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        return userTraffics;
     }
+
+//    public ArrayList<UserTraffic> getListFriends(String uid) {
+//        final ArrayList<UserTraffic> arrayList = new ArrayList<>();
+//        for (int i = 0; i < getListUID(uid).size(); i++) {
+//            mDatabase.child(getListUID(uid).get(i)).addChildEventListener(new ChildEventListener() {
+//                @Override
+//                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+//                    UserTraffic item = dataSnapshot.getValue(UserTraffic.class);
+//                    arrayList.add(item);
+//                }
+//
+//                @Override
+//                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+//
+//                }
+//
+//                @Override
+//                public void onChildRemoved(DataSnapshot dataSnapshot) {
+//
+//                }
+//
+//                @Override
+//                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+//
+//                }
+//
+//                @Override
+//                public void onCancelled(DatabaseError databaseError) {
+//
+//                }
+//            });
+//
+//        }
+//        return arrayList;
+//    }
 }
