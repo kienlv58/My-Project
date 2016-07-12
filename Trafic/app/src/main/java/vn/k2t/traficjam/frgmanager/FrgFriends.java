@@ -50,6 +50,7 @@ public class FrgFriends extends FrgBase {
         return f;
     }
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = null;
