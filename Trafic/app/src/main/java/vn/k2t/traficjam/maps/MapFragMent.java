@@ -43,6 +43,7 @@ import vn.k2t.traficjam.frgmanager.FrgMaps;
 import vn.k2t.traficjam.model.UserTraffic;
 import vn.k2t.traficjam.onclick.ItemClick;
 import vn.k2t.traficjam.onclick.OnClickFrg;
+
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
@@ -277,8 +278,10 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     @Override
     public void onConnected(Bundle bundle) {
         mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        initCamera(mCurrentLocation);
-        saveLocationUserFromFireBase(mCurrentLocation);
+        if (mCurrentLocation != null) {
+            initCamera(mCurrentLocation);
+            saveLocationUserFromFireBase(mCurrentLocation);
+        }
 //        if (mUser.getAvatar() == "") {
         // LatLng latLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
         //  Resources res = getActivity().getResources();
