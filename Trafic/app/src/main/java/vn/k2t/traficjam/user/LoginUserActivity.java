@@ -137,9 +137,6 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                     mDatabase.child(uid).child("avatar").setValue(avatar);
                     mDatabase.child(uid).child("uidProvider").setValue(uidProvider);
                     mDatabase.child(uid).child("rank").setValue("");
-                    mDatabase.child(uid).child("location").setValue("");
-
-
                     mDatabase.child(uid).child("latitude").setValue("");
                     mDatabase.child(uid).child("longitude").setValue("");
                     mDatabase.child(uid).child("list_friend").setValue(list_friend);
