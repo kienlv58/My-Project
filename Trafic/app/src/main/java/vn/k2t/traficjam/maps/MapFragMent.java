@@ -299,6 +299,7 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     }
 
     private void saveLocationUserFromFireBase(final Location location) {
+        
         Map<String, Object> childUpdates = new HashMap<>();
         childUpdates.put("latitude", location.getLatitude() + "");
         childUpdates.put("longitude", location.getLongitude() + "");
