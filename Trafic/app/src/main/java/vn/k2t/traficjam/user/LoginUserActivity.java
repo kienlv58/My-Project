@@ -128,21 +128,21 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                     //String avatar = String.valueOf(firebaseUser.getPhotoUrl());
                     String uidProvider = firebaseUser.getProviderId();
                     ArrayList<String> list_friend = new ArrayList<>();
-                    UserTraffic mUser = new UserTraffic(uid, name, avatar, email, uidProvider, "", "", "", list_friend);
-                    mDatabase.child(uid).child("uid").setValue(uid);
-                    mDatabase.child(uid).child("email").setValue(email);
-                    mDatabase.child(uid).child("name").setValue(name);
-                    mDatabase.child(uid).child("avatar").setValue(avatar);
-                    mDatabase.child(uid).child("uidProvider").setValue(uidProvider);
-                    mDatabase.child(uid).child("rank").setValue("");
-                    mDatabase.child(uid).child("latitude").setValue("");
-                    mDatabase.child(uid).child("longitude").setValue("");
-                    mDatabase.child(uid).child("list_friend").setValue(list_friend);
+                    UserTraffic mUser = new UserTraffic(uid, name, avatar, email, uidProvider, "", "", "", 1, "");
+                    mDatabase.child(uid).setValue(mUser);
+//                    mDatabase.child(uid).child("email").setValue(email);
+//                    mDatabase.child(uid).child("name").setValue(name);
+//                    mDatabase.child(uid).child("avatar").setValue(avatar);
+//                    mDatabase.child(uid).child("uidProvider").setValue(uidProvider);
+//                    mDatabase.child(uid).child("rank").setValue("");
+//                    mDatabase.child(uid).child("latitude").setValue("");
+//                    mDatabase.child(uid).child("longitude").setValue("");
+//                    mDatabase.child(uid).child("list_friend").setValue(list_friend);
 
                     sqlUser = new SQLUser(getApplicationContext());
                     sqlUser.insertUser(mUser);
                     Intent intent = new Intent();
-                    setResult(200,intent);
+                    setResult(200, intent);
                     progressDialog.dismiss();
                     Toast.makeText(LoginUserActivity.this, email + "====" + name, Toast.LENGTH_SHORT).show();
                 } else
@@ -155,7 +155,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
             public void onSuccess(LoginResult loginResult) {
                 Profile profile = Profile.getCurrentProfile();
                 String uid_fb = profile.getId();
-                avatar = "http://graph.facebook.com/"+uid_fb+"/picture?type=large";
+                avatar = "http://graph.facebook.com/" + uid_fb + "/picture?type=large";
                 //avatar = String.valueOf(profile.getProfilePictureUri(400,800));
                 handeFBaccesstoken(loginResult.getAccessToken());
             }
@@ -262,7 +262,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
     }
 
     //google + firebase
-    public void firebaseAuthWithGoogle( String tokenID) {
+    public void firebaseAuthWithGoogle(String tokenID) {
         mAuth = FirebaseAuth.getInstance();
         AuthCredential authCredential = GoogleAuthProvider.getCredential(tokenID, null);
         mAuth.signInWithCredential(authCredential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -272,12 +272,12 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                     Toast.makeText(LoginUserActivity.this, task + "", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(LoginUserActivity.this, "login fail", Toast.LENGTH_SHORT).show();
-                    Toast.makeText(LoginUserActivity.this, R.string.login_fail, Toast.LENGTH_SHORT).show();}
+                    Toast.makeText(LoginUserActivity.this, R.string.login_fail, Toast.LENGTH_SHORT).show();
+                }
                 finish();
             }
         });
     }
-
 
 
     @Override
@@ -309,8 +309,8 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                             new RetrieveTokenTask().execute(emailGG);
                         }
                     });
-                }else
-                Toast.makeText(LoginUserActivity.this, "khong dang nhap dk", Toast.LENGTH_SHORT).show();
+                } else
+                    Toast.makeText(LoginUserActivity.this, "khong dang nhap dk", Toast.LENGTH_SHORT).show();
             }
         }
         if (requestCode == 111) {
@@ -348,6 +348,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
         }).create().show();
 
     }
+
     private class RetrieveTokenTask extends AsyncTask<String, Void, String> {
 
         @Override
@@ -396,7 +397,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
         Person currentUser = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
 
 
-        AsyncTask<Void, Void, String > task = new AsyncTask<Void, Void, String>() {
+        AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
             @Override
             protected String doInBackground(Void... params) {
                 String token = null;
