@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-//apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 23
@@ -45,6 +45,6 @@ dependencies {
     //compile 'com.google.android.gms:play-services-maps:9.0.0'
     //compile 'com.google.android.gms:play-services-location:9.0.0'
     compile 'com.gordonwong:material-sheet-fab:1.2.1'
-    compile 'com.android.support:cardview-v7:23.3.0'
+    compile 'com.android.support:cardview-v7:24.0.0'
 }
 
