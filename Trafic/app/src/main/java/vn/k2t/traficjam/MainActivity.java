@@ -281,7 +281,7 @@ public class MainActivity extends AppCompatActivity
                     if (mUtilities.isConnected()) {
                         progressDialog.show();
                         newPosts.setImage(base64Image);
-                        mDatabases.child(AppConstants.POSTS).child(mUser.getUid()).setValue(newPosts);
+                        mDatabases.child(AppConstants.POSTS).push().setValue(newPosts);
                         switch (TYPE) {
                             case AppConstants.TYPE_TRAFFIC_JAM:
                                 tickLocation(BitmapDescriptorFactory.HUE_RED);
@@ -370,7 +370,7 @@ public class MainActivity extends AppCompatActivity
         //  alertDialog.setTitle("ban co muon chup anh khong");
 
         // Setting Dialog Message
-        alertDialog.setMessage("ban co muon chup anh khong");
+        alertDialog.setMessage(R.string.you_want_camera);
 
         // Setting Icon to Dialog
         //alertDialog.setIcon(R.drawable.delete);
@@ -379,7 +379,7 @@ public class MainActivity extends AppCompatActivity
         final double latitude = Double.parseDouble(data.getmItemData().get(AppConstants.KEY_LATITUDE).trim());
         final double longtitude = Double.parseDouble(data.getmItemData().get(AppConstants.KEY_LONGTITUDE).trim());
         final LatLng latLng = new LatLng(latitude, longtitude);
-        alertDialog.setPositiveButton("Co", new DialogInterface.OnClickListener() {
+        alertDialog.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 Intent intentTakePhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 if (intentTakePhoto.resolveActivity(getPackageManager()) != null) {
@@ -394,24 +394,25 @@ public class MainActivity extends AppCompatActivity
                     newPosts.setLongitude(longtitude + "");
                     newPosts.setTitle(mUtilities.getAddressFromLatLng(latLng));
                     newPosts.setType(type);
+                    newPosts.setUser_id(mUser.getUid());
                     newPosts.setName(mUser.getName());
                     newPosts.setCreated_at(Utilities.currentDate());
                     intentTakePhoto.putExtra(MediaStore.EXTRA_OUTPUT, capturedImageURI);
                     startActivityForResult(intentTakePhoto, AppConstants.REQUEST_TAKE_PHOTO);
                 } else {
-                    Toast.makeText(MainActivity.this, "Device does not support camera", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, R.string.device_does_not_support_camera, Toast.LENGTH_LONG).show();
 
                 }
             }
         });
 
         // on pressing cancel button
-        alertDialog.setNegativeButton("Khong", new DialogInterface.OnClickListener() {
+        alertDialog.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 if (mUtilities.isConnected()) {
                     progressDialog.show();
-                    Posts posts = new Posts(mUtilities.getAddressFromLatLng(latLng), mUser.getName(), type, AppConstants.GOOD_RANK, latitude + "", longtitude + "", "", Utilities.currentDate());
-                    mDatabases.child(AppConstants.POSTS).child(mUser.getUid()).setValue(posts);
+                    Posts posts = new Posts(mUser.getUid(), mUtilities.getAddressFromLatLng(latLng), mUser.getName(), type, AppConstants.GOOD_RANK, latitude + "", longtitude + "", "", Utilities.currentDate());
+                    mDatabases.child(AppConstants.POSTS).push().setValue(posts);
                     switch (type) {
                         case AppConstants.TYPE_TRAFFIC_JAM:
                             tickLocation(BitmapDescriptorFactory.HUE_RED);
@@ -433,3 +434,4 @@ public class MainActivity extends AppCompatActivity
         alertDialog.show();
     }
 }
+

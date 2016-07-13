@@ -47,4 +47,8 @@
     <string name="Email_or_password_is_malformed">Email hoặc mật khẩu không đúng định dạng</string>
     <string name="acoount">Tài khoản hoặc mật khẩu không đúng</string>
     <string name="login_fail">login fail</string>
+    <string name="you_want_camera">Bạn có muốn chụp ảnh không</string>
+    <string name="yes">Có</string>
+    <string name="no">Không</string>
+    <string name="device_does_not_support_camera">Thiết bị không hỗ trợ camera</string>
 </resources>

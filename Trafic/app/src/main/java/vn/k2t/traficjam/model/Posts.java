@@ -4,6 +4,7 @@ package vn.k2t.traficjam.model;
  * Created by root on 12/07/2016.
  */
 public class Posts {
+    private String user_id;
     private String title;
     private String name;
     private String type;
@@ -17,7 +18,8 @@ public class Posts {
 
     }
 
-    public Posts(String title, String name, String type, String rank, String latitude, String longitude, String image, String created_at) {
+    public Posts(String user_id, String title, String name, String type, String rank, String latitude, String longitude, String image, String created_at) {
+        this.user_id = user_id;
         this.title = title;
         this.name = name;
         this.type = type;
@@ -26,6 +28,14 @@ public class Posts {
         this.longitude = longitude;
         this.image = image;
         this.created_at = created_at;
+    }
+
+    public String getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(String user_id) {
+        this.user_id = user_id;
     }
 
     public void setName(String name) {
