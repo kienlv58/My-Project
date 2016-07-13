@@ -49,4 +49,8 @@
     <string name="login_fail">login fail</string>
     <string name="input_search">Tìm kiếm</string>
     <string name="contact">Contact</string>
+    <string name="you_want_camera">Bạn có muốn chụp ảnh không</string>
+    <string name="yes">Có</string>
+    <string name="no">Không</string>
+    <string name="device_does_not_support_camera">Thiết bị không hỗ trợ camera</string>
 </resources>
