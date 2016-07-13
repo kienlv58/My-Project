@@ -55,7 +55,7 @@ public class FrgNews extends FrgBase {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = null;
         utilities = new Utilities(mContext);
-        if (utilities.isConnected()) {
+       // if (utilities.isConnected()) {
             rootView = inflater.inflate(R.layout.frg_news, container, false);
             ButterKnife.bind(this, rootView);
             mDatabase = FirebaseDatabase.getInstance().getReference().child(AppConstants.POSTS);
@@ -97,10 +97,10 @@ public class FrgNews extends FrgBase {
 
                 }
             });
-        } else {
-            super.newInstance(mContext);
-            return super.onCreateView(inflater, container, savedInstanceState);
-        }
+//        } else {
+//            super.newInstance(mContext);
+//            return super.onCreateView(inflater, container, savedInstanceState);
+//        }
 
         return rootView;
     }

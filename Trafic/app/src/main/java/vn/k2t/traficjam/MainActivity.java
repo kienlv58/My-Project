@@ -30,6 +30,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,18 +38,24 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.ByteArrayOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
+import vn.k2t.traficjam.adapter.ListFriendAdapter;
 import vn.k2t.traficjam.adapter.TabAdapter;
 import vn.k2t.traficjam.database.queries.SQLUser;
 import vn.k2t.traficjam.maps.MapFragMent;
@@ -67,16 +74,21 @@ import vn.k2t.traficjam.user.LoginUserActivity;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener, ItemClick {
 
+    private static final String TAG = "MainActivity";
     @Bind(R.id.toolbar)
     Toolbar toolbar;
     @Bind(R.id.drawer_layout)
     DrawerLayout drawer;
     @Bind(R.id.nav_view)
     NavigationView navigationView;
+    @Bind(R.id.nav_view_right)
+    NavigationView navigationView_Right;
     @Bind(R.id.viewPager)
     ViewPager viewPager;
     @Bind(R.id.tabLayout)
     TabLayout tabLayout;
+    @Bind(R.id.lv_listfriend)
+    ListView lv_listfriend;
 
 
     private FragmentManager manager;
@@ -87,12 +99,14 @@ public class MainActivity extends AppCompatActivity
     //firebase
     FirebaseAuth mAuth;
     FirebaseAuth.AuthStateListener mAuthStateListener;
-    DatabaseReference mDatabases;
+    DatabaseReference mDatabase;
 
     public static UserTraffic mUser;
     SQLUser sqlUser;
     private String user_uid;
     private Uri capturedImageURI;
+    private ArrayList<UserTraffic> listUser;
+    private ListFriendAdapter adapter;
     //FirebaseUser user;
     private Utilities mUtilities;
     private ProgressDialog progressDialog;
@@ -108,8 +122,9 @@ public class MainActivity extends AppCompatActivity
         initToolbar();
         initObject();
         mAuth = FirebaseAuth.getInstance();
-        mDatabases = FirebaseDatabase.getInstance().getReference();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
         getUserFromDB();
+        getAllFriends();
         /**
          * generate keyhas facebook
          */
@@ -137,6 +152,13 @@ public class MainActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
+        navigationView_Right.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(MenuItem item) {
+                drawer.closeDrawer(GravityCompat.END);
+                return true;
+            }
+        });
         setTabFragment();
     }
 
@@ -150,9 +172,9 @@ public class MainActivity extends AppCompatActivity
 
     private void initObject() {
 
-        imgUserProfile = (CircleImageView) navigationView.getHeaderView(0).findViewById(R.id.profile_image_user);
-        tvNavUserName = (TextView) navigationView.getHeaderView(0).findViewById(R.id.tv_nav_Name);
-        tvNavEmail = (TextView) navigationView.getHeaderView(0).findViewById(R.id.tv_nav_email);
+        imgUserProfile = (CircleImageView) navigationView_Right.getHeaderView(0).findViewById(R.id.profile_image_user);
+        tvNavUserName = (TextView) navigationView_Right.getHeaderView(0).findViewById(R.id.tv_nav_Name);
+        tvNavEmail = (TextView) navigationView_Right.getHeaderView(0).findViewById(R.id.tv_nav_email);
         imgUserProfile.setOnClickListener(this);
         tvNavUserName.setOnClickListener(this);
         tvNavEmail.setOnClickListener(this);
@@ -181,23 +203,17 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
-        return true;
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.item_contact) {
+            drawer.openDrawer(GravityCompat.END);
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -281,7 +297,7 @@ public class MainActivity extends AppCompatActivity
                     if (mUtilities.isConnected()) {
                         progressDialog.show();
                         newPosts.setImage(base64Image);
-                        mDatabases.child(AppConstants.POSTS).child(mUser.getUid()).setValue(newPosts);
+                        mDatabase.child(AppConstants.POSTS).child(mUser.getUid()).setValue(newPosts);
                         switch (TYPE) {
                             case AppConstants.TYPE_TRAFFIC_JAM:
                                 tickLocation(BitmapDescriptorFactory.HUE_RED);
@@ -303,15 +319,38 @@ public class MainActivity extends AppCompatActivity
     public void getUserFromDB() {
         sqlUser = new SQLUser(this);
         mUser = sqlUser.getUser();
-        if (mUser != null) {
-            CommonMethod.getInstance().loadImage(mUser.getAvatar(), imgUserProfile);
-            tvNavUserName.setText(mUser.getName());
-            tvNavEmail.setText(mUser.getEmail());
-            user_uid = mUser.getUid();
-        } else {
-            imgUserProfile.setImageResource(R.drawable.bg_profile);
-            tvNavUserName.setText("Đăng nhập");
-            tvNavEmail.setText("");
+        try {
+            if (mUser != null) {
+                user_uid = mUser.getUid();
+
+                mDatabase.child(AppConstants.USER).child(user_uid).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        tvNavUserName.setText(dataSnapshot.child("name").getValue().toString());
+                        tvNavEmail.setText(dataSnapshot.child("email").getValue().toString());
+                        String imagestr = dataSnapshot.child("avatar").getValue().toString();
+
+                        if (imagestr.contains("http") || imagestr.equals("") || imagestr.equals(" ")) {
+                            CommonMethod.getInstance().loadImage(imagestr, imgUserProfile);
+                        } else {
+                            imgUserProfile.setImageBitmap(StringToBitMap(imagestr));
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+            } else {
+                imgUserProfile.setImageResource(R.drawable.bg_profile);
+                tvNavUserName.setText("Đăng nhập");
+                tvNavEmail.setText("");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
 //        user =FirebaseAuth.getInstance().getCurrentUser();
@@ -345,6 +384,17 @@ public class MainActivity extends AppCompatActivity
                 break;
         }
 
+    }
+
+    public static Bitmap StringToBitMap(String image) {
+        try {
+            byte[] encodeByte = Base64.decode(image, Base64.DEFAULT);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
+            return bitmap;
+        } catch (Exception e) {
+            e.getMessage();
+            return null;
+        }
     }
 
     private void tickLocation(float a) {
@@ -406,7 +456,7 @@ public class MainActivity extends AppCompatActivity
                 if (mUtilities.isConnected()) {
                     progressDialog.show();
                     Posts posts = new Posts(mUtilities.getAddressFromLatLng(latLng), mUser.getName(), type, AppConstants.GOOD_RANK, latitude + "", longtitude + "", "", Utilities.currentDate());
-                    mDatabases.child(AppConstants.POSTS).child(mUser.getUid()).setValue(posts);
+                    mDatabase.child(AppConstants.POSTS).child(mUser.getUid()).setValue(posts);
                     switch (type) {
                         case AppConstants.TYPE_TRAFFIC_JAM:
                             tickLocation(BitmapDescriptorFactory.HUE_RED);
@@ -426,5 +476,53 @@ public class MainActivity extends AppCompatActivity
 
         // Showing Alert Message
         alertDialog.show();
+    }
+
+    public void getAllFriends() {
+        listUser = new ArrayList<>();
+        listUser.clear();
+        mDatabase.child(AppConstants.USER).child(user_uid).child("friends").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                mDatabase.child(AppConstants.USER).child(dataSnapshot.getKey()).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        String avatar = dataSnapshot.child("avatar").getValue().toString();
+                        String name = dataSnapshot.child("name").getValue().toString();
+                        String status = dataSnapshot.child("status").getValue().toString();
+                        UserTraffic userTraffic = new UserTraffic(name,avatar,status);
+                        listUser.add(userTraffic);
+                        adapter = new ListFriendAdapter(MainActivity.this, listUser);
+                        lv_listfriend.setAdapter(adapter);
+                        adapter.notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 }

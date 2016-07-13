@@ -31,6 +31,7 @@ public class SQLUser {
     private static final String COLUMN_LONGITUDE = "longitude";
     private static final String COLUMN_STATUS = "status";
     private static final String COLUMN_PHONE = "phone";
+    private static final String COLUMN_TYPE = "type";
 
     private static String sqlUsers = "SELECT * " + "FROM " + TABLE_USER;
     //    private static String sqlVideo = "SELECT * " + "FROM " + TABLE_USER_VIDEO + " where uid='%s'";
@@ -88,8 +89,10 @@ public class SQLUser {
             return null;
         cursor.moveToFirst();
         int indexUserID = cursor.getColumnIndex(COLUMN_UID);
+        int indextype= cursor.getColumnIndex(COLUMN_TYPE);
+        int indexStatus= cursor.getColumnIndex(COLUMN_STATUS);
         while (!cursor.isAfterLast()) {
-            Friends f = new Friends(cursor.getString(indexUserID));
+            Friends f = new Friends(cursor.getString(indexUserID),cursor.getInt(indextype),cursor.getString(indexStatus));
             list.add(f);
             cursor.moveToNext();
         }
@@ -108,8 +111,6 @@ public class SQLUser {
     }
 
     public long insertUser(UserTraffic mUser) {
-        //myDataBase=myContext.openOrCreateDatabase(DATABASE_PATH + "/" + DATABASE_NAME, Context.MODE_PRIVATE, null);
-
         ContentValues contentValues = new ContentValues();
         contentValues.put(COLUMN_UID, mUser.getUid());
         contentValues.put(COLUMN_NAME, mUser.getName());
@@ -127,12 +128,14 @@ public class SQLUser {
 
     }
 
-    public long insertFriends(String uid) {
+    public long insertFriends(Friends friends) {
         //myDataBase=myContext.openOrCreateDatabase(DATABASE_PATH + "/" + DATABASE_NAME, Context.MODE_PRIVATE, null);
         long result = 0;
-        if (checkFriend(uid)) {
+        if (checkFriend(friends.getFriend_uid())) {
             ContentValues contentValues = new ContentValues();
-            contentValues.put(COLUMN_UID, uid);
+            contentValues.put(COLUMN_UID, friends.getFriend_uid());
+            contentValues.put(COLUMN_TYPE, friends.getType());
+            contentValues.put(COLUMN_STATUS, friends.getStatus());
             result = databaseHelper.getWritableDatabase().insert(TABLE_FRIENDS, null, contentValues);
         }
         return result;

@@ -14,10 +14,6 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="10dp"
         android:src="@drawable/ic_user_profile" />
-    <ImageView
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:id="@+id/test_bitmap"/>
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -47,4 +47,6 @@
     <string name="Email_or_password_is_malformed">Email hoặc mật khẩu không đúng định dạng</string>
     <string name="acoount">Tài khoản hoặc mật khẩu không đúng</string>
     <string name="login_fail">login fail</string>
+    <string name="input_search">Tìm kiếm</string>
+    <string name="contact">Contact</string>
 </resources>
