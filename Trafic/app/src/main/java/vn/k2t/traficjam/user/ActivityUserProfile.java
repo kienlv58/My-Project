@@ -1,6 +1,5 @@
 package vn.k2t.traficjam.user;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -171,32 +170,35 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
                 startActivityForResult(intent, SELECT_IMAGE);
             }
         });
-        mDatabase.child(_uid).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                dialog_edt_name.setText(dataSnapshot.child("name").getValue().toString());
-                dialog_edt_phone.setText(dataSnapshot.child("phone").getValue().toString());
+        if (mDatabase.child("user").child(_uid) != null) {
+            mDatabase.child("user").child(_uid).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    dialog_edt_name.setText(dataSnapshot.child("name").getValue().toString());
+                    dialog_edt_phone.setText(dataSnapshot.child("phone").getValue().toString());
 //                dialog_image_update.setImageURI(Uri.parse(dataSnapshot.child("avatar").getValue().toString()));
-                CommonMethod.getInstance().loadImage(dataSnapshot.child("avatar").getValue().toString(), dialog_image_update);
-            }
+                    CommonMethod.getInstance().loadImage(dataSnapshot.child("avatar").getValue().toString(), dialog_image_update);
+                }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
-        dialog_btn_cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.cancel();
-            }
-        });
-        dialog_btn_update.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+                }
+            });
+            dialog_btn_cancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.cancel();
+                }
+            });
+            dialog_btn_update.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
-            }
-        });
+                }
+            });
+        }
+
         dialog.setCancelable(true);
         dialog.setContentView(view);
     }
@@ -204,7 +206,7 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == SELECT_IMAGE && resultCode == Activity.RESULT_OK) {
+        if (requestCode == SELECT_IMAGE && resultCode == ActivityUserProfile.RESULT_OK) {
             try {
                 if (bitmap != null) {
                     bitmap.recycle();
