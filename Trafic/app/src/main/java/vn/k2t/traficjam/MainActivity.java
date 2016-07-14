@@ -123,8 +123,12 @@ public class MainActivity extends AppCompatActivity
         initObject();
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
-        getUserFromDB();
-        getAllFriends();
+        try {
+            getUserFromDB();
+            getAllFriends();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         /**
          * generate keyhas facebook
          */
