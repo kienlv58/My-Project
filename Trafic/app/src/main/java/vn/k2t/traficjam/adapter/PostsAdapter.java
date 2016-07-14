@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -61,14 +62,24 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
         TextView tvBody;
        // @Bind(R.id.tv_time)
         TextView tvTime;
+        TextView tvlocation;
+        ImageView img_status;
+        ImageView img_like;
+        ImageView img_report;
+        ImageView img_share;
 
         public ViewHolder(View itemView) {
             super(itemView);
            // ButterKnife.bind(this, itemView);
-            ivAvatar= (CircleImageView) itemView.findViewById(R.id.iv_avatar);
-            tvName= (TextView) itemView.findViewById(R.id.tv_name);
-            tvBody= (TextView) itemView.findViewById(R.id.tv_body);
-            tvTime= (TextView) itemView.findViewById(R.id.tv_time);
+            ivAvatar= (CircleImageView) itemView.findViewById(R.id.avatar);
+            tvName= (TextView) itemView.findViewById(R.id.txtv_name);
+            tvBody= (TextView) itemView.findViewById(R.id.txtv_status);
+            tvTime= (TextView) itemView.findViewById(R.id.txtv_time);
+            tvlocation = (TextView)itemView.findViewById(R.id.txtv_location);
+            img_status = (ImageView)itemView.findViewById(R.id.img_status);
+            img_like = (ImageView)itemView.findViewById(R.id.img_like);
+            img_report = (ImageView)itemView.findViewById(R.id.img_report);
+            img_share = (ImageView)itemView.findViewById(R.id.img_share);
         }
     }
 

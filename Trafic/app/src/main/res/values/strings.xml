@@ -53,4 +53,6 @@
     <string name="yes">Có</string>
     <string name="no">Không</string>
     <string name="device_does_not_support_camera">Thiết bị không hỗ trợ camera</string>
+    <string name="see">Xem</string>
+    <string name="tick">Đánh dấu</string>
 </resources>
