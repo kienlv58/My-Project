@@ -57,6 +57,10 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
     private String user_uid;
     private ArrayList<UserTraffic> listData;
 
+    public FrgFriends() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
 
     public static FrgFriends newInstance(Context context) {
         f = new FrgFriends();
@@ -177,10 +181,10 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
         if (searchWithName(s + "") != null) {
             listData.addAll(searchWithName(s + ""));
             listFriendAdapter = new ListFriendAdapter(getActivity(), listData);
-        } else if (searchWithSdt(s + "") !=null) {
+        } else if (searchWithSdt(s + "") != null) {
             listData.addAll(searchWithSdt(s + ""));
             listFriendAdapter = new ListFriendAdapter(getActivity(), listData);
-        } else if (searchWithEmail(s+"") !=null){
+        } else if (searchWithEmail(s + "") != null) {
             listData.addAll(searchWithEmail(s + ""));
             listFriendAdapter = new ListFriendAdapter(getActivity(), listData);
         }
@@ -215,6 +219,7 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
         }
         return listSearch;
     }
+
     public ArrayList<UserTraffic> searchWithEmail(String email) {
         ArrayList<UserTraffic> listSearch = new ArrayList<UserTraffic>();
         for (UserTraffic mItem : list) {
