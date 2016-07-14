@@ -2,10 +2,52 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#eeeeee"
     android:orientation="vertical">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:background="@android:color/white">
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/inputlayout_search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_toLeftOf="@+id/iv_search"
+            android:textColorHint="@color/Brown">
+
+            <EditText
+                android:layout_marginLeft="5dp"
+                android:id="@+id/edt_search"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/input_search"
+                android:singleLine="true"
+                android:textColor="@color/BlackColor"
+                android:textColorHint="@color/RedColor"
+                android:textSize="15sp"
+
+                />
+        </android.support.design.widget.TextInputLayout>
+
+        <ImageView
+            android:id="@+id/iv_search"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_search" />
+    </RelativeLayout>
+
     <ListView
-        android:id="@+id/lv_listfriend"
+        android:id="@+id/lv_listSearch"
+        android:layout_margin="5dp"
+        android:background="@android:color/white"
         android:layout_width="match_parent"
         android:layout_height="match_parent"></ListView>
 </LinearLayout>

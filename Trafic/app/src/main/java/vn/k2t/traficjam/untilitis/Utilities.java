@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Geocoder;
+import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.telephony.TelephonyManager;
@@ -94,6 +95,30 @@ public class Utilities {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String formattedDate = df.format(calendar.getTime());
         return formattedDate;
+    }
+
+    public static float convertRadius(Location a, Location b) {
+        return a.distanceTo(b);
+    }
+
+    public static final double LOCAL_PI = 3.1415926535897932385;
+
+    static double ToRadians(double degrees) {
+        double radians = degrees * LOCAL_PI / 180;
+        return radians;
+    }
+
+    public static double DirectDistance(double lat1, double lng1, double lat2, double lng2) {
+        double earthRadius = 3958.75;
+        double dLat = ToRadians(lat2 - lat1);
+        double dLng = ToRadians(lng2 - lng1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(ToRadians(lat1)) * Math.cos(ToRadians(lat2)) *
+                        Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double dist = earthRadius * c;
+        double meterConversion = 1609.00;
+        return dist * meterConversion;
     }
 
     /**

@@ -4,62 +4,60 @@ package vn.k2t.traficjam.maps;
  * Created by root on 07/07/2016.
  */
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.directions.route.AbstractRouting;
+import com.directions.route.Route;
+import com.directions.route.RouteException;
+import com.directions.route.Routing;
+import com.directions.route.RoutingListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
-
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import java.io.IOException;
-
-import vn.k2t.traficjam.MainActivity;
-import vn.k2t.traficjam.R;
-import vn.k2t.traficjam.database.queries.SQLUser;
-import vn.k2t.traficjam.frgmanager.FrgMaps;
-import vn.k2t.traficjam.model.UserTraffic;
-import vn.k2t.traficjam.onclick.ItemClick;
-import vn.k2t.traficjam.onclick.OnClickFrg;
-
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import vn.k2t.traficjam.MainActivity;
 import vn.k2t.traficjam.R;
+import vn.k2t.traficjam.database.queries.SQLUser;
+import vn.k2t.traficjam.model.Posts;
 import vn.k2t.traficjam.model.UserTraffic;
 import vn.k2t.traficjam.untilitis.AppConstants;
+import vn.k2t.traficjam.untilitis.Utilities;
 
 /**
  * Created by Paul on 8/11/15.
@@ -68,7 +66,7 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
         GoogleMap.OnInfoWindowClickListener,
         GoogleMap.OnMapLongClickListener,
         GoogleMap.OnMapClickListener,
-        GoogleMap.OnMarkerClickListener, android.location.LocationListener {
+        GoogleMap.OnMarkerClickListener, LocationListener, RoutingListener {
 
     private GoogleApiClient mGoogleApiClient;
     private Location mCurrentLocation;
@@ -83,6 +81,12 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     DatabaseReference mDatabase;
     UserTraffic user;
     SQLUser sqlUser;
+    private Utilities mUtilities;
+    public static ArrayList<Posts> items = new ArrayList<>();
+    private LatLng from;
+    private LatLng to;
+    private String[] colors = {"#7fff7272", "#7f31c7c5", "#7fff8a00"};
+    private List<Polyline> polylines;
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -93,6 +97,7 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
+
         mMap = getMap();
         initObject();
         initListeners();
@@ -101,8 +106,8 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     private void initListeners() {
 
         getMap().setOnMarkerClickListener(this);
-        getMap().setOnMapLongClickListener(this);
-        getMap().setOnInfoWindowClickListener(this);
+        // getMap().setOnMapLongClickListener(this);
+        // getMap().setOnInfoWindowClickListener(this);
         getMap().setOnMapClickListener(this);
     }
 
@@ -113,6 +118,9 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
         user = sqlUser.getUser();
         //user = FirebaseAuth.getInstance().getCurrentUser();
         mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        mUtilities = new Utilities(getActivity());
+        polylines = new ArrayList<>();
 
     }
 
@@ -138,7 +146,7 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
             if (location != null) {
                 CameraPosition position = CameraPosition.builder()
                         .target(new LatLng(location.getLatitude(), location.getLongitude()))
-                        .zoom(15.2f)
+                        .zoom(13.5f)
                         .bearing(0.0f)
                         .tilt(0.0f)
                         .build();
@@ -150,6 +158,7 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
 
                 //getMap().getUiSettings().setZoomControlsEnabled(true);
                 LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                from = new LatLng(location.getLatitude(), location.getLongitude());
                 MarkerOptions options = new MarkerOptions().position(latLng);
                 options.title(getAddressFromLatLng(latLng));
 //                if (user != null) {
@@ -181,11 +190,14 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
 //                                    .decodeResource(getResources(), R.mipmap.ic_launcher)));
 //                }
                 //getMap().addMarker(options);
-
+                mMap.clear();
                 //getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+                CameraUpdate center = CameraUpdateFactory.newLatLng(latLng);
+                mMap.moveCamera(center);
+                drawCircle(location);
                 mMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), null);
-                //  drawCircle(location);
-
+                saveLocationUserFromFireBase(mCurrentLocation);
+                getAllLocationTrafficJam();
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, this);
             } else {
                 Toast.makeText(getActivity(), getActivity().getString(R.string.can_not_get_location_of_you), Toast.LENGTH_LONG).show();
@@ -194,31 +206,28 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     }
 
     private void drawCircle(Location location) {
-        getMap().addCircle(new CircleOptions()
+        mMap.addCircle(new CircleOptions()
                 .center(new LatLng(location.getLatitude(), location.getLongitude()))
-                .radius(200).strokeWidth(2)
+                .radius(1000).strokeWidth(2)
                 .strokeColor(Color.GRAY)
                 .fillColor(0x30ff0000));
     }
 
-//    public void addMarker(String title, Location location) {
-//        MarkerOptions markerOptions = new MarkerOptions();
-//        MarkerOptions options = new MarkerOptions();
-//        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-//        options.position(latLng);
-//        options.title(title);
-//        markerOptions.title(title);
-//        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-//
-//        mMap.addMarker(markerOptions);
-//        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
-//    }
+    public void addMarker(double latitude, double longtitude, float a) {
+        MarkerOptions markerOptions = new MarkerOptions();
+        LatLng latLng = new LatLng(latitude, longtitude);
+        markerOptions.position(latLng);
 
-    public void addMarker(String title, LatLng position) {
+        markerOptions.title(mUtilities.getAddressFromLatLng(latLng));
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(a));
+        mMap.addMarker(markerOptions);
+    }
+
+    public void addMarker(String title, LatLng position, float a) {
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(position);
         markerOptions.title(title);
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(a));
 
         mMap.addMarker(markerOptions);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
@@ -285,7 +294,8 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
         mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (mCurrentLocation != null) {
             initCamera(mCurrentLocation);
-            saveLocationUserFromFireBase(mCurrentLocation);
+            //    saveLocationUserFromFireBase(mCurrentLocation);
+            //   getAllLocationTrafficJam();
         }
 //        if (mUser.getAvatar() == "") {
         // LatLng latLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
@@ -293,15 +303,50 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
         // }
     }
 
-    private void saveLocationUserFromFireBase(final double laitude, final double longitude) {
-        Map<String, Object> childUpdates = new HashMap<>();
-//        childUpdates.put("latitude", laitude + "");
-//        childUpdates.put("longitude", longitude + "");
-        mDatabase.child(user.getUid()).updateChildren(childUpdates);
+    private void getAllLocationTrafficJam() {
+        mDatabase.child(AppConstants.POSTS).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    Posts post = postSnapshot.getValue(Posts.class);
+                    items.add(post);
+                }
+                showAllLocationTrafficJamInRadius3000Km(items);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+
+    private void getAllFriend() {
+
+    }
+
+    public void showAllLocationTrafficJamInRadius3000Km(ArrayList<Posts> posts) {
+        mMap.clear();
+        try {
+            for (Posts post : posts) {
+                double latitude = Double.parseDouble(post.getLatitude());
+                double longtitude = Double.parseDouble(post.getLongitude());
+                Log.i("aaa", Utilities.DirectDistance(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), latitude, longtitude) + "");
+                if (Utilities.DirectDistance(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), latitude, longtitude) < 3000d) {
+                    if (post.getType().equals(AppConstants.TYPE_TRAFFIC_JAM))
+                        addMarker(latitude, longtitude, BitmapDescriptorFactory.HUE_RED);
+                    else if (post.getType().equals(AppConstants.TYPE_ACCIDENT))
+                        addMarker(latitude, longtitude, BitmapDescriptorFactory.HUE_GREEN);
+
+                }
+            }
+        } catch (Exception ex) {
+
+        }
     }
 
     private void saveLocationUserFromFireBase(final Location location) {
-
         Map<String, Object> childUpdates = new HashMap<>();
         childUpdates.put("latitude", location.getLatitude() + "");
         childUpdates.put("longitude", location.getLongitude() + "");
@@ -317,7 +362,7 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        Toast.makeText(getActivity(), getActivity().getString(R.string.can_not_get_location_of_you), Toast.LENGTH_LONG).show();
+        // Toast.makeText(getActivity(), getActivity().getString(R.string.can_not_get_location_of_you), Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -328,17 +373,20 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     @Override
     public boolean onMarkerClick(Marker marker) {
         marker.showInfoWindow();
+
         return true;
     }
 
     @Override
     public void onMapClick(LatLng latLng) {
-
-        MarkerOptions options = new MarkerOptions().position(latLng);
-        options.title(getAddressFromLatLng(latLng));
-
-        options.icon(BitmapDescriptorFactory.defaultMarker());
-        getMap().addMarker(options);
+        to = new LatLng(latLng.latitude, latLng.longitude);
+        Routing routing = new Routing.Builder()
+                .travelMode(AbstractRouting.TravelMode.DRIVING)
+                .withListener(this)
+                .alternativeRoutes(true)
+                .waypoints(from, to)
+                .build();
+        routing.execute();
     }
 
     @Override
@@ -370,8 +418,6 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
     @Override
     public void onLocationChanged(Location location) {
         initCamera(location);
-        saveLocationUserFromFireBase(location);
-        // initCamera(location);
     }
 
     @Override
@@ -389,5 +435,72 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
 
     }
 
+    @Override
+    public void onRoutingFailure(RouteException e) {
 
+    }
+
+    @Override
+    public void onRoutingStart() {
+
+    }
+
+    private static final int[] COLORS = new int[]{R.color.colorPrimary, R.color.colorPrimary, R.color.colorPrimary, R.color.colorAccent, R.color.primary_dark_material_light};
+
+    @Override
+    public void onRoutingSuccess(ArrayList<Route> route, int shortestRouteIndex) {
+        CameraUpdate center = CameraUpdateFactory.newLatLng(from);
+        CameraUpdate zoom = CameraUpdateFactory.zoomTo(16);
+
+        mMap.moveCamera(center);
+
+
+        if (polylines.size() > 0) {
+            for (Polyline poly : polylines) {
+                poly.remove();
+            }
+        }
+
+        polylines = new ArrayList<>();
+        //add route(s) to the map.
+        for (int i = 0; i < route.size(); i++) {
+            if (route.get(i).getLength() == findMinDestination(route)) {
+                int colorIndex = i % COLORS.length;
+                PolylineOptions polyOptions = new PolylineOptions();
+                polyOptions.color(getResources().getColor(COLORS[colorIndex]));
+                polyOptions.width(10 + i * 3);
+                polyOptions.addAll(route.get(i).getPoints());
+                Polyline polyline = mMap.addPolyline(polyOptions);
+                polylines.add(polyline);
+            }
+        }
+
+
+        // Start marker
+//        MarkerOptions options = new MarkerOptions();
+//        options.position(from);
+//        options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN));
+//        mMap.addMarker(options);
+//        // End marker
+//        options = new MarkerOptions();
+//        options.position(to);
+//        options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+//        mMap.addMarker(options);
+
+    }
+
+    private int findMinDestination(ArrayList<Route> route) {
+        int min = route.get(0).getLength();
+        for (int i = 0; i < route.size(); i++) {
+            if (min > route.get(i).getLength()) {
+                min = route.get(i).getLength();
+            }
+        }
+        return min;
+    }
+
+    @Override
+    public void onRoutingCancelled() {
+
+    }
 }

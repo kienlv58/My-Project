@@ -1,9 +1,7 @@
 package vn.k2t.traficjam.adapter;
 
 import android.content.Context;
-import android.graphics.BitmapFactory;
 import android.support.v7.widget.RecyclerView;
-import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,8 +36,8 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(PostsAdapter.ViewHolder holder, int position) {
         if (items.get(position).getImage() != "") {
-            byte[] imageAsBytes = Base64.decode(items.get(position).getImage().getBytes(), Base64.DEFAULT);
-            holder.ivAvatar.setImageBitmap(BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length));
+//            byte[] imageAsBytes = Base64.decode(items.get(position).getImage().getBytes(), Base64.DEFAULT);
+//            holder.ivAvatar.setImageBitmap(BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length));
         } else {
             holder.ivAvatar.setImageResource(R.mipmap.ic_launcher);
         }
