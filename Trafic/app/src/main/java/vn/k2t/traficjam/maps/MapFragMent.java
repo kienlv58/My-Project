@@ -474,8 +474,6 @@ public class MapFragMent extends SupportMapFragment implements GoogleApiClient.C
                 polylines.add(polyline);
             }
         }
-
-
         // Start marker
 //        MarkerOptions options = new MarkerOptions();
 //        options.position(from);
