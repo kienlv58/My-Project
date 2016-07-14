@@ -10,7 +10,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -26,9 +25,6 @@ import com.facebook.FacebookSdk;
 import com.facebook.Profile;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.google.android.gms.auth.GoogleAuthException;
-import com.google.android.gms.auth.GoogleAuthUtil;
-import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -36,7 +32,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.plus.Plus;
-import com.google.android.gms.plus.model.people.Person;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -48,8 +43,6 @@ import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import butterknife.Bind;
@@ -80,7 +73,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
     SQLUser sqlUser;
     String tokenGG;
     String emailGG;
-    String avatar;
+    String avatar = "";
     UserTraffic mUser;
 
 
@@ -122,7 +115,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 final FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
                 if (firebaseUser != null) {
-                    new AsyncTask<Void,Void,Void>(){
+                    new AsyncTask<Void, Void, Void>() {
                         @Override
                         protected void onPreExecute() {
                             super.onPreExecute();
@@ -271,7 +264,12 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
 
     //google + firebase
     public void firebaseAuthWithGoogle(GoogleSignInAccount account) {
-        avatar = String.valueOf(account.getPhotoUrl());
+        if (String.valueOf(account.getPhotoUrl()).equals("")) {
+            avatar = String.valueOf(account.getPhotoUrl());
+        } else
+            avatar = " ";
+
+
         AuthCredential authCredential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
         mAuth.signInWithCredential(authCredential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
@@ -310,9 +308,9 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                 GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
                 GoogleSignInAccount account = result.getSignInAccount();
                 firebaseAuthWithGoogle(account);
-                }
-
             }
+
+        }
 
         if (requestCode == 111) {
             edt_email.setText(data.getStringExtra("email"));
