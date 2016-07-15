@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import vn.k2t.traficjam.FrgBase;
+import vn.k2t.traficjam.MainActivity;
 import vn.k2t.traficjam.R;
 import vn.k2t.traficjam.adapter.ListFriendAdapter;
 import vn.k2t.traficjam.database.queries.SQLUser;
@@ -91,8 +92,11 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
     @Override
     public void onStart() {
         super.onStart();
-        user_uid = sqlUser.getUser().getUid();
-        getAllUser();
+        if (MainActivity.mUser!=null){
+            user_uid = sqlUser.getUser().getUid();
+            getAllUser();
+        }
+
 
     }
 

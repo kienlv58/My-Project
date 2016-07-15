@@ -68,7 +68,7 @@ public class MapManager implements GoogleMap.OnMyLocationChangeListener, Locatio
 //    };
 
     public void initMap() {
-        gMap.getUiSettings().setZoomControlsEnabled(true);
+        gMap.getUiSettings().setZoomControlsEnabled(false);
         gMap.setMyLocationEnabled(true);
         gMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         gMap.setOnMyLocationChangeListener(this);

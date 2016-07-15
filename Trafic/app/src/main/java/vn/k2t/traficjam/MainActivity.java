@@ -144,6 +144,8 @@ public class MainActivity extends AppCompatActivity
     private List<Polyline> polylines;
     private static final int[] COLORS = new int[]{R.color.colorPrimary, R.color.colorPrimary, R.color.colorPrimary, R.color.colorAccent, R.color.primary_dark_material_light};
 
+
+
     @Override
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,7 +158,10 @@ public class MainActivity extends AppCompatActivity
         mDatabase = FirebaseDatabase.getInstance().getReference();
         try {
             getUserFromDB();
-            getAllFriends();
+            if(mUser!=null){
+                getAllFriends();
+            }
+
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -177,6 +182,29 @@ public class MainActivity extends AppCompatActivity
         } catch (NoSuchAlgorithmException e) {
 
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+//        if (mUtilities.isConnected()){
+//            android.support.v7.app.AlertDialog.Builder builder= new android.support.v7.app.AlertDialog.Builder(this);
+//            builder.setMessage(R.string.turn_on_wifi);
+//            builder.setCancelable(false);
+//            builder.setNegativeButton("OK", new DialogInterface.OnClickListener() {
+//                @Override
+//                public void onClick(DialogInterface dialogInterface, int i) {
+//
+//                }
+//            });
+//            builder.setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
+//                @Override
+//                public void onClick(DialogInterface dialogInterface, int i) {
+//                    finish();
+//                }
+//            });
+//            builder.show();
+//        }
     }
 
     private void initToolbar() {
@@ -361,27 +389,36 @@ public class MainActivity extends AppCompatActivity
         try {
             if (mUser != null) {
                 user_uid = mUser.getUid();
+                tvNavUserName.setText(mUser.getName());
+                tvNavEmail.setText(mUser.getEmail());
+                String imagestr = mUser.getAvatar();
 
-                mDatabase.child(AppConstants.USER).child(user_uid).addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        tvNavUserName.setText(dataSnapshot.child("name").getValue().toString());
-                        tvNavEmail.setText(dataSnapshot.child("email").getValue().toString());
-                        String imagestr = dataSnapshot.child("avatar").getValue().toString();
+//                if (imagestr.contains("http") || imagestr.equals("") || imagestr.equals(" ")) {
+//                    CommonMethod.getInstance().loadImage(imagestr, imgUserProfile);
+//                } else {
+//                    imgUserProfile.setImageBitmap(StringToBitMap(imagestr));
+//                }
 
-                        if (imagestr.contains("http") || imagestr.equals("") || imagestr.equals(" ")) {
-                            CommonMethod.getInstance().loadImage(imagestr, imgUserProfile);
-                        } else {
-                            imgUserProfile.setImageBitmap(StringToBitMap(imagestr));
-                        }
-
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
+//                mDatabase.child(AppConstants.USER).child(user_uid).addValueEventListener(new ValueEventListener() {
+//                    @Override
+//                    public void onDataChange(DataSnapshot dataSnapshot) {
+//                        tvNavUserName.setText(dataSnapshot.child("name").getValue().toString());
+//                        tvNavEmail.setText(dataSnapshot.child("email").getValue().toString());
+//                        String imagestr = dataSnapshot.child("avatar").getValue().toString();
+//
+//                        if (imagestr.contains("http") || imagestr.equals("") || imagestr.equals(" ")) {
+//                            CommonMethod.getInstance().loadImage(imagestr, imgUserProfile);
+//                        } else {
+//                            imgUserProfile.setImageBitmap(StringToBitMap(imagestr));
+//                        }
+//
+//                    }
+//
+//                    @Override
+//                    public void onCancelled(DatabaseError databaseError) {
+//
+//                    }
+//                });
 
             } else {
                 imgUserProfile.setImageResource(R.drawable.bg_profile);
@@ -863,5 +900,7 @@ public class MainActivity extends AppCompatActivity
         }
         return min;
     }
+
+
 }
 
