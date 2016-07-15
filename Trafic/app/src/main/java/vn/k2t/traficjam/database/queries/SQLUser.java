@@ -149,4 +149,15 @@ public class SQLUser {
     public void deleteShare(String id) {
         long result = databaseHelper.getWritableDatabase().delete(TABLE_USER_SHARE, "uid" + " =?", new String[]{String.valueOf(id)});
     }
+
+    public int updateInfoUser(UserTraffic mUser,int id) {
+        databaseHelper.openDataBase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_NAME, mUser.getName());
+        contentValues.put(COLUMN_PHONE, mUser.getPhone());
+        String[] whereAgr = new String[]{id + ""};
+        int rows = databaseHelper.getWritableDatabase().update(TABLE_USER_SHARE, contentValues, COLUMN_UID + "=?", whereAgr);
+        databaseHelper.close();
+        return rows;
+    }
 }

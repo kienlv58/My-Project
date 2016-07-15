@@ -479,6 +479,7 @@ public class MainActivity extends AppCompatActivity
                 tvNavEmail.setText(mUser.getEmail());
                 String imagestr = mUser.getAvatar();
 
+<<<<<<< HEAD
                 mDatabase.child(AppConstants.USER).child(user_uid).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -503,6 +504,13 @@ public class MainActivity extends AppCompatActivity
 //                } else {
 //                    imgUserProfile.setImageBitmap(StringToBitMap(imagestr));
 //                }
+=======
+                if (imagestr.contains("http")) {
+                    CommonMethod.getInstance().loadImage(imagestr, imgUserProfile);
+                } else{
+                    imgUserProfile.setImageBitmap(StringToBitMap(imagestr));
+                }
+>>>>>>> 9b4e1c4e34e1d445195059b007c6e5390c8723cb
 
 //                mDatabase.child(AppConstants.USER).child(user_uid).addValueEventListener(new ValueEventListener() {
 //                    @Override
