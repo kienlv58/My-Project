@@ -95,6 +95,7 @@ import vn.k2t.traficjam.untilitis.CommonMethod;
 import vn.k2t.traficjam.untilitis.Utilities;
 import vn.k2t.traficjam.user.ActivityUserProfile;
 import vn.k2t.traficjam.user.LoginUserActivity;
+import vn.k2t.traficjam.user.RequestFriendActivity;
 
 
 public class MainActivity extends AppCompatActivity
@@ -122,7 +123,7 @@ public class MainActivity extends AppCompatActivity
     private TabAdapter tabAdapter;
     private CircleImageView imgUserProfile;
     private TextView tvNavUserName, tvNavEmail;
-    ArrayList<Friends> listRequest;
+    public static ArrayList<Friends> listRequest;
 
     //firebase
     FirebaseAuth mAuth;
@@ -284,7 +285,10 @@ public class MainActivity extends AppCompatActivity
         tabLayout.setupWithViewPager(viewPager);
 
     }
-
+private void addFragMentMaps(){
+    FragmentTransaction transaction = manager.beginTransaction();
+    transaction.replace(android.R.id.content, FrgBase.newInstance(getApplicationContext())).commit();
+}
     @Override
     public void onBackPressed() {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -323,14 +327,14 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.friend) {
 
         } else if (id == R.id.request_friend) {
-            startActivity(new Intent(MainActivity.this, ActivityUserProfile.class));
+           Intent intent = new Intent(MainActivity.this, RequestFriendActivity.class);
+            startActivity(intent);
             // overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
         } else if (id == R.id.message) {
 
 
         } else if (id == R.id.map) {
-            Intent intent = new Intent(MainActivity.this, MapsActivity.class);
-            startActivity(intent);
+            addFragMentMaps();
         }
         else if(id == R.id.chiduong){
         }

@@ -8,7 +8,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -28,44 +30,88 @@ public class ListFriendAdapter extends ArrayAdapter<UserTraffic> {
 
     private final ImageLoader imageLoader;
     private LayoutInflater inflater;
+    int s;
 
 
-    public ListFriendAdapter(Context context, ArrayList<UserTraffic> objects) {
+    public ListFriendAdapter(Context context, ArrayList<UserTraffic> objects,int s) {
         super(context, 0, objects);
         inflater = LayoutInflater.from(context);
         imageLoader = ImageLoader.getInstance();
         imageLoader.init(ImageLoaderConfiguration.createDefault(context));
+        this.s =s;
     }
+
 
     @Override
     public View getView(int position, View view, ViewGroup parent) {
         ViewHolder viewHolder;
-        if (view == null) {
-            viewHolder = new ViewHolder();
-            view = inflater.inflate(R.layout.item_listfriends, null);
-            viewHolder.tv_name_user = (TextView) view.findViewById(R.id.tv_name_user);
-            viewHolder.tv_status_user = (TextView) view.findViewById(R.id.tv_status_user);
-            viewHolder.iv_avatar_user = (ImageView) view.findViewById(R.id.iv_avatar_user);
+        if (s == 1) {
+            if (view == null) {
+                viewHolder = new ViewHolder();
 
-            view.setTag(viewHolder);
+                view = inflater.inflate(R.layout.item_listfriends, null);
+                viewHolder.layout1 = (RelativeLayout)view.findViewById(R.id.layout1);
+                viewHolder.layout2 = (RelativeLayout)view.findViewById(R.id.layout2);
+                viewHolder.tv_name_user = (TextView) view.findViewById(R.id.tv_name_user);
+                viewHolder.tv_status_user = (TextView) view.findViewById(R.id.tv_status_user);
+                viewHolder.iv_avatar_user = (ImageView) view.findViewById(R.id.iv_avatar_user);
 
-        } else {
-            viewHolder = (ViewHolder) view.getTag();
-        }
-        viewHolder.tv_name_user.setText(getItem(position).getName());
-        int status = getItem(position).getStatus();
-        if (status == 1) {
-            viewHolder.tv_status_user.setText("online");
-        } else {
-            viewHolder.tv_status_user.setText("offline");
-        }
-        String imagestr = getItem(position).getAvatar();
-        if (imagestr.contains("http")) {
-            imageLoader.displayImage(imagestr, viewHolder.iv_avatar_user);
-        } else if (imagestr.equals("") || imagestr.equals(" ")) {
-            imageLoader.displayImage("drawable://" + R.drawable.bg_user_profile, viewHolder.iv_avatar_user);
-        } else {
-            viewHolder.iv_avatar_user.setImageBitmap(StringToBitMap(imagestr));
+                view.setTag(viewHolder);
+
+            } else {
+                viewHolder = (ViewHolder) view.getTag();
+            }
+            viewHolder.layout1.setVisibility(View.VISIBLE);
+            viewHolder.layout2.setVisibility(View.GONE);
+            viewHolder.tv_name_user.setText(getItem(position).getName());
+            int status = getItem(position).getStatus();
+            if (status == 1) {
+                viewHolder.tv_status_user.setText("online");
+            } else {
+                viewHolder.tv_status_user.setText("offline");
+            }
+            String imagestr = getItem(position).getAvatar();
+            if (imagestr.contains("http")) {
+                imageLoader.displayImage(imagestr, viewHolder.iv_avatar_user);
+            } else if (imagestr.equals("") || imagestr.equals(" ")) {
+                imageLoader.displayImage("drawable://" + R.drawable.bg_user_profile, viewHolder.iv_avatar_user);
+            } else {
+                viewHolder.iv_avatar_user.setImageBitmap(StringToBitMap(imagestr));
+            }
+        }else if (s == 2){
+            if (view == null) {
+                viewHolder = new ViewHolder();
+                view = inflater.inflate(R.layout.item_listfriends, null);
+                viewHolder.layout1 = (RelativeLayout)view.findViewById(R.id.layout1);
+                viewHolder.layout2 = (RelativeLayout)view.findViewById(R.id.layout2);
+                viewHolder.tv_name_user = (TextView) view.findViewById(R.id.name_user);
+                viewHolder.tv_email = (TextView) view.findViewById(R.id.email_user);
+                viewHolder.iv_avatar_user = (ImageView) view.findViewById(R.id.avatar_user);
+                //viewHolder.btn_accept = (Button) view.findViewById(R.id.btn_accept);
+
+                view.setTag(viewHolder);
+
+            } else {
+                viewHolder = (ViewHolder) view.getTag();
+            }
+            viewHolder.layout1.setVisibility(View.GONE);
+            viewHolder.layout2.setVisibility(View.VISIBLE);
+            viewHolder.tv_name_user.setText(getItem(position).getName());
+            viewHolder.tv_email.setText(getItem(position).getEmail());
+//            int status = getItem(position).getStatus();
+//            if (status == 1) {
+//                viewHolder.tv_status_user.setText("online");
+//            } else {
+//                viewHolder.tv_status_user.setText("offline");
+//            }
+            String imagestr = getItem(position).getAvatar();
+            if (imagestr.contains("http")) {
+                imageLoader.displayImage(imagestr, viewHolder.iv_avatar_user);
+            } else if (imagestr.equals("") || imagestr.equals(" ")) {
+                imageLoader.displayImage("drawable://" + R.drawable.bg_user_profile, viewHolder.iv_avatar_user);
+            } else {
+                viewHolder.iv_avatar_user.setImageBitmap(StringToBitMap(imagestr));
+            }
         }
         return view;
 
@@ -85,6 +131,10 @@ public class ListFriendAdapter extends ArrayAdapter<UserTraffic> {
     class ViewHolder {
         TextView tv_name_user, tv_status_user;
         ImageView iv_avatar_user;
+        TextView tv_email;
+        Button btn_accept;
+        RelativeLayout layout1;
+        RelativeLayout layout2;
 
     }
 
