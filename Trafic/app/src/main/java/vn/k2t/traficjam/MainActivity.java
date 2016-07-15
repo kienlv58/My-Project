@@ -18,6 +18,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -162,22 +163,20 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         initToolbar();
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Đang tải dữ liệu...");
+        progressDialog.setCancelable(false);
 
 
 
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
         try {
-            getUserFromDB();
             initObject();
-            getAllFriends();
-            loadRequestFriend(mUser.getUid());
-            String count = String.valueOf(listRequest.size());
-            if (listRequest.size() != 0){
-                tv_friend =(TextView) MenuItemCompat.getActionView(navigationView.getMenu().
-                        findItem(R.id.request_friend));
-                initializeCountDrawer(count);
-            }
+            getUserFromDB();
+            //getAllFriends();
+            //loadRequestFriend(mUser.getUid());
+
 
         }catch (Exception e){
             e.printStackTrace();
@@ -260,6 +259,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initObject() {
+        tv_friend =(TextView) MenuItemCompat.getActionView(navigationView.getMenu().
+                findItem(R.id.request_friend));
+        //initializeCountDrawer("");
 
         imgUserProfile = (CircleImageView) navigationView_Right.getHeaderView(0).findViewById(R.id.profile_image_user);
         tvNavUserName = (TextView) navigationView_Right.getHeaderView(0).findViewById(R.id.tv_nav_Name);
@@ -314,22 +316,25 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            Intent intent = new Intent(MainActivity.this, LoginUserActivity.class);
+        if (id == R.id.profile) {
+            Intent intent = new Intent(MainActivity.this, ActivityUserProfile.class);
             startActivity(intent);
             // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-            Intent intent = new Intent(MainActivity.this, MapsActivity.class);
-            startActivity(intent);
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.friend) {
+
+        } else if (id == R.id.request_friend) {
             startActivity(new Intent(MainActivity.this, ActivityUserProfile.class));
             // overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-        } else if (id == R.id.request_friend) {
+        } else if (id == R.id.message) {
 
 
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.map) {
+            Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+            startActivity(intent);
+        }
+        else if(id == R.id.chiduong){
+        }
+        else if (id == R.id.acticle) {
 
         }
 
@@ -416,33 +421,12 @@ public class MainActivity extends AppCompatActivity
         mDatabase.child(AppConstants.USER).child(uid).child("friends").child("friend_request").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                mDatabase.child(AppConstants.USER).child(uid).child("friends").child("friend_request").child(dataSnapshot.getKey()).addChildEventListener(new ChildEventListener() {
-                    @Override
-                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                        Friends f = dataSnapshot.getValue(Friends.class);
-                        listRequest.add(f);
-                    }
-
-                    @Override
-                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                    }
-
-                    @Override
-                    public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                    }
-
-                    @Override
-                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
+                Friends f = dataSnapshot.getValue(Friends.class);
+                listRequest.add(f);
+                String count = String.valueOf(listRequest.size());
+                if (listRequest.size() != 0){
+                    initializeCountDrawer(count);
+                }
             }
 
             @Override
@@ -478,39 +462,54 @@ public class MainActivity extends AppCompatActivity
                 tvNavUserName.setText(mUser.getName());
                 tvNavEmail.setText(mUser.getEmail());
                 String imagestr = mUser.getAvatar();
+                new AsyncTask<Void,Void,Void>(){
 
-<<<<<<< HEAD
-                mDatabase.child(AppConstants.USER).child(user_uid).addValueEventListener(new ValueEventListener() {
                     @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        tvNavUserName.setText(dataSnapshot.child("name").getValue().toString());
-                        tvNavEmail.setText(dataSnapshot.child("email").getValue().toString());
-                        String imagestr = dataSnapshot.child("avatar").getValue().toString();
-
-                        if (imagestr.contains("http") || imagestr.equals("") || imagestr.equals(" ")) {
-                            CommonMethod.getInstance().loadImage(imagestr, imgUserProfile);
-                        } else {
-                            imgUserProfile.setImageBitmap(StringToBitMap(imagestr));
-                        }
-                        //cap nhat vao DB luon
+                    protected Void doInBackground(Void... params) {
+                        loadRequestFriend(user_uid);
+                        return null;
 
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError databaseError) {}
+                    protected void onPostExecute(Void aVoid) {
+                        super.onPostExecute(aVoid);
+
+                    }
+                }.execute();
+
+
+//
+//                mDatabase.child(AppConstants.USER).child(user_uid).addValueEventListener(new ValueEventListener() {
+//                    @Override
+//                    public void onDataChange(DataSnapshot dataSnapshot) {
+//                        tvNavUserName.setText(dataSnapshot.child("name").getValue().toString());
+//                        tvNavEmail.setText(dataSnapshot.child("email").getValue().toString());
+//                        String imagestr = dataSnapshot.child("avatar").getValue().toString();
+//
+//                        if (imagestr.contains("http") || imagestr.equals("") || imagestr.equals(" ")) {
+//                            CommonMethod.getInstance().loadImage(imagestr, imgUserProfile);
+//                        } else {
+//                            imgUserProfile.setImageBitmap(StringToBitMap(imagestr));
+//                        }
+//                        //cap nhat vao DB luon
+//
+//                    }
+//
+//                    @Override
+//                    public void onCancelled(DatabaseError databaseError) {}
 
 //                if (imagestr.contains("http") || imagestr.equals("") || imagestr.equals(" ")) {
 //                    CommonMethod.getInstance().loadImage(imagestr, imgUserProfile);
 //                } else {
 //                    imgUserProfile.setImageBitmap(StringToBitMap(imagestr));
 //                }
-=======
+
                 if (imagestr.contains("http")) {
                     CommonMethod.getInstance().loadImage(imagestr, imgUserProfile);
                 } else{
                     imgUserProfile.setImageBitmap(StringToBitMap(imagestr));
                 }
->>>>>>> 9b4e1c4e34e1d445195059b007c6e5390c8723cb
 
 //                mDatabase.child(AppConstants.USER).child(user_uid).addValueEventListener(new ValueEventListener() {
 //                    @Override
@@ -532,7 +531,7 @@ public class MainActivity extends AppCompatActivity
 //
 //                    }
 //                });
-            });
+ //           });
             }
 
              else {
@@ -867,54 +866,6 @@ public class MainActivity extends AppCompatActivity
 
         // Showing Alert Message
         alertDialog.show();
-    }
-
-    public void getAllFriends() {
-        listUser = new ArrayList<>();
-        listUser.clear();
-//        mDatabase.child(AppConstants.USER).child(user_uid).child("friends").addChildEventListener(new ChildEventListener() {
-//            @Override
-//            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-//                mDatabase.child(AppConstants.USER).child(dataSnapshot.getKey()).addValueEventListener(new ValueEventListener() {
-//                    @Override
-//                    public void onDataChange(DataSnapshot dataSnapshot) {
-//                        String avatar = dataSnapshot.child("avatar").getValue().toString();
-//                        String name = dataSnapshot.child("name").getValue().toString();
-//                        String status = dataSnapshot.child("status").getValue().toString();
-//                        UserTraffic userTraffic = new UserTraffic(name, avatar, status);
-//                        listUser.add(userTraffic);
-//                        adapter = new ListFriendAdapter(MainActivity.this, listUser);
-//                        lv_listfriend.setAdapter(adapter);
-//                        adapter.notifyDataSetChanged();
-//                    }
-//
-//                    @Override
-//                    public void onCancelled(DatabaseError databaseError) {
-//
-//                    }
-//                });
-//            }
-//
-//            @Override
-//            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-//
-//            }
-//
-//            @Override
-//            public void onChildRemoved(DataSnapshot dataSnapshot) {
-//
-//            }
-//
-//            @Override
-//            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-//
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//
-//            }
-//        });
     }
 
     @Override

@@ -34,6 +34,15 @@ public class UserTraffic implements Serializable {
         this.status = status;
     }
 
+    public UserTraffic(String uid, String name, String avatar, String email, String uidProvider, int status) {
+        this.uid = uid;
+        this.name = name;
+        this.avatar = avatar;
+        this.email = email;
+        this.uidProvider = uidProvider;
+        this.status = status;
+    }
+
     public UserTraffic(String uid, String name, String avatar, String email, String uidProvider, String rank, String latitude, String longitude, int status, String phone) {
         this.uid = uid;
         this.name = name;

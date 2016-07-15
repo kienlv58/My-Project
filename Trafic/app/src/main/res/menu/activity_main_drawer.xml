@@ -4,35 +4,39 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_camera"
-            android:icon="@drawable/ic_menu_camera"
-            android:title="Import" />
+            android:id="@+id/profile"
+            android:icon="@drawable/profile"
+            android:title="Hồ sơ" />
         <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
-        <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow" />
+            android:id="@+id/friend"
+            android:icon="@drawable/friend"
+            android:title="Bạn bè" />
         <item
             android:id="@+id/request_friend"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="ye cau ket ban"
+            android:icon="@drawable/add_friend"
+            android:title="Kết bạn"
             app:actionViewClass="android.widget.TextView"
             />
+        <item
+            android:id="@+id/message"
+            android:icon="@drawable/msg"
+            android:title="Tin nhắn" />
     </group>
 
     <item android:title="Communicate">
         <menu>
             <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
+                android:id="@+id/map"
+                android:icon="@drawable/location"
+                android:title="Cảnh báo" />
             <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
+                android:id="@+id/chiduong"
+                android:icon="@drawable/chiduong"
+                android:title="Chỉ đường" />
+            <item
+                android:id="@+id/acticle"
+                android:icon="@drawable/acticle"
+                android:title="Xem cảnh báo" />
         </menu>
     </item>
 

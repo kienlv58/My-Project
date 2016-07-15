@@ -245,13 +245,17 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
             mDatabase.child("user").child(user_uid).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    dialog_edt_name.setText(dataSnapshot.child("name").getValue().toString());
-                    dialog_edt_phone.setText(dataSnapshot.child("phone").getValue().toString());
-                    String imagestr = dataSnapshot.child("avatar").getValue().toString();
-                    if (imagestr.contains("http") || imagestr.equals("") || imagestr.equals(" ")) {
-                        CommonMethod.getInstance().loadImage(imagestr, dialog_image_update);
-                    } else {
-                        dialog_image_update.setImageBitmap(StringToBitMap(imagestr));
+                    if (dataSnapshot != null) {
+                        dialog_edt_name.setText(dataSnapshot.child("name").getValue().toString());
+//                        if (dataSnapshot.child("phone") != null) {
+//                            dialog_edt_phone.setText(dataSnapshot.child("phone").getValue().toString());
+//                        }
+                        String imagestr = dataSnapshot.child("avatar").getValue().toString();
+                        if (imagestr.contains("http") || imagestr.equals("") || imagestr.equals(" ")) {
+                            CommonMethod.getInstance().loadImage(imagestr, dialog_image_update);
+                        } else {
+                            dialog_image_update.setImageBitmap(StringToBitMap(imagestr));
+                        }
                     }
                 }
 
