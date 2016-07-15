@@ -2,29 +2,27 @@ package vn.k2t.traficjam.frgmanager;
 
 import android.content.Context;
 import android.location.Geocoder;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
+import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.gordonwong.materialsheetfab.MaterialSheetFab;
-import com.gordonwong.materialsheetfab.MaterialSheetFabEventListener;
 
 import java.io.IOException;
 import java.util.HashMap;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import vn.k2t.traficjam.FrgBase;
 import vn.k2t.traficjam.R;
-import vn.k2t.traficjam.libs.Fab;
 import vn.k2t.traficjam.maps.MapFragMent;
 import vn.k2t.traficjam.model.ItemData;
 import vn.k2t.traficjam.onclick.ItemClick;
@@ -34,25 +32,25 @@ import vn.k2t.traficjam.untilitis.Utilities;
 /**
  * Created by root on 06/07/2016.
  */
-public class FrgMaps extends FrgBase implements View.OnClickListener {
+public class FrgMaps extends FrgBase {
 
-
-    @Bind(R.id.fab)
-    Fab fab;
-    @Bind(R.id.fab_sheet)
-    View sheetView;
-    @Bind(R.id.overlay)
-    View overlay;
-    @Bind(R.id.fab_sheet_item_traffic_jam)
-    TextView trafficJam;
-    @Bind(R.id.fab_sheet_item_accident)
-    TextView accident;
+    @Bind(R.id.multiple_actions)
+    FloatingActionsMenu menu;
+    @Bind(R.id.action_tick)
+    FloatingActionButton actionTick;
+    @Bind(R.id.action_see)
+    FloatingActionButton actionSee;
+    @Bind(R.id.action_traffic)
+    FloatingActionButton actionTraffic;
+    @Bind(R.id.action_accident)
+    FloatingActionButton actionAccident;
+    @Bind(R.id.action_pokemon)
+    FloatingActionButton actionPokemon;
     GoogleMap mMap;
     private static Context mContext;
     private static FrgMaps f;
     private Utilities utilities;
-    private MaterialSheetFab materialSheetFab;
-    private int statusBarColor;
+
     private static ItemClick click;
 
     public FrgMaps() {
@@ -75,7 +73,8 @@ public class FrgMaps extends FrgBase implements View.OnClickListener {
         if (utilities.isConnected()) {
             rootView = inflater.inflate(R.layout.frg_maps, container, false);
             ButterKnife.bind(this, rootView);
-            setupFab();
+            initFloatingActionMenu(rootView);
+
         } else {
             super.newInstance(mContext);
             return super.onCreateView(inflater, container, savedInstanceState);
@@ -85,6 +84,77 @@ public class FrgMaps extends FrgBase implements View.OnClickListener {
 //        setupFab();
 
         return rootView;
+    }
+
+    private String type = new String();
+
+    @OnClick({R.id.action_pokemon, R.id.action_accident, R.id.action_traffic})
+    protected void onClickChoose(FloatingActionButton button) {
+        show();
+
+
+        if (button == actionAccident) {
+            type = AppConstants.TYPE_ACCIDENT;
+
+        } else if (button == actionTraffic) {
+            type = AppConstants.TYPE_TRAFFIC_JAM;
+
+        } else if (button == actionPokemon) {
+            // click.selectedItem(data, AppConstants.TYPE_ACCIDENT);
+        }
+    }
+
+    @OnClick({R.id.action_see, R.id.action_tick})
+    protected void onClickAction(FloatingActionButton button) {
+        ItemData data = new ItemData();
+        double latitude = MapFragMent.mMap.getMyLocation().getLatitude();
+        double longtitude = MapFragMent.mMap.getMyLocation().getLongitude();
+        HashMap<String, String> hashMap = new HashMap<>();
+        hashMap.put(AppConstants.KEY_LATITUDE, latitude + "");
+        hashMap.put(AppConstants.KEY_LONGTITUDE, longtitude + "");
+        data.setmItemData(hashMap);
+        if (button == actionTick) {
+            switch (type) {
+                case AppConstants.TYPE_TRAFFIC_JAM:
+                    click.selectedItem(data, AppConstants.TYPE_TRAFFIC_JAM);
+                    menu.collapse();
+                    break;
+                case AppConstants.TYPE_ACCIDENT:
+                    click.selectedItem(data, AppConstants.TYPE_ACCIDENT);
+                    menu.collapse();
+                    break;
+
+            }
+        } else if (button == actionSee) {
+            switch (type) {
+                case AppConstants.TYPE_TRAFFIC_JAM:
+                    click.selectedItem(data, AppConstants.TYPE_SEE_TRAFFIC_JAM);
+                    menu.collapse();
+                    break;
+                case AppConstants.TYPE_ACCIDENT:
+                    click.selectedItem(data, AppConstants.TYPE_SEE_ACCIDENT);
+                    menu.collapse();
+                    break;
+
+            }
+
+        }
+    }
+
+    private void show() {
+        actionSee.setVisibility(View.VISIBLE);
+        actionTick.setVisibility(View.VISIBLE);
+        actionAccident.setVisibility(View.GONE);
+        actionTraffic.setVisibility(View.GONE);
+        actionPokemon.setVisibility(View.GONE);
+    }
+
+    private void hide() {
+        actionSee.setVisibility(View.GONE);
+        actionTick.setVisibility(View.GONE);
+        actionAccident.setVisibility(View.VISIBLE);
+        actionTraffic.setVisibility(View.VISIBLE);
+        actionPokemon.setVisibility(View.VISIBLE);
     }
 
     public void addMarker(String title, LatLng position) {
@@ -98,75 +168,89 @@ public class FrgMaps extends FrgBase implements View.OnClickListener {
 
     }
 
-    private void setupFab() {
+    private void initFloatingActionMenu(View view) {
 
-
-        int sheetColor = getResources().getColor(R.color.background_card);
-        int fabColor = getResources().getColor(R.color.theme_accent);
-
-        // Create material sheet FAB
-        materialSheetFab = new MaterialSheetFab<>(fab, sheetView, overlay, sheetColor, fabColor);
-
-        // Set material sheet event listener
-        materialSheetFab.setEventListener(new MaterialSheetFabEventListener() {
+        menu.setOnFloatingActionsMenuUpdateListener(new FloatingActionsMenu.OnFloatingActionsMenuUpdateListener() {
             @Override
-            public void onShowSheet() {
-                // Save current status bar color
-                statusBarColor = getStatusBarColor();
-                // Set darker status bar color to match the dim overlay
-                setStatusBarColor(getResources().getColor(R.color.colorPrimary));
+            public void onMenuExpanded() {
+                hide();
             }
 
             @Override
-            public void onHideSheet() {
-                // Restore status bar color
-                setStatusBarColor(statusBarColor);
+            public void onMenuCollapsed() {
+                hide();
             }
         });
-
-        // Set material sheet item click listeners
-        trafficJam.setOnClickListener(this);
-        accident.setOnClickListener(this);
-
     }
+//    private void setupFab() {
+//
+//
+//        int sheetColor = getResources().getColor(R.color.background_card);
+//        int fabColor = getResources().getColor(R.color.theme_accent);
+//
+//        // Create material sheet FAB
+//        materialSheetFab = new MaterialSheetFab<>(fab, sheetView, overlay, sheetColor, fabColor);
+//
+//        // Set material sheet event listener
+//        materialSheetFab.setEventListener(new MaterialSheetFabEventListener() {
+//            @Override
+//            public void onShowSheet() {
+//                // Save current status bar color
+//                statusBarColor = getStatusBarColor();
+//                // Set darker status bar color to match the dim overlay
+//                setStatusBarColor(getResources().getColor(R.color.colorPrimary));
+//            }
+//
+//            @Override
+//            public void onHideSheet() {
+//                // Restore status bar color
+//                setStatusBarColor(statusBarColor);
+//            }
+//        });
+//
+//        // Set material sheet item click listeners
+//        trafficJam.setOnClickListener(this);
+//        accident.setOnClickListener(this);
+//
+//    }
+//
+//    private int getStatusBarColor() {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            return getActivity().getWindow().getStatusBarColor();
+//        }
+//        return 0;
+//    }
+//
+//    private void setStatusBarColor(int color) {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            getActivity().getWindow().setStatusBarColor(color);
+//        }
+//    }
 
-    private int getStatusBarColor() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            return getActivity().getWindow().getStatusBarColor();
-        }
-        return 0;
-    }
-
-    private void setStatusBarColor(int color) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getActivity().getWindow().setStatusBarColor(color);
-        }
-    }
-
-    @Override
-    public void onClick(View v) {
-        ItemData data = new ItemData();
-        double latitude = MapFragMent.mMap.getMyLocation().getLatitude();
-        double longtitude = MapFragMent.mMap.getMyLocation().getLongitude();
-        HashMap<String, String> hashMap = new HashMap<>();
-        hashMap.put(AppConstants.KEY_LATITUDE, latitude + "");
-        hashMap.put(AppConstants.KEY_LONGTITUDE, longtitude + "");
-        data.setmItemData(hashMap);
-        switch (v.getId()) {
-            case R.id.fab_sheet_item_traffic_jam:
-                //tickLocation(BitmapDescriptorFactory.HUE_RED);
-                click.selectedItem(data, AppConstants.TYPE_TRAFFIC_JAM);
-                materialSheetFab.hideSheet();
-                break;
-
-            case R.id.fab_sheet_item_accident:
-                //tickLocation(BitmapDescriptorFactory.HUE_GREEN);
-                click.selectedItem(data, AppConstants.TYPE_ACCIDENT);
-                materialSheetFab.hideSheet();
-                break;
-        }
-
-    }
+//    @Override
+//    public void onClick(View v) {
+//        ItemData data = new ItemData();
+//        double latitude = MapFragMent.mMap.getMyLocation().getLatitude();
+//        double longtitude = MapFragMent.mMap.getMyLocation().getLongitude();
+//        HashMap<String, String> hashMap = new HashMap<>();
+//        hashMap.put(AppConstants.KEY_LATITUDE, latitude + "");
+//        hashMap.put(AppConstants.KEY_LONGTITUDE, longtitude + "");
+//        data.setmItemData(hashMap);
+//        switch (v.getId()) {
+//            case R.id.fab_sheet_item_traffic_jam:
+//                //tickLocation(BitmapDescriptorFactory.HUE_RED);
+//                click.selectedItem(data, AppConstants.TYPE_TRAFFIC_JAM);
+//                materialSheetFab.hideSheet();
+//                break;
+//
+//            case R.id.fab_sheet_item_accident:
+//                //tickLocation(BitmapDescriptorFactory.HUE_GREEN);
+//                click.selectedItem(data, AppConstants.TYPE_ACCIDENT);
+//                materialSheetFab.hideSheet();
+//                break;
+//        }
+//
+//    }
 
 
     private void tickLocation(float a) {

@@ -22,8 +22,6 @@ import vn.k2t.traficjam.untilitis.Utilities;
 public class FrgBase extends Fragment {
 
     private static FrgBase f;
-   // private static ItemData mItem;
-    private static String mKey = new String();
     private static Context mContext;
     private Utilities utilities;
     public FrgBase() {
@@ -33,7 +31,6 @@ public class FrgBase extends Fragment {
 
     public static FrgBase newInstance(Context context) {
         f = new FrgBase();
-       // mItem = item;
         mContext = context;
         return f;
     }

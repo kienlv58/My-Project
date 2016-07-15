@@ -264,12 +264,6 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
 
     //google + firebase
     public void firebaseAuthWithGoogle(GoogleSignInAccount account) {
-        if (String.valueOf(account.getPhotoUrl()).equals("")) {
-            avatar = String.valueOf(account.getPhotoUrl());
-        } else
-            avatar = " ";
-
-
         AuthCredential authCredential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
         mAuth.signInWithCredential(authCredential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
@@ -307,6 +301,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                 progressDialog.show();
                 GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
                 GoogleSignInAccount account = result.getSignInAccount();
+                avatar = String.valueOf(account.getPhotoUrl());
                 firebaseAuthWithGoogle(account);
             }
 
