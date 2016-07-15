@@ -393,11 +393,11 @@ public class MainActivity extends AppCompatActivity
                 tvNavEmail.setText(mUser.getEmail());
                 String imagestr = mUser.getAvatar();
 
-//                if (imagestr.contains("http") || imagestr.equals("") || imagestr.equals(" ")) {
-//                    CommonMethod.getInstance().loadImage(imagestr, imgUserProfile);
-//                } else {
-//                    imgUserProfile.setImageBitmap(StringToBitMap(imagestr));
-//                }
+                if (imagestr.contains("http")) {
+                    CommonMethod.getInstance().loadImage(imagestr, imgUserProfile);
+                } else{
+                    imgUserProfile.setImageBitmap(StringToBitMap(imagestr));
+                }
 
 //                mDatabase.child(AppConstants.USER).child(user_uid).addValueEventListener(new ValueEventListener() {
 //                    @Override
