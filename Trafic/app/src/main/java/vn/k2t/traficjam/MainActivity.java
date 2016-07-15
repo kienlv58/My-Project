@@ -13,6 +13,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -20,11 +21,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.annotation.IdRes;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -32,6 +36,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -53,6 +58,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.api.model.StringList;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -78,6 +84,7 @@ import vn.k2t.traficjam.adapter.TabAdapter;
 import vn.k2t.traficjam.database.queries.SQLUser;
 import vn.k2t.traficjam.maps.MapFragMent;
 import vn.k2t.traficjam.maps.MapsActivity;
+import vn.k2t.traficjam.model.Friends;
 import vn.k2t.traficjam.model.ItemData;
 import vn.k2t.traficjam.model.Posts;
 import vn.k2t.traficjam.model.UserTraffic;
@@ -107,12 +114,14 @@ public class MainActivity extends AppCompatActivity
     TabLayout tabLayout;
     @Bind(R.id.lv_listfriend)
     ListView lv_listfriend;
+    TextView tv_friend;
 
 
     private FragmentManager manager;
     private TabAdapter tabAdapter;
     private CircleImageView imgUserProfile;
     private TextView tvNavUserName, tvNavEmail;
+    ArrayList<Friends> listRequest;
 
     //firebase
     FirebaseAuth mAuth;
@@ -151,12 +160,22 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         initToolbar();
-        initObject();
+
+
+
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
         try {
             getUserFromDB();
+            initObject();
             getAllFriends();
+            loadRequestFriend(mUser.getUid());
+            String count = String.valueOf(listRequest.size());
+            if (listRequest.size() != 0){
+                tv_friend =(TextView) MenuItemCompat.getActionView(navigationView.getMenu().
+                        findItem(R.id.request_friend));
+                initializeCountDrawer(count);
+            }
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -177,6 +196,15 @@ public class MainActivity extends AppCompatActivity
         } catch (NoSuchAlgorithmException e) {
 
         }
+    }
+    private void initializeCountDrawer(String count){
+
+        //Gravity property aligns the text
+        tv_friend.setGravity(Gravity.CENTER_VERTICAL);
+        tv_friend.setTypeface(null, Typeface.BOLD);
+        tv_friend.setTextColor(getResources().getColor(R.color.colorAccent));
+        tv_friend.setText(count);
+
     }
 
     private void initToolbar() {
@@ -270,7 +298,8 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_slideshow) {
             startActivity(new Intent(MainActivity.this, ActivityUserProfile.class));
             // overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-        } else if (id == R.id.nav_manage) {
+        } else if (id == R.id.request_friend) {
+
 
         } else if (id == R.id.nav_share) {
 
@@ -355,6 +384,65 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    public void loadRequestFriend(final String uid){
+        listRequest = new ArrayList<>();
+        listRequest.clear();
+        mDatabase.child(AppConstants.USER).child(uid).child("friends").child("friend_request").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                mDatabase.child(AppConstants.USER).child(uid).child("friends").child("friend_request").child(dataSnapshot.getKey()).addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        Friends f = dataSnapshot.getValue(Friends.class);
+                        listRequest.add(f);
+                    }
+
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                    }
+
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        listRequest.size();
+
+    }
+
     public void getUserFromDB() {
         sqlUser = new SQLUser(this);
         mUser = sqlUser.getUser();
@@ -374,6 +462,7 @@ public class MainActivity extends AppCompatActivity
                         } else {
                             imgUserProfile.setImageBitmap(StringToBitMap(imagestr));
                         }
+                        //cap nhat vao DB luon
 
                     }
 
@@ -391,24 +480,6 @@ public class MainActivity extends AppCompatActivity
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-//        user =FirebaseAuth.getInstance().getCurrentUser();
-//
-//        if (user!= null) {
-//            mDatabases = FirebaseDatabase.getInstance().getReference().child(user.getUid());
-//            ValueEventListener eventListener = new ValueEventListener() {
-//                @Override
-//                public void onDataChange(DataSnapshot dataSnapshot) {
-//                    mUser = dataSnapshot.getValue(UserTraffic.class);
-//                }
-//
-//                @Override
-//                public void onCancelled(DatabaseError databaseError) {
-//
-//                }
-//            };
-//            mDatabases.addValueEventListener(eventListener);
-//        }
     }
 
     @Override
@@ -737,49 +808,49 @@ public class MainActivity extends AppCompatActivity
     public void getAllFriends() {
         listUser = new ArrayList<>();
         listUser.clear();
-        mDatabase.child(AppConstants.USER).child(user_uid).child("friends").addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                mDatabase.child(AppConstants.USER).child(dataSnapshot.getKey()).addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        String avatar = dataSnapshot.child("avatar").getValue().toString();
-                        String name = dataSnapshot.child("name").getValue().toString();
-                        String status = dataSnapshot.child("status").getValue().toString();
-                        UserTraffic userTraffic = new UserTraffic(name, avatar, status);
-                        listUser.add(userTraffic);
-                        adapter = new ListFriendAdapter(MainActivity.this, listUser);
-                        lv_listfriend.setAdapter(adapter);
-                        adapter.notifyDataSetChanged();
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+//        mDatabase.child(AppConstants.USER).child(user_uid).child("friends").addChildEventListener(new ChildEventListener() {
+//            @Override
+//            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+//                mDatabase.child(AppConstants.USER).child(dataSnapshot.getKey()).addValueEventListener(new ValueEventListener() {
+//                    @Override
+//                    public void onDataChange(DataSnapshot dataSnapshot) {
+//                        String avatar = dataSnapshot.child("avatar").getValue().toString();
+//                        String name = dataSnapshot.child("name").getValue().toString();
+//                        String status = dataSnapshot.child("status").getValue().toString();
+//                        UserTraffic userTraffic = new UserTraffic(name, avatar, status);
+//                        listUser.add(userTraffic);
+//                        adapter = new ListFriendAdapter(MainActivity.this, listUser);
+//                        lv_listfriend.setAdapter(adapter);
+//                        adapter.notifyDataSetChanged();
+//                    }
+//
+//                    @Override
+//                    public void onCancelled(DatabaseError databaseError) {
+//
+//                    }
+//                });
+//            }
+//
+//            @Override
+//            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+//
+//            }
+//
+//            @Override
+//            public void onChildRemoved(DataSnapshot dataSnapshot) {
+//
+//            }
+//
+//            @Override
+//            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//
+//            }
+//        });
     }
 
     @Override
