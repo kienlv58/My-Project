@@ -143,8 +143,14 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                             //String avatar = String.valueOf(firebaseUser.getPhotoUrl());
                             String uidProvider = firebaseUser.getProviderId();
 
+
                             mUser = new UserTraffic(uid, name, avatar, email, uidProvider, "", "", "", 1, "");
-                            mDatabase.child(AppConstants.USER).child(uid).setValue(mUser);
+                            mDatabase.child(AppConstants.USER).child(uid).child("uid").setValue(uid);
+                            mDatabase.child(AppConstants.USER).child(uid).child("email").setValue(email);
+                            mDatabase.child(AppConstants.USER).child(uid).child("name").setValue(name);
+                            mDatabase.child(AppConstants.USER).child(uid).child("avatar").setValue(avatar);
+                            mDatabase.child(AppConstants.USER).child(uid).child("uidProvider").setValue(uidProvider);
+                            mDatabase.child(AppConstants.USER).child(uid).child("status").setValue(1);
 
                             return null;
                         }
@@ -264,12 +270,6 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
 
     //google + firebase
     public void firebaseAuthWithGoogle(GoogleSignInAccount account) {
-        if (String.valueOf(account.getPhotoUrl()).equals("")) {
-            avatar = String.valueOf(account.getPhotoUrl());
-        } else
-            avatar = " ";
-
-
         AuthCredential authCredential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
         mAuth.signInWithCredential(authCredential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
@@ -307,6 +307,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                 progressDialog.show();
                 GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
                 GoogleSignInAccount account = result.getSignInAccount();
+                avatar = String.valueOf(account.getPhotoUrl());
                 firebaseAuthWithGoogle(account);
             }
 

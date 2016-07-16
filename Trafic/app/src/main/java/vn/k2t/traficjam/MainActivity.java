@@ -13,18 +13,23 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.annotation.IdRes;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -32,6 +37,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -53,6 +59,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.api.model.StringList;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -78,6 +85,7 @@ import vn.k2t.traficjam.adapter.TabAdapter;
 import vn.k2t.traficjam.database.queries.SQLUser;
 import vn.k2t.traficjam.maps.MapFragMent;
 import vn.k2t.traficjam.maps.MapsActivity;
+import vn.k2t.traficjam.model.Friends;
 import vn.k2t.traficjam.model.ItemData;
 import vn.k2t.traficjam.model.Posts;
 import vn.k2t.traficjam.model.UserTraffic;
@@ -87,10 +95,11 @@ import vn.k2t.traficjam.untilitis.CommonMethod;
 import vn.k2t.traficjam.untilitis.Utilities;
 import vn.k2t.traficjam.user.ActivityUserProfile;
 import vn.k2t.traficjam.user.LoginUserActivity;
+import vn.k2t.traficjam.user.RequestFriendActivity;
 
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener, ItemClick, LocationListener, RoutingListener {
+        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
     private static final String TAG = "MainActivity";
     @Bind(R.id.toolbar)
@@ -107,12 +116,14 @@ public class MainActivity extends AppCompatActivity
     TabLayout tabLayout;
     @Bind(R.id.lv_listfriend)
     ListView lv_listfriend;
+    TextView tv_friend;
 
 
     private FragmentManager manager;
     private TabAdapter tabAdapter;
     private CircleImageView imgUserProfile;
     private TextView tvNavUserName, tvNavEmail;
+    public static ArrayList<Friends> listRequest = new ArrayList<>();
 
     //firebase
     FirebaseAuth mAuth;
@@ -144,6 +155,7 @@ public class MainActivity extends AppCompatActivity
     private List<Polyline> polylines;
     private static final int[] COLORS = new int[]{R.color.colorPrimary, R.color.colorPrimary, R.color.colorPrimary, R.color.colorAccent, R.color.primary_dark_material_light};
 
+
     @Override
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,15 +163,18 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         initToolbar();
-        initObject();
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Đang tải dữ liệu...");
+        progressDialog.setCancelable(false);
+
+
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
-        try {
-            getUserFromDB();
-            getAllFriends();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+        initObject();
+        getUserFromDB();
+
+
         /**
          * generate keyhas facebook
          */
@@ -177,6 +192,39 @@ public class MainActivity extends AppCompatActivity
         } catch (NoSuchAlgorithmException e) {
 
         }
+    }
+
+    private void initializeCountDrawer(String count) {
+
+        //Gravity property aligns the text
+        tv_friend.setGravity(Gravity.CENTER_VERTICAL);
+        tv_friend.setTypeface(null, Typeface.BOLD);
+        tv_friend.setTextColor(getResources().getColor(R.color.colorAccent));
+        tv_friend.setText(count);
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+//        if (mUtilities.isConnected()){
+//            android.support.v7.app.AlertDialog.Builder builder= new android.support.v7.app.AlertDialog.Builder(this);
+//            builder.setMessage(R.string.turn_on_wifi);
+//            builder.setCancelable(false);
+//            builder.setNegativeButton("OK", new DialogInterface.OnClickListener() {
+//                @Override
+//                public void onClick(DialogInterface dialogInterface, int i) {
+//
+//                }
+//            });
+//            builder.setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
+//                @Override
+//                public void onClick(DialogInterface dialogInterface, int i) {
+//                    finish();
+//                }
+//            });
+//            builder.show();
+//        }
     }
 
     private void initToolbar() {
@@ -206,6 +254,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initObject() {
+        tv_friend = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().
+                findItem(R.id.request_friend));
+        //initializeCountDrawer("");
 
         imgUserProfile = (CircleImageView) navigationView_Right.getHeaderView(0).findViewById(R.id.profile_image_user);
         tvNavUserName = (TextView) navigationView_Right.getHeaderView(0).findViewById(R.id.tv_nav_Name);
@@ -260,21 +311,24 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            Intent intent = new Intent(MainActivity.this, LoginUserActivity.class);
+        if (id == R.id.profile) {
+            Intent intent = new Intent(MainActivity.this, ActivityUserProfile.class);
             startActivity(intent);
             // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        } else if (id == R.id.friend) {
+
+        } else if (id == R.id.request_friend) {
+            Intent intent = new Intent(MainActivity.this, RequestFriendActivity.class);
+            startActivityForResult(intent, AppConstants.REQUEST_ADD_FRIENDS);
+            // overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+        } else if (id == R.id.message) {
+
+
+        } else if (id == R.id.map) {
             Intent intent = new Intent(MainActivity.this, MapsActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_slideshow) {
-            startActivity(new Intent(MainActivity.this, ActivityUserProfile.class));
-            // overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.chiduong) {
+        } else if (id == R.id.acticle) {
 
         }
 
@@ -313,46 +367,77 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == 300) {
             getUserFromDB();
         }
-        switch (requestCode) {
-            case AppConstants.REQUEST_TAKE_PHOTO:
-                if (resultCode == RESULT_OK) {
-                    progressDialog.show();
-                    Cursor cursor = getContentResolver().query(capturedImageURI,
-                            new String[]{MediaStore.Images.Media.DATA}, null, null, null);
-                    int index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-                    cursor.moveToFirst();
-                    String capturedImageFilePath = cursor.getString(index);
-                    cursor.close();
-
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inSampleSize = 8;
-                    Bitmap bitmap = BitmapFactory.decodeFile(capturedImageFilePath, options);
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                    byte[] bytes = baos.toByteArray();
-                    String base64Image = Base64.encodeToString(bytes, Base64.DEFAULT);
-
-                    if (mUtilities.isConnected()) {
-                        progressDialog.show();
-                        newPosts.setImage(base64Image);
-                        mDatabase.child(AppConstants.POSTS).child(mUser.getUid()).setValue(newPosts);
-//                        mDatabases.child(AppConstants.POSTS).push().setValue(newPosts);
-                        switch (TYPE) {
-                            case AppConstants.TYPE_TRAFFIC_JAM:
-                                tickLocation(BitmapDescriptorFactory.HUE_RED);
-                                break;
-                            case AppConstants.TYPE_ACCIDENT:
-                                tickLocation(BitmapDescriptorFactory.HUE_GREEN);
-                                break;
-                        }
-                        progressDialog.dismiss();
-                    } else {
-                        progressDialog.dismiss();
-                        Toast.makeText(MainActivity.this, getResources().getString(R.string.erro_network), Toast.LENGTH_LONG).show();
-                    }
-                }
-                break;
+        if (requestCode == AppConstants.REQUEST_ADD_FRIENDS) {
+//            String count = String.valueOf(listRequest.size());
+//            if (listRequest.size() != 0) {
+//                initializeCountDrawer(count);
+//            }else {
+//                initializeCountDrawer("");
+//            }
+            loadRequestFriend(mUser.getUid());
         }
+
+
+    }
+
+    public void loadRequestFriend(final String uid) {
+        listRequest.clear();
+
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                mDatabase.child(AppConstants.USER).child(uid).child("friends").child("friend_request").addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        Friends f = dataSnapshot.getValue(Friends.class);
+                        listRequest.add(f);
+                        String count = String.valueOf(listRequest.size());
+                        if (listRequest.size() != 0) {
+                            initializeCountDrawer(count);
+                        } else {
+                            initializeCountDrawer("");
+                        }
+                    }
+
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                    }
+
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+
+                    }
+                });
+
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                String count = String.valueOf(listRequest.size());
+                if (listRequest.size() != 0) {
+                    initializeCountDrawer(count);
+                } else {
+                    initializeCountDrawer("");
+                }
+            }
+        }.execute();
+
+
     }
 
     public void getUserFromDB() {
@@ -361,28 +446,16 @@ public class MainActivity extends AppCompatActivity
         try {
             if (mUser != null) {
                 user_uid = mUser.getUid();
+                loadRequestFriend(mUser.getUid());
 
-                mDatabase.child(AppConstants.USER).child(user_uid).addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        tvNavUserName.setText(dataSnapshot.child("name").getValue().toString());
-                        tvNavEmail.setText(dataSnapshot.child("email").getValue().toString());
-                        String imagestr = dataSnapshot.child("avatar").getValue().toString();
-
-                        if (imagestr.contains("http") || imagestr.equals("") || imagestr.equals(" ")) {
-                            CommonMethod.getInstance().loadImage(imagestr, imgUserProfile);
-                        } else {
-                            imgUserProfile.setImageBitmap(StringToBitMap(imagestr));
-                        }
-
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-
+                tvNavUserName.setText(mUser.getName());
+                tvNavEmail.setText(mUser.getEmail());
+                String imagestr = mUser.getAvatar();
+                if (imagestr.contains("http")) {
+                    CommonMethod.getInstance().loadImage(imagestr, imgUserProfile);
+                } else {
+                    imgUserProfile.setImageBitmap(StringToBitMap(imagestr));
+                }
             } else {
                 imgUserProfile.setImageResource(R.drawable.bg_profile);
                 tvNavUserName.setText("Đăng nhập");
@@ -391,264 +464,8 @@ public class MainActivity extends AppCompatActivity
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-//        user =FirebaseAuth.getInstance().getCurrentUser();
-//
-//        if (user!= null) {
-//            mDatabases = FirebaseDatabase.getInstance().getReference().child(user.getUid());
-//            ValueEventListener eventListener = new ValueEventListener() {
-//                @Override
-//                public void onDataChange(DataSnapshot dataSnapshot) {
-//                    mUser = dataSnapshot.getValue(UserTraffic.class);
-//                }
-//
-//                @Override
-//                public void onCancelled(DatabaseError databaseError) {
-//
-//                }
-//            };
-//            mDatabases.addValueEventListener(eventListener);
-//        }
     }
 
-    @Override
-    public void selectedItem(Object obj, String type) {
-        if (obj instanceof ItemData) {
-            ItemData data = (ItemData) obj;
-            switch (type) {
-                case AppConstants.TYPE_TRAFFIC_JAM:
-                    showSettingsAlert(data, type);
-                    break;
-                case AppConstants.TYPE_ACCIDENT:
-                    showSettingsAlert(data, type);
-                    break;
-                case AppConstants.TYPE_SEE_TRAFFIC_JAM:
-                    Location location = new Location("");
-                    location.setLatitude(Double.parseDouble(data.getmItemData().get(AppConstants.KEY_LATITUDE)));
-                    location.setLongitude(Double.parseDouble(data.getmItemData().get(AppConstants.KEY_LONGTITUDE)));
-                    //initCamera(location);
-                    MapFragMent.mMap.clear();
-                    showAllLocationTrafficJamInRadius3000Km(items, AppConstants.TYPE_TRAFFIC_JAM);
-                    TYPE = AppConstants.TYPE_TRAFFIC_JAM;
-                    break;
-                case AppConstants.TYPE_SEE_ACCIDENT:
-                    Location locations = new Location("");
-                    locations.setLatitude(Double.parseDouble(data.getmItemData().get(AppConstants.KEY_LATITUDE)));
-                    locations.setLongitude(Double.parseDouble(data.getmItemData().get(AppConstants.KEY_LONGTITUDE)));
-                    // initCamera(locations);
-                    MapFragMent.mMap.clear();
-                    showAllLocationTrafficJamInRadius3000Km(items, AppConstants.TYPE_ACCIDENT);
-                    TYPE = AppConstants.TYPE_ACCIDENT;
-                    break;
-            }
-        } else if (obj instanceof Location) {
-            mCurrentLocation = (Location) obj;
-            switch (type) {
-                case AppConstants.TYPE_CONNETCED:
-                    initCamera(mCurrentLocation);
-                    requestFirebase(AppConstants.TYPE_ALL);
-                    break;
-            }
-        }
-
-    }
-
-    private Location mCurrentLocation;
-    protected LocationManager locationManager;
-
-    private boolean checkGPS() {
-        locationManager = (LocationManager) this
-                .getSystemService(LOCATION_SERVICE);
-
-        // getting GPS status
-        boolean isGPSEnabled = locationManager
-                .isProviderEnabled(LocationManager.GPS_PROVIDER);
-        return isGPSEnabled;
-    }
-
-    public void showSettingsAlert() {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-
-        // Setting Dialog Title
-        alertDialog.setTitle("GPS is settings");
-
-        // Setting Dialog Message
-        alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?");
-
-        // Setting Icon to Dialog
-        //alertDialog.setIcon(R.drawable.delete);
-
-        // On pressing Settings button
-        alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
-            }
-        });
-
-        // on pressing cancel button
-        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        // Showing Alert Message
-        alertDialog.show();
-    }
-
-
-    public void initCamera(Location location) {
-        if (!checkGPS()) {
-            showSettingsAlert();
-        } else {
-            if (location != null) {
-                CameraPosition position = CameraPosition.builder()
-                        .target(new LatLng(location.getLatitude(), location.getLongitude()))
-                        .zoom(13.5f)
-                        .bearing(0.0f)
-                        .tilt(0.0f)
-                        .build();
-
-                MapFragMent.mMap.setMapType(MAP_TYPES[1]);
-                MapFragMent.mMap.setTrafficEnabled(true);
-                MapFragMent.mMap.setMyLocationEnabled(true);
-
-
-                //getMap().getUiSettings().setZoomControlsEnabled(true);
-                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                // from = new LatLng(location.getLatitude(), location.getLongitude());
-                MarkerOptions options = new MarkerOptions().position(latLng);
-                options.title(mUtilities.getAddressFromLatLng(latLng));
-//                if (user != null) {
-//                    if (user.getAvatar() != "") {
-//                    } else {
-//                        options.icon(BitmapDescriptorFactory
-//                                .fromBitmap(BitmapFactory
-//                                        .decodeResource(getResources(), R.mipmap.ic_launcher)));
-//                    }
-//                } else {
-//                    options.icon(BitmapDescriptorFactory
-//                            .fromBitmap(BitmapFactory
-//                                    .decodeResource(getResources(), R.mipmap.ic_launcher)));
-//                }
-//                getMap().addMarker(options);
-                // LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                //MarkerOptions options = new MarkerOptions().position(latLng);
-                //options.title(getAddressFromLatLng(latLng));
-//                if (mUser != null) {
-//                    if (mUser.getAvatar() != "") {
-//                    } else {
-//                        options.icon(BitmapDescriptorFactory
-//                                .fromBitmap(BitmapFactory
-//                                        .decodeResource(getResources(), R.mipmap.ic_launcher)));
-//                    }
-//                } else {
-//                    options.icon(BitmapDescriptorFactory
-//                            .fromBitmap(BitmapFactory
-//                                    .decodeResource(getResources(), R.mipmap.ic_launcher)));
-//                }
-                //getMap().addMarker(options);
-                MapFragMent.mMap.clear();
-                //getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
-                CameraUpdate center = CameraUpdateFactory.newLatLng(latLng);
-                MapFragMent.mMap.moveCamera(center);
-                //drawCircle(location);
-
-                MapFragMent.mMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), null);
-
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, this);
-            } else {
-                Toast.makeText(this, R.string.can_not_get_location_of_you, Toast.LENGTH_LONG).show();
-            }
-        }
-    }
-
-    private void requestFirebase(String type) {
-        saveLocationUserFromFireBase(mCurrentLocation);
-        getAllLocationTrafficJam(type);
-    }
-
-    private void drawCircle(Location location) {
-        MapFragMent.mMap.addCircle(new CircleOptions()
-                .center(new LatLng(location.getLatitude(), location.getLongitude()))
-                .radius(2000).strokeWidth(2)
-                .strokeColor(Color.GRAY)
-                .fillColor(0x30ff0000));
-    }
-
-
-    private void getAllLocationTrafficJam(final String type) {
-        items.clear();
-        mDatabase.child(AppConstants.POSTS).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    Posts post = postSnapshot.getValue(Posts.class);
-                    items.add(post);
-                }
-                showAllLocationTrafficJamInRadius3000Km(items, type);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-
-    public void showAllLocationTrafficJamInRadius3000Km(ArrayList<Posts> posts, String type) {
-        try {
-            for (Posts post : posts) {
-                double latitude = Double.parseDouble(post.getLatitude());
-                double longtitude = Double.parseDouble(post.getLongitude());
-                if (type.equals(AppConstants.TYPE_ALL)) {
-                    if (Utilities.DirectDistance(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), latitude, longtitude) < 2000d) {
-
-                        if (post.getType().equals(AppConstants.TYPE_TRAFFIC_JAM))
-                            addMarker(latitude, longtitude, BitmapDescriptorFactory.HUE_RED);
-                        else if (post.getType().equals(AppConstants.TYPE_ACCIDENT))
-                            addMarker(latitude, longtitude, BitmapDescriptorFactory.HUE_GREEN);
-
-                    }
-                } else {
-                    float a = 0;
-                    if (post.getType().equals(type)) {
-                        if (type.equals(AppConstants.TYPE_ACCIDENT)) {
-                            a = BitmapDescriptorFactory.HUE_GREEN;
-                        } else if (type.equals(AppConstants.TYPE_TRAFFIC_JAM)) {
-                            a = BitmapDescriptorFactory.HUE_RED;
-                        }
-                        addMarker(latitude, longtitude, a);
-                    }
-                }
-
-
-            }
-        } catch (Exception ex) {
-
-        }
-    }
-
-    public void addMarker(double latitude, double longtitude, float a) {
-        MarkerOptions markerOptions = new MarkerOptions();
-        LatLng latLng = new LatLng(latitude, longtitude);
-        markerOptions.position(latLng);
-
-        markerOptions.title(mUtilities.getAddressFromLatLng(latLng));
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(a));
-        MapFragMent.mMap.addMarker(markerOptions);
-    }
-
-    private void saveLocationUserFromFireBase(final Location location) {
-        Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("latitude", location.getLatitude() + "");
-        childUpdates.put("longitude", location.getLongitude() + "");
-        if (mUser != null) {
-            mDatabase.child(AppConstants.USER).child(mUser.getUid()).updateChildren(childUpdates);
-        }
-    }
 
     public static Bitmap StringToBitMap(String image) {
         try {
@@ -661,222 +478,5 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void tickLocation(float a) {
-        MarkerOptions markerOptions = new MarkerOptions();
-        double latitude = MapFragMent.mMap.getMyLocation().getLatitude();
-        double longtitude = MapFragMent.mMap.getMyLocation().getLongitude();
-        LatLng latLng = new LatLng(latitude, longtitude);
-        markerOptions.position(latLng);
-        markerOptions.title(mUtilities.getAddressFromLatLng(latLng));
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(a));
-        MapFragMent.mMap.addMarker(markerOptions);
-    }
 
-    public void showSettingsAlert(final ItemData data, final String type) {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-
-        // Setting Dialog Title
-        //  alertDialog.setTitle("ban co muon chup anh khong");
-
-        // Setting Dialog Message
-        alertDialog.setMessage(R.string.you_want_camera);
-
-        // Setting Icon to Dialog
-        //alertDialog.setIcon(R.drawable.delete);
-
-        // On pressing Settings button
-        final double latitude = Double.parseDouble(data.getmItemData().get(AppConstants.KEY_LATITUDE).trim());
-        final double longtitude = Double.parseDouble(data.getmItemData().get(AppConstants.KEY_LONGTITUDE).trim());
-        final LatLng latLng = new LatLng(latitude, longtitude);
-        alertDialog.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                Intent intentTakePhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if (intentTakePhoto.resolveActivity(getPackageManager()) != null) {
-                    @SuppressLint("SimpleDateFormat")
-                    String date = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-                    String fileName = "TrafficJam_" + date;
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put(MediaStore.Images.Media.TITLE, fileName);
-                    capturedImageURI = getContentResolver().insert(
-                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
-                    newPosts.setLatitude(latitude + "");
-                    newPosts.setLongitude(longtitude + "");
-                    newPosts.setTitle(mUtilities.getAddressFromLatLng(latLng));
-                    newPosts.setType(type);
-                    newPosts.setUser_id(mUser.getUid());
-                    newPosts.setName(mUser.getName());
-                    newPosts.setCreated_at(Utilities.currentDate());
-                    intentTakePhoto.putExtra(MediaStore.EXTRA_OUTPUT, capturedImageURI);
-                    startActivityForResult(intentTakePhoto, AppConstants.REQUEST_TAKE_PHOTO);
-                } else {
-                    Toast.makeText(MainActivity.this, R.string.device_does_not_support_camera, Toast.LENGTH_LONG).show();
-
-                }
-            }
-        });
-
-        // on pressing cancel button
-        alertDialog.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                if (mUtilities.isConnected()) {
-                    progressDialog.show();
-
-//                    Posts posts = new Posts(mUtilities.getAddressFromLatLng(latLng), mUser.getName(), type, AppConstants.GOOD_RANK, latitude + "", longtitude + "", "", Utilities.currentDate());
-//                    mDatabase.child(AppConstants.POSTS).child(mUser.getUid()).setValue(posts);
-//
-//                    Posts posts = new Posts(mUser.getUid(), mUtilities.getAddressFromLatLng(latLng), mUser.getName(), type, AppConstants.GOOD_RANK, latitude + "", longtitude + "", "", Utilities.currentDate());
-//                    mDatabase.child(AppConstants.POSTS).push().setValue(posts);
-
-                    switch (type) {
-                        case AppConstants.TYPE_TRAFFIC_JAM:
-                            tickLocation(BitmapDescriptorFactory.HUE_RED);
-                            break;
-                        case AppConstants.TYPE_ACCIDENT:
-                            tickLocation(BitmapDescriptorFactory.HUE_GREEN);
-                            break;
-                    }
-                    progressDialog.dismiss();
-                } else {
-                    progressDialog.dismiss();
-                    Toast.makeText(MainActivity.this, getResources().getString(R.string.erro_network), Toast.LENGTH_LONG).show();
-                }
-                dialog.dismiss();
-            }
-        });
-
-        // Showing Alert Message
-        alertDialog.show();
-    }
-
-    public void getAllFriends() {
-        listUser = new ArrayList<>();
-        listUser.clear();
-        mDatabase.child(AppConstants.USER).child(user_uid).child("friends").addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                mDatabase.child(AppConstants.USER).child(dataSnapshot.getKey()).addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        String avatar = dataSnapshot.child("avatar").getValue().toString();
-                        String name = dataSnapshot.child("name").getValue().toString();
-                        String status = dataSnapshot.child("status").getValue().toString();
-                        UserTraffic userTraffic = new UserTraffic(name, avatar, status);
-                        listUser.add(userTraffic);
-                        adapter = new ListFriendAdapter(MainActivity.this, listUser);
-                        lv_listfriend.setAdapter(adapter);
-                        adapter.notifyDataSetChanged();
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        initCamera(location);
-        requestFirebase(TYPE);
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-
-    }
-
-    @Override
-    public void onRoutingFailure(RouteException e) {
-
-    }
-
-    @Override
-    public void onRoutingStart() {
-
-    }
-
-    @Override
-    public void onRoutingSuccess(ArrayList<Route> route, int in) {
-        CameraUpdate center = CameraUpdateFactory.newLatLng(from);
-        CameraUpdate zoom = CameraUpdateFactory.zoomTo(16);
-
-        MapFragMent.mMap.moveCamera(center);
-        if (polylines.size() > 0) {
-            for (Polyline poly : polylines) {
-                poly.remove();
-            }
-        }
-
-        polylines = new ArrayList<>();
-        //add route(s) to the map.
-        for (int i = 0; i < route.size(); i++) {
-            if (route.get(i).getLength() == findMinDestination(route)) {
-                int colorIndex = i % COLORS.length;
-                PolylineOptions polyOptions = new PolylineOptions();
-                polyOptions.color(getResources().getColor(COLORS[colorIndex]));
-                polyOptions.width(10 + i * 3);
-                polyOptions.addAll(route.get(i).getPoints());
-                Polyline polyline = MapFragMent.mMap.addPolyline(polyOptions);
-                polylines.add(polyline);
-            }
-        }
-        // Start marker
-//        MarkerOptions options = new MarkerOptions();
-//        options.position(from);
-//        options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN));
-//        mMap.addMarker(options);
-//        // End marker
-//        options = new MarkerOptions();
-//        options.position(to);
-//        options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-//        mMap.addMarker(options);
-    }
-
-    @Override
-    public void onRoutingCancelled() {
-
-    }
-
-    private int findMinDestination(ArrayList<Route> route) {
-        int min = route.get(0).getLength();
-        for (int i = 0; i < route.size(); i++) {
-            if (min > route.get(i).getLength()) {
-                min = route.get(i).getLength();
-            }
-        }
-        return min;
-    }
 }
-

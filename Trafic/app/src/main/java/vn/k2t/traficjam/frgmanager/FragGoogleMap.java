@@ -3,6 +3,9 @@ package vn.k2t.traficjam.frgmanager;
 import android.content.Context;
 import android.location.Geocoder;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,25 +14,31 @@ import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import vn.k2t.traficjam.FrgBase;
 import vn.k2t.traficjam.R;
 import vn.k2t.traficjam.maps.MapFragMent;
+import vn.k2t.traficjam.maps.MapManager;
+import vn.k2t.traficjam.maps.MapsManager;
+import vn.k2t.traficjam.model.ItemData;
 import vn.k2t.traficjam.onclick.ItemClick;
+import vn.k2t.traficjam.untilitis.AppConstants;
 import vn.k2t.traficjam.untilitis.Utilities;
 
 /**
- * Created by root on 06/07/2016.
+ * Created by root on 7/15/16.
  */
-public class FrgMaps extends FrgBase {
-
+public class FragGoogleMap extends FrgBase {
     @Bind(R.id.multiple_actions)
     FloatingActionsMenu menu;
     @Bind(R.id.action_tick)
@@ -42,23 +51,25 @@ public class FrgMaps extends FrgBase {
     FloatingActionButton actionAccident;
     @Bind(R.id.action_pokemon)
     FloatingActionButton actionPokemon;
-    GoogleMap mMap;
-    private static Context mContext;
-    private static FrgMaps f;
+
+    private SupportMapFragment fragment;
+    private GoogleMap mMap;
+    public static FragGoogleMap f;
+    public static Context mContext;
+    public static ItemClick click;
     private Utilities utilities;
+    private MapsManager mapManager;
 
-    private static ItemClick click;
-
-    public FrgMaps() {
+    public FragGoogleMap() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
-    public static FrgMaps newInstance(Context context) {
-        f = new FrgMaps();
-        mContext = context;
-        click = (ItemClick) mContext;
+    public static FragGoogleMap newInstance(Context context) {
+        f= new FragGoogleMap();
+        mContext=context;
+        click= (ItemClick) mContext;
         return f;
+
     }
 
     @Override
@@ -66,15 +77,15 @@ public class FrgMaps extends FrgBase {
         View rootView = null;
         utilities = new Utilities(mContext);
 
-        if (utilities.isConnected()) {
-            rootView = inflater.inflate(R.layout.frg_maps, container, false);
-            ButterKnife.bind(this, rootView);
-            initFloatingActionMenu(rootView);
-
-        } else {
-            super.newInstance(mContext);
-            return super.onCreateView(inflater, container, savedInstanceState);
-        }
+//        if (utilities.isConnected()) {
+//            rootView = inflater.inflate(R.layout.layout_google_map, container, false);
+//            ButterKnife.bind(this, rootView);
+//            initFloatingActionMenu(rootView);
+//
+//        } else {
+//            rootView = inflater.inflate(R.layout.layout_google_map, container, false);
+//            return rootView;
+//        }
 //        rootView = inflater.inflate(R.layout.frg_maps, container, false);
 //        ButterKnife.bind(this, rootView);
 //        setupFab();
@@ -82,60 +93,85 @@ public class FrgMaps extends FrgBase {
         return rootView;
     }
 
-//
-//
-//    @OnClick({R.id.action_pokemon, R.id.action_accident, R.id.action_traffic})
-//    protected void onClickChoose(FloatingActionButton button) {
-//        show();
-//
-//
-//        if (button == actionAccident) {
-//            type = AppConstants.TYPE_ACCIDENT;
-//
-//        } else if (button == actionTraffic) {
-//            type = AppConstants.TYPE_TRAFFIC_JAM;
-//
-//        } else if (button == actionPokemon) {
-//            // click.selectedItem(data, AppConstants.TYPE_ACCIDENT);
-//        }
-//    }
 
-//    @OnClick({R.id.action_see, R.id.action_tick})
-//    protected void onClickAction(FloatingActionButton button) {
-//        ItemData data = new ItemData();
-//        double latitude = MapFragMent.mMap.getMyLocation().getLatitude();
-//        double longtitude = MapFragMent.mMap.getMyLocation().getLongitude();
-//        HashMap<String, String> hashMap = new HashMap<>();
-//        hashMap.put(AppConstants.KEY_LATITUDE, latitude + "");
-//        hashMap.put(AppConstants.KEY_LONGTITUDE, longtitude + "");
-//        data.setmItemData(hashMap);
-//        if (button == actionTick) {
-//            switch (type) {
-//                case AppConstants.TYPE_TRAFFIC_JAM:
-//                    click.selectedItem(data, AppConstants.TYPE_TRAFFIC_JAM);
-//                    menu.collapse();
-//                    break;
-//                case AppConstants.TYPE_ACCIDENT:
-//                    click.selectedItem(data, AppConstants.TYPE_ACCIDENT);
-//                    menu.collapse();
-//                    break;
-//
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        FragmentManager fm = getChildFragmentManager();
+//        if (utilities.isConnected()){
+//            fragment = (SupportMapFragment) fm.findFragmentById(R.id.map_container);
+//            if (fragment == null) {
+//                fragment = SupportMapFragment.newInstance();
+//                fm.beginTransaction().replace(R.id.map_container, fragment).commit();
 //            }
-//        } else if (button == actionSee) {
-//            switch (type) {
-//                case AppConstants.TYPE_TRAFFIC_JAM:
-//                    click.selectedItem(data, AppConstants.TYPE_SEE_TRAFFIC_JAM);
-//                    menu.collapse();
-//                    break;
-//                case AppConstants.TYPE_ACCIDENT:
-//                    click.selectedItem(data, AppConstants.TYPE_SEE_ACCIDENT);
-//                    menu.collapse();
-//                    break;
-//
-//            }
-//
 //        }
-//    }
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (utilities.isConnected()&& mMap==null){
+            mMap = fragment.getMap();
+            mapManager= new MapsManager(mMap,mContext);
+        }
+    }
+
+    private String type = new String();
+
+    @OnClick({R.id.action_pokemon, R.id.action_accident, R.id.action_traffic})
+    protected void onClickChoose(FloatingActionButton button) {
+        show();
+
+
+        if (button == actionAccident) {
+            type = AppConstants.TYPE_ACCIDENT;
+
+        } else if (button == actionTraffic) {
+            type = AppConstants.TYPE_TRAFFIC_JAM;
+
+        } else if (button == actionPokemon) {
+            // click.selectedItem(data, AppConstants.TYPE_ACCIDENT);
+        }
+    }
+
+    @OnClick({R.id.action_see, R.id.action_tick})
+    protected void onClickAction(FloatingActionButton button) {
+        ItemData data = new ItemData();
+        double latitude = MapFragMent.mMap.getMyLocation().getLatitude();
+        double longtitude = MapFragMent.mMap.getMyLocation().getLongitude();
+        HashMap<String, String> hashMap = new HashMap<>();
+        hashMap.put(AppConstants.KEY_LATITUDE, latitude + "");
+        hashMap.put(AppConstants.KEY_LONGTITUDE, longtitude + "");
+        data.setmItemData(hashMap);
+        if (button == actionTick) {
+            switch (type) {
+                case AppConstants.TYPE_TRAFFIC_JAM:
+                    click.selectedItem(data, AppConstants.TYPE_TRAFFIC_JAM);
+                    menu.collapse();
+                    break;
+                case AppConstants.TYPE_ACCIDENT:
+                    click.selectedItem(data, AppConstants.TYPE_ACCIDENT);
+                    menu.collapse();
+                    break;
+
+            }
+        } else if (button == actionSee) {
+            switch (type) {
+                case AppConstants.TYPE_TRAFFIC_JAM:
+                    click.selectedItem(data, AppConstants.TYPE_SEE_TRAFFIC_JAM);
+                    menu.collapse();
+                    break;
+                case AppConstants.TYPE_ACCIDENT:
+                    click.selectedItem(data, AppConstants.TYPE_SEE_ACCIDENT);
+                    menu.collapse();
+                    break;
+
+            }
+
+        }
+    }
 
     private void show() {
         actionSee.setVisibility(View.VISIBLE);
@@ -271,4 +307,6 @@ public class FrgMaps extends FrgBase {
 
         return address;
     }
+
+
 }

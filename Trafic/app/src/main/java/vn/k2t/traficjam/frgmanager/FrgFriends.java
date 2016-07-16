@@ -13,6 +13,7 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import vn.k2t.traficjam.FrgBase;
+import vn.k2t.traficjam.MainActivity;
 import vn.k2t.traficjam.R;
 import vn.k2t.traficjam.adapter.ListFriendAdapter;
 import vn.k2t.traficjam.database.queries.SQLUser;
@@ -73,7 +75,6 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = null;
         utilities = new Utilities(mContext);
-
         if (utilities.isConnected()) {
             rootView = inflater.inflate(R.layout.frg_friends, container, false);
             mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -91,8 +92,11 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
     @Override
     public void onStart() {
         super.onStart();
-        user_uid = sqlUser.getUser().getUid();
-        getAllUser();
+        if (MainActivity.mUser!=null){
+            user_uid = sqlUser.getUser().getUid();
+            getAllUser();
+        }
+
 
     }
 
@@ -180,13 +184,13 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
         listData = new ArrayList<>();
         if (searchWithName(s + "") != null) {
             listData.addAll(searchWithName(s + ""));
-            listFriendAdapter = new ListFriendAdapter(getActivity(), listData);
+            listFriendAdapter = new ListFriendAdapter(getActivity(), listData,1);
         } else if (searchWithSdt(s + "") != null) {
             listData.addAll(searchWithSdt(s + ""));
-            listFriendAdapter = new ListFriendAdapter(getActivity(), listData);
+            listFriendAdapter = new ListFriendAdapter(getActivity(), listData,1);
         } else if (searchWithEmail(s + "") != null) {
             listData.addAll(searchWithEmail(s + ""));
-            listFriendAdapter = new ListFriendAdapter(getActivity(), listData);
+            listFriendAdapter = new ListFriendAdapter(getActivity(), listData,1);
         }
 
         lv_listSearch.setAdapter(listFriendAdapter);

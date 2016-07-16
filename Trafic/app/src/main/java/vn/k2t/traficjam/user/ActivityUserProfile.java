@@ -66,7 +66,7 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
     private UserTraffic mUser;
     SQLUser sqlUser;
     private Dialog dialog;
-    private String _uid, user_uid;
+    private String friend_uid, user_uid;
     private DatabaseReference mDatabase;
     private UserTraffic userTraffic = null;
     private Bitmap bitmap;
@@ -88,13 +88,13 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
         profile_btn_wait.setOnClickListener(this);
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
-            _uid = bundle.getString(FrgFriends.KEY_FRIEND_UID);
+            friend_uid = bundle.getString(FrgFriends.KEY_FRIEND_UID);
             user_uid = bundle.getString(FrgFriends.KEY_USER_UID);
             profile_btn_update.setEnabled(false);
             profile_btn_add.setEnabled(true);
             profile_btn_wait.setEnabled(false);
         } else {
-            _uid = sqlUser.getUser().getUid();
+            user_uid = sqlUser.getUser().getUid();
             profile_btn_update.setEnabled(true);
             profile_btn_add.setEnabled(false);
             profile_btn_wait.setEnabled(false);
@@ -102,8 +102,8 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
         avatar = (CircleImageView) findViewById(R.id.profile_image);
         tvUserName = (TextView) findViewById(R.id.tvUserName);
         tvEmail = (TextView) findViewById(R.id.tvEmail);
-        if (_uid != null) {
-            mDatabase.child(AppConstants.USER).child(_uid).addValueEventListener(new ValueEventListener() {
+        if (friend_uid != null) {
+            mDatabase.child(AppConstants.USER).child(friend_uid).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     tvUserName.setText(dataSnapshot.child("name").getValue().toString());
@@ -198,13 +198,13 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
     }
 
     private void cancelRequest() {
-        mDatabase.child(AppConstants.USER).child(user_uid).child("friends").child(_uid).removeValue(new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                Toast.makeText(ActivityUserProfile.this, "canceler request", Toast.LENGTH_SHORT).show();
-            }
-        });
-        mDatabase.child(AppConstants.USER).child(_uid).child("friends").child(user_uid).removeValue(new DatabaseReference.CompletionListener() {
+//        mDatabase.child(AppConstants.USER).child(friend_uid).child("friend_request").child(friend_uid).removeValue(new DatabaseReference.CompletionListener() {
+//            @Override
+//            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+//                Toast.makeText(ActivityUserProfile.this, "canceler request", Toast.LENGTH_SHORT).show();
+//            }
+//        });
+        mDatabase.child(AppConstants.USER).child(friend_uid).child("friends").child("friend_request").child(user_uid).removeValue(new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                 Toast.makeText(ActivityUserProfile.this, "canceler request", Toast.LENGTH_SHORT).show();
@@ -215,10 +215,10 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
     }
 
     private void addFriend() {
-        Friends f1 = new Friends(_uid, 0, "send");
-        mDatabase.child(AppConstants.USER).child(user_uid).child("friends").child(_uid).setValue(f1);
+//        Friends f1 = new Friends(friend_uid, 0, "send");
+//        mDatabase.child(AppConstants.USER).child(user_uid).child("friend_request").child(_uid).setValue(f1);
         Friends f2 = new Friends(user_uid, 0, "get");
-        mDatabase.child(AppConstants.USER).child(_uid).child("friends").child(user_uid).setValue(f2);
+        mDatabase.child(AppConstants.USER).child(friend_uid).child("friends").child("friend_request").child(user_uid).setValue(f2);
         Toast.makeText(this, "sender request", Toast.LENGTH_SHORT).show();
         profile_btn_add.setEnabled(false);
         profile_btn_wait.setEnabled(true);
@@ -242,16 +242,20 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
             }
         });
         try {
-            mDatabase.child("user").child(_uid).addValueEventListener(new ValueEventListener() {
+            mDatabase.child("user").child(user_uid).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    dialog_edt_name.setText(dataSnapshot.child("name").getValue().toString());
-                    dialog_edt_phone.setText(dataSnapshot.child("phone").getValue().toString());
-                    String imagestr = dataSnapshot.child("avatar").getValue().toString();
-                    if (imagestr.contains("http") || imagestr.equals("") || imagestr.equals(" ")) {
-                        CommonMethod.getInstance().loadImage(imagestr, dialog_image_update);
-                    } else {
-                        dialog_image_update.setImageBitmap(StringToBitMap(imagestr));
+                    if (dataSnapshot != null) {
+                        dialog_edt_name.setText(dataSnapshot.child("name").getValue().toString());
+//                        if (dataSnapshot.child("phone") != null) {
+//                            dialog_edt_phone.setText(dataSnapshot.child("phone").getValue().toString());
+//                        }
+                        String imagestr = dataSnapshot.child("avatar").getValue().toString();
+                        if (imagestr.contains("http") || imagestr.equals("") || imagestr.equals(" ")) {
+                            CommonMethod.getInstance().loadImage(imagestr, dialog_image_update);
+                        } else {
+                            dialog_image_update.setImageBitmap(StringToBitMap(imagestr));
+                        }
                     }
                 }
 
@@ -270,10 +274,10 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
                 @Override
                 public void onClick(View v) {
                     if (bitmap != null) {
-                        mDatabase.child(AppConstants.USER).child(_uid).child("avatar").setValue(base64Image);
+                        mDatabase.child(AppConstants.USER).child(user_uid).child("avatar").setValue(base64Image);
                     }
-                    mDatabase.child(AppConstants.USER).child(_uid).child("name").setValue(dialog_edt_name.getText().toString());
-                    mDatabase.child(AppConstants.USER).child(_uid).child("phone").setValue(dialog_edt_phone.getText().toString());
+                    mDatabase.child(AppConstants.USER).child(user_uid).child("name").setValue(dialog_edt_name.getText().toString());
+                    mDatabase.child(AppConstants.USER).child(user_uid).child("phone").setValue(dialog_edt_phone.getText().toString());
                     Toast.makeText(ActivityUserProfile.this, "update success", Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
                 }
