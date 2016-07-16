@@ -32,6 +32,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -185,6 +186,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        getUserFromDB();
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
 //        if (mUtilities.isConnected()){
@@ -323,6 +330,7 @@ public class MainActivity extends AppCompatActivity
 
                 if (mUser != null) {
                     startActivityForResult(new Intent(this, ActivityUserProfile.class), 300);
+                    drawer.closeDrawer(GravityCompat.END);
                     overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_in_left);
                 } else {
                     Intent intent = new Intent(MainActivity.this, LoginUserActivity.class);
@@ -338,7 +346,10 @@ public class MainActivity extends AppCompatActivity
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 200)
             getUserFromDB();
-        if (requestCode == 300) {
+        else if (requestCode == 300) {
+            getUserFromDB();
+        }
+        else if(requestCode==200 && resultCode==RESULT_OK){
             getUserFromDB();
         }
         switch (requestCode) {
@@ -395,7 +406,11 @@ public class MainActivity extends AppCompatActivity
 
                 if (imagestr.contains("http")) {
                     CommonMethod.getInstance().loadImage(imagestr, imgUserProfile);
-                } else{
+                }
+                else if(imagestr.isEmpty()){
+                    imgUserProfile.setImageResource(R.drawable.ic_user_profile);
+                }
+                else{
                     imgUserProfile.setImageBitmap(StringToBitMap(imagestr));
                 }
 

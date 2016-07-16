@@ -3,6 +3,7 @@ package vn.k2t.traficjam.user;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -10,6 +11,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -40,8 +42,11 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.Arrays;
 
@@ -51,6 +56,7 @@ import vn.k2t.traficjam.R;
 import vn.k2t.traficjam.database.queries.SQLUser;
 import vn.k2t.traficjam.model.UserTraffic;
 import vn.k2t.traficjam.untilitis.AppConstants;
+import vn.k2t.traficjam.untilitis.CommonMethod;
 
 public class LoginUserActivity extends AppCompatActivity implements View.OnClickListener, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
@@ -75,6 +81,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
     String emailGG;
     String avatar = "";
     UserTraffic mUser;
+    String username;
 
 
     //firebase
@@ -107,7 +114,6 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
         txtv_register.setOnClickListener(this);
         progressDialog = new ProgressDialog(this);
         progressDialog.setCancelable(false);
-        progressDialog.setMessage("Đang gửi...");
         progressDialog.setMessage(getString(R.string.is_send));
 
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
@@ -127,24 +133,47 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                         protected void onPostExecute(Void aVoid) {
                             super.onPostExecute(aVoid);
                             sqlUser = new SQLUser(getApplicationContext());
-                            sqlUser.insertUser(mUser);
+                            UserTraffic user = sqlUser.getUser();
+                            if (user == null) {
+                                sqlUser.insertUser(mUser);
+                            }
                             Intent intent = new Intent();
                             setResult(200, intent);
                             progressDialog.dismiss();
-                            Toast.makeText(LoginUserActivity.this, mUser.getEmail() + "====" + mUser.getName(), Toast.LENGTH_SHORT).show();
                             finish();
                         }
 
                         @Override
                         protected Void doInBackground(Void... params) {
-                            String uid = firebaseUser.getUid();
-                            String email = firebaseUser.getEmail();
-                            String name = firebaseUser.getDisplayName();
-                            //String avatar = String.valueOf(firebaseUser.getPhotoUrl());
-                            String uidProvider = firebaseUser.getProviderId();
+                            final String uid = firebaseUser.getUid();
+                            final String email = firebaseUser.getEmail();
 
-                            mUser = new UserTraffic(uid, name, avatar, email, uidProvider, "", "", "", 1, "");
-                            mDatabase.child(AppConstants.USER).child(uid).setValue(mUser);
+                            //String avatar = String.valueOf(firebaseUser.getPhotoUrl());
+                            final String uidProvider = firebaseUser.getProviderId();
+
+
+                            if (firebaseUser.getDisplayName() != null) {
+                                mUser = new UserTraffic(uid, firebaseUser.getDisplayName(), avatar, email, uidProvider, "", "", "", 1, "");
+                                mDatabase.child(AppConstants.USER).child(uid).setValue(mUser);
+                            } else {
+
+                                //final String name;
+                                mDatabase.child(AppConstants.USER).child(uid).child("name").addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        String name = dataSnapshot.getValue().toString();
+                                        mUser = new UserTraffic(uid, name, avatar, email, uidProvider, "", "", "", 1, "");
+                                        sqlUser.insertUser(mUser);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+                                    }
+                                });
+
+                            }
+
+
 
                             return null;
                         }
@@ -195,6 +224,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                 .build();
 
     }
+
 
     @Override
     public void onClick(View v) {
@@ -305,12 +335,16 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                 firebaseAuthWithGoogle(account);
             }
 
+        } else if (requestCode == 111 && resultCode == RESULT_OK) {
+            Intent intent = new Intent();
+            setResult(RESULT_OK, intent);
+            //finish();
         }
 
-        if (requestCode == 111) {
-            edt_email.setText(data.getStringExtra("email"));
-            edt_pass.setText(data.getStringExtra("pass"));
-        }
+//        if (requestCode == 111) {
+//            edt_email.setText(data.getStringExtra("email"));
+//            edt_pass.setText(data.getStringExtra("pass"));
+//        }
     }
 
 

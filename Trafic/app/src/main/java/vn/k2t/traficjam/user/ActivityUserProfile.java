@@ -3,6 +3,7 @@ package vn.k2t.traficjam.user;
 import android.Manifest;
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -95,7 +96,7 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
             profile_btn_add.setEnabled(true);
             profile_btn_wait.setEnabled(false);
         } else {
-            _uid = mUser.getUid();
+            _uid = sqlUser.getUser().getUid();
             profile_btn_update.setEnabled(true);
             profile_btn_add.setEnabled(false);
             profile_btn_wait.setEnabled(false);
@@ -103,37 +104,31 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
         avatar = (CircleImageView) findViewById(R.id.profile_image);
         tvUserName = (TextView) findViewById(R.id.tvUserName);
         tvEmail = (TextView) findViewById(R.id.tvEmail);
+        if (_uid != null) {
+            mDatabase.child(AppConstants.USER).child(_uid).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    tvUserName.setText(dataSnapshot.child("name").getValue().toString());
+                    tvEmail.setText(dataSnapshot.child("email").getValue().toString());
+                    String imagestr = dataSnapshot.child("avatar").getValue().toString();
+                    if (imagestr.contains("http")) {
+                        CommonMethod.getInstance().loadImage(imagestr, avatar);
+                    }
+                    else if(imagestr.isEmpty()){
+                        avatar.setImageResource(R.drawable.ic_user_profile);
+                    }
+                    else {
+                        avatar.setImageBitmap(StringToBitMap(imagestr));
+                    }
 
-        tvUserName.setText(mUser.getName());
-        tvEmail.setText(mUser.getEmail());
-        String imagestr = mUser.getAvatar();
+                }
 
-        if (imagestr.contains("http")) {
-            CommonMethod.getInstance().loadImage(imagestr, avatar);
-        } else{
-            avatar.setImageBitmap(StringToBitMap(imagestr));
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
         }
-//        if (_uid != null) {
-//            mDatabase.child(AppConstants.USER).child(_uid).addValueEventListener(new ValueEventListener() {
-//                @Override
-//                public void onDataChange(DataSnapshot dataSnapshot) {
-//                    tvUserName.setText(dataSnapshot.child("name").getValue().toString());
-//                    tvEmail.setText(dataSnapshot.child("email").getValue().toString());
-//                    String imagestr = dataSnapshot.child("avatar").getValue().toString();
-//                    if (imagestr.contains("http") || imagestr.equals("") || imagestr.equals(" ")) {
-//                        CommonMethod.getInstance().loadImage(imagestr, avatar);
-//                    } else {
-//                        avatar.setImageBitmap(StringToBitMap(imagestr));
-//                    }
-//
-//                }
-//
-//                @Override
-//                public void onCancelled(DatabaseError databaseError) {
-//
-//                }
-//            });
-//        }
 
         final Drawable upArrow = getResources().getDrawable(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
         upArrow.setColorFilter(getResources().getColor(R.color.WhiteColor), PorterDuff.Mode.SRC_ATOP);
@@ -185,6 +180,13 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
             case R.id.item_logout:
                 FirebaseAuth.getInstance().signOut();
                 sqlUser.deleteUser();
+
+                SharedPreferences preferences=getApplicationContext().getSharedPreferences("my_data",MODE_PRIVATE);
+                SharedPreferences.Editor editor=preferences.edit();
+                editor.putString("username","");
+                editor.commit();
+                Log.e("Profile User: ","");
+
                 Intent intent = new Intent();
                 setResult(300, intent);
                 finish();
@@ -253,33 +255,28 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
             }
         });
         try {
-        dialog_edt_name.setText(mUser.getName());
-        dialog_edt_phone.setText(mUser.getPhone());
-        String imagestr = mUser.getAvatar();
-        if (imagestr.contains("http")) {
-            CommonMethod.getInstance().loadImage(imagestr, dialog_image_update);
-        } else {
-            dialog_image_update.setImageBitmap(StringToBitMap(imagestr));
-        }
-//        try {
-//            mDatabase.child("user").child(_uid).addValueEventListener(new ValueEventListener() {
-//                @Override
-//                public void onDataChange(DataSnapshot dataSnapshot) {
-//                    dialog_edt_name.setText(dataSnapshot.child("name").getValue().toString());
-//                    dialog_edt_phone.setText(dataSnapshot.child("phone").getValue().toString());
-//                    String imagestr = dataSnapshot.child("avatar").getValue().toString();
-//                    if (imagestr.contains("http") || imagestr.equals("") || imagestr.equals(" ")) {
-//                        CommonMethod.getInstance().loadImage(imagestr, dialog_image_update);
-//                    } else {
-//                        dialog_image_update.setImageBitmap(StringToBitMap(imagestr));
-//                    }
-//                }
-//
-//                @Override
-//                public void onCancelled(DatabaseError databaseError) {
-//
-//                }
-//            });
+            mDatabase.child("user").child(_uid).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    dialog_edt_name.setText(dataSnapshot.child("name").getValue().toString());
+                    dialog_edt_phone.setText(dataSnapshot.child("phone").getValue().toString());
+                    String imagestr = dataSnapshot.child("avatar").getValue().toString();
+                    if (imagestr.contains("http")) {
+                        CommonMethod.getInstance().loadImage(imagestr, dialog_image_update);
+                    }
+                    else if(imagestr.isEmpty()){
+                        avatar.setImageResource(R.drawable.ic_user_profile);
+                    }
+                    else {
+                        dialog_image_update.setImageBitmap(StringToBitMap(imagestr));
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
             dialog_btn_cancel.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -295,17 +292,21 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
                     mDatabase.child(AppConstants.USER).child(_uid).child("name").setValue(dialog_edt_name.getText().toString());
                     mDatabase.child(AppConstants.USER).child(_uid).child("phone").setValue(dialog_edt_phone.getText().toString());
 
+                    mUser.setName(dialog_edt_name.getText().toString());
+                    mUser.setPhone(dialog_edt_phone.getText().toString());
+                    mUser.setAvatar(base64Image);
+                    sqlUser.updateInfoUser(mUser,mUser.getUid());
 
                     Toast.makeText(ActivityUserProfile.this, "update success", Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
                 }
             });
         } catch (Exception e) {
-//            FirebaseAuth.getInstance().signOut();
-//            sqlUser.deleteUser();
-//            Intent intent = new Intent();
-//            setResult(300, intent);
-//            finish();
+            FirebaseAuth.getInstance().signOut();
+            sqlUser.deleteUser();
+            Intent intent = new Intent();
+            setResult(300, intent);
+            finish();
         }
 
 
