@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity
         try {
             getUserFromDB();
             getAllFriends();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         /**
@@ -423,27 +423,30 @@ public class MainActivity extends AppCompatActivity
                     showSettingsAlert(data, type);
                     break;
                 case AppConstants.TYPE_SEE_TRAFFIC_JAM:
-//                MapFragMent map = (MapFragMent) getSupportFragmentManager().findFragmentById(R.id.maps);
-//                Location location = new Location("");
-//                location.setLatitude(Double.parseDouble(data.getmItemData().get(AppConstants.KEY_LATITUDE)));
-//                location.setLongitude(Double.parseDouble(data.getmItemData().get(AppConstants.KEY_LONGTITUDE)));
-//                MapFragMent.getInstance().initCamera(location, AppConstants.TYPE_TRAFFIC_JAM);
-//                MapFragMent.getInstance().setType(AppConstants.TYPE_TRAFFIC_JAM);
+                    Location location = new Location("");
+                    location.setLatitude(Double.parseDouble(data.getmItemData().get(AppConstants.KEY_LATITUDE)));
+                    location.setLongitude(Double.parseDouble(data.getmItemData().get(AppConstants.KEY_LONGTITUDE)));
+                    //initCamera(location);
+                    MapFragMent.mMap.clear();
+                    showAllLocationTrafficJamInRadius3000Km(items, AppConstants.TYPE_TRAFFIC_JAM);
+                    TYPE = AppConstants.TYPE_TRAFFIC_JAM;
                     break;
                 case AppConstants.TYPE_SEE_ACCIDENT:
-//                MapFragMent maps = (MapFragMent) getSupportFragmentManager().findFragmentById(R.id.maps);
-//                Location locations = new Location("");
-//                locations.setLatitude(Double.parseDouble(data.getmItemData().get(AppConstants.KEY_LATITUDE)));
-//                locations.setLongitude(Double.parseDouble(data.getmItemData().get(AppConstants.KEY_LONGTITUDE)));
-//                maps.initCamera(locations, AppConstants.TYPE_ACCIDENT);
-//                maps.setType(AppConstants.TYPE_ACCIDENT);
+                    Location locations = new Location("");
+                    locations.setLatitude(Double.parseDouble(data.getmItemData().get(AppConstants.KEY_LATITUDE)));
+                    locations.setLongitude(Double.parseDouble(data.getmItemData().get(AppConstants.KEY_LONGTITUDE)));
+                    // initCamera(locations);
+                    MapFragMent.mMap.clear();
+                    showAllLocationTrafficJamInRadius3000Km(items, AppConstants.TYPE_ACCIDENT);
+                    TYPE = AppConstants.TYPE_ACCIDENT;
                     break;
             }
         } else if (obj instanceof Location) {
             mCurrentLocation = (Location) obj;
             switch (type) {
                 case AppConstants.TYPE_CONNETCED:
-                    initCamera(mCurrentLocation, AppConstants.TYPE_ALL);
+                    initCamera(mCurrentLocation);
+                    requestFirebase(AppConstants.TYPE_ALL);
                     break;
             }
         }
@@ -495,7 +498,7 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    public void initCamera(Location location, String type) {
+    public void initCamera(Location location) {
         if (!checkGPS()) {
             showSettingsAlert();
         } else {
@@ -551,8 +554,7 @@ public class MainActivity extends AppCompatActivity
                 CameraUpdate center = CameraUpdateFactory.newLatLng(latLng);
                 MapFragMent.mMap.moveCamera(center);
                 //drawCircle(location);
-                saveLocationUserFromFireBase(mCurrentLocation);
-                getAllLocationTrafficJam(type);
+
                 MapFragMent.mMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), null);
 
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, this);
@@ -560,6 +562,11 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(this, R.string.can_not_get_location_of_you, Toast.LENGTH_LONG).show();
             }
         }
+    }
+
+    private void requestFirebase(String type) {
+        saveLocationUserFromFireBase(mCurrentLocation);
+        getAllLocationTrafficJam(type);
     }
 
     private void drawCircle(Location location) {
@@ -572,6 +579,7 @@ public class MainActivity extends AppCompatActivity
 
 
     private void getAllLocationTrafficJam(final String type) {
+        items.clear();
         mDatabase.child(AppConstants.POSTS).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -591,7 +599,6 @@ public class MainActivity extends AppCompatActivity
 
 
     public void showAllLocationTrafficJamInRadius3000Km(ArrayList<Posts> posts, String type) {
-        MapFragMent.mMap.clear();
         try {
             for (Posts post : posts) {
                 double latitude = Double.parseDouble(post.getLatitude());
@@ -605,11 +612,18 @@ public class MainActivity extends AppCompatActivity
                             addMarker(latitude, longtitude, BitmapDescriptorFactory.HUE_GREEN);
 
                     }
-                } else if (post.getType().equals(AppConstants.TYPE_TRAFFIC_JAM)) {
-                    addMarker(latitude, longtitude, BitmapDescriptorFactory.HUE_RED);
-                } else if (type.equals(AppConstants.TYPE_ACCIDENT)) {
-                    addMarker(latitude, longtitude, BitmapDescriptorFactory.HUE_GREEN);
+                } else {
+                    float a = 0;
+                    if (post.getType().equals(type)) {
+                        if (type.equals(AppConstants.TYPE_ACCIDENT)) {
+                            a = BitmapDescriptorFactory.HUE_GREEN;
+                        } else if (type.equals(AppConstants.TYPE_TRAFFIC_JAM)) {
+                            a = BitmapDescriptorFactory.HUE_RED;
+                        }
+                        addMarker(latitude, longtitude, a);
+                    }
                 }
+
 
             }
         } catch (Exception ex) {
@@ -784,7 +798,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onLocationChanged(Location location) {
-
+        initCamera(location);
+        requestFirebase(TYPE);
     }
 
     @Override
