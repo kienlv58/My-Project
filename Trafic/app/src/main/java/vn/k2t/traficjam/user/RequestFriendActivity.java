@@ -1,5 +1,6 @@
 package vn.k2t.traficjam.user;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -51,7 +52,8 @@ public class RequestFriendActivity extends AppCompatActivity {
                 adapter = new ListFriendAdapter(getApplicationContext(),lisUser,2);
                 listRQ = (ListView)findViewById(R.id.listRQ);
                 listRQ.setAdapter(adapter);
-                Log.i("aaa",lisUser.size()+"");
+                Intent intent =  new Intent();
+                setResult(AppConstants.REQUEST_ADD_FRIENDS,intent);
             }
         }.execute();
 
@@ -62,7 +64,7 @@ public class RequestFriendActivity extends AppCompatActivity {
         lisUser = new ArrayList<>();
         lisUser.clear();
         for (int i = 0; i < lisRequest.size();i++){
-            mDatabase.child(AppConstants.USER).child(lisRequest.get(i).getFriend_uid()).addValueEventListener(new ValueEventListener() {
+            mDatabase.child(AppConstants.USER).child(lisRequest.get(i).getFriend_uid()).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     UserTraffic userTraffic = dataSnapshot.getValue(UserTraffic.class);
@@ -76,5 +78,12 @@ public class RequestFriendActivity extends AppCompatActivity {
             });
         }
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent =  new Intent();
+        setResult(AppConstants.REQUEST_ADD_FRIENDS,intent);
     }
 }

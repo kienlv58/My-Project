@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity
     private TabAdapter tabAdapter;
     private CircleImageView imgUserProfile;
     private TextView tvNavUserName, tvNavEmail;
-    public static ArrayList<Friends> listRequest;
+    public static ArrayList<Friends> listRequest = new ArrayList<>();
 
     //firebase
     FirebaseAuth mAuth;
@@ -156,7 +156,6 @@ public class MainActivity extends AppCompatActivity
     private static final int[] COLORS = new int[]{R.color.colorPrimary, R.color.colorPrimary, R.color.colorPrimary, R.color.colorAccent, R.color.primary_dark_material_light};
 
 
-
     @Override
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,19 +168,16 @@ public class MainActivity extends AppCompatActivity
         progressDialog.setCancelable(false);
 
 
-
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
-        try {
+
             initObject();
             getUserFromDB();
             //getAllFriends();
             //loadRequestFriend(mUser.getUid());
 
 
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+
         /**
          * generate keyhas facebook
          */
@@ -200,7 +196,8 @@ public class MainActivity extends AppCompatActivity
 
         }
     }
-    private void initializeCountDrawer(String count){
+
+    private void initializeCountDrawer(String count) {
 
         //Gravity property aligns the text
         tv_friend.setGravity(Gravity.CENTER_VERTICAL);
@@ -260,7 +257,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initObject() {
-        tv_friend =(TextView) MenuItemCompat.getActionView(navigationView.getMenu().
+        tv_friend = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().
                 findItem(R.id.request_friend));
         //initializeCountDrawer("");
 
@@ -285,10 +282,12 @@ public class MainActivity extends AppCompatActivity
         tabLayout.setupWithViewPager(viewPager);
 
     }
-private void addFragMentMaps(){
-    FragmentTransaction transaction = manager.beginTransaction();
-    transaction.replace(android.R.id.content, FrgBase.newInstance(getApplicationContext())).commit();
-}
+
+    private void addFragMentMaps() {
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.replace(android.R.id.content, FrgBase.newInstance(getApplicationContext())).commit();
+    }
+
     @Override
     public void onBackPressed() {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -327,18 +326,16 @@ private void addFragMentMaps(){
         } else if (id == R.id.friend) {
 
         } else if (id == R.id.request_friend) {
-           Intent intent = new Intent(MainActivity.this, RequestFriendActivity.class);
-            startActivity(intent);
+            Intent intent = new Intent(MainActivity.this, RequestFriendActivity.class);
+            startActivityForResult(intent, AppConstants.REQUEST_ADD_FRIENDS);
             // overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
         } else if (id == R.id.message) {
 
 
         } else if (id == R.id.map) {
             addFragMentMaps();
-        }
-        else if(id == R.id.chiduong){
-        }
-        else if (id == R.id.acticle) {
+        } else if (id == R.id.chiduong) {
+        } else if (id == R.id.acticle) {
 
         }
 
@@ -376,6 +373,15 @@ private void addFragMentMaps(){
             getUserFromDB();
         if (requestCode == 300) {
             getUserFromDB();
+        }
+        if (requestCode == AppConstants.REQUEST_ADD_FRIENDS) {
+//            String count = String.valueOf(listRequest.size());
+//            if (listRequest.size() != 0) {
+//                initializeCountDrawer(count);
+//            }else {
+//                initializeCountDrawer("");
+//            }
+            loadRequestFriend(mUser.getUid());
         }
         switch (requestCode) {
             case AppConstants.REQUEST_TAKE_PHOTO:
@@ -419,41 +425,63 @@ private void addFragMentMaps(){
         }
     }
 
-    public void loadRequestFriend(final String uid){
-        listRequest = new ArrayList<>();
+    public void loadRequestFriend(final String uid) {
         listRequest.clear();
-        mDatabase.child(AppConstants.USER).child(uid).child("friends").child("friend_request").addChildEventListener(new ChildEventListener() {
+
+        new AsyncTask<Void, Void, Void>() {
+
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Friends f = dataSnapshot.getValue(Friends.class);
-                listRequest.add(f);
+            protected Void doInBackground(Void... params) {
+                mDatabase.child(AppConstants.USER).child(uid).child("friends").child("friend_request").addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        Friends f = dataSnapshot.getValue(Friends.class);
+                        listRequest.add(f);
+                        String count = String.valueOf(listRequest.size());
+                        if (listRequest.size() != 0) {
+                            initializeCountDrawer(count);
+                        } else {
+                            initializeCountDrawer("");
+                        }
+                    }
+
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                    }
+
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+
+                    }
+                });
+
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
                 String count = String.valueOf(listRequest.size());
-                if (listRequest.size() != 0){
+                if (listRequest.size() != 0) {
                     initializeCountDrawer(count);
+                } else {
+                    initializeCountDrawer("");
                 }
             }
+        }.execute();
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-        listRequest.size();
 
     }
 
@@ -463,82 +491,17 @@ private void addFragMentMaps(){
         try {
             if (mUser != null) {
                 user_uid = mUser.getUid();
+                loadRequestFriend(mUser.getUid());
+
                 tvNavUserName.setText(mUser.getName());
                 tvNavEmail.setText(mUser.getEmail());
                 String imagestr = mUser.getAvatar();
-                new AsyncTask<Void,Void,Void>(){
-
-                    @Override
-                    protected Void doInBackground(Void... params) {
-                        loadRequestFriend(user_uid);
-                        return null;
-
-                    }
-
-                    @Override
-                    protected void onPostExecute(Void aVoid) {
-                        super.onPostExecute(aVoid);
-
-                    }
-                }.execute();
-
-
-//
-//                mDatabase.child(AppConstants.USER).child(user_uid).addValueEventListener(new ValueEventListener() {
-//                    @Override
-//                    public void onDataChange(DataSnapshot dataSnapshot) {
-//                        tvNavUserName.setText(dataSnapshot.child("name").getValue().toString());
-//                        tvNavEmail.setText(dataSnapshot.child("email").getValue().toString());
-//                        String imagestr = dataSnapshot.child("avatar").getValue().toString();
-//
-//                        if (imagestr.contains("http") || imagestr.equals("") || imagestr.equals(" ")) {
-//                            CommonMethod.getInstance().loadImage(imagestr, imgUserProfile);
-//                        } else {
-//                            imgUserProfile.setImageBitmap(StringToBitMap(imagestr));
-//                        }
-//                        //cap nhat vao DB luon
-//
-//                    }
-//
-//                    @Override
-//                    public void onCancelled(DatabaseError databaseError) {}
-
-//                if (imagestr.contains("http") || imagestr.equals("") || imagestr.equals(" ")) {
-//                    CommonMethod.getInstance().loadImage(imagestr, imgUserProfile);
-//                } else {
-//                    imgUserProfile.setImageBitmap(StringToBitMap(imagestr));
-//                }
-
                 if (imagestr.contains("http")) {
                     CommonMethod.getInstance().loadImage(imagestr, imgUserProfile);
-                } else{
+                } else {
                     imgUserProfile.setImageBitmap(StringToBitMap(imagestr));
                 }
-
-//                mDatabase.child(AppConstants.USER).child(user_uid).addValueEventListener(new ValueEventListener() {
-//                    @Override
-//                    public void onDataChange(DataSnapshot dataSnapshot) {
-//                        tvNavUserName.setText(dataSnapshot.child("name").getValue().toString());
-//                        tvNavEmail.setText(dataSnapshot.child("email").getValue().toString());
-//                        String imagestr = dataSnapshot.child("avatar").getValue().toString();
-//
-//                        if (imagestr.contains("http") || imagestr.equals("") || imagestr.equals(" ")) {
-//                            CommonMethod.getInstance().loadImage(imagestr, imgUserProfile);
-//                        } else {
-//                            imgUserProfile.setImageBitmap(StringToBitMap(imagestr));
-//                        }
-//
-//                    }
-//
-//                    @Override
-//                    public void onCancelled(DatabaseError databaseError) {
-//
-//                    }
-//                });
- //           });
-            }
-
-             else {
+            } else {
                 imgUserProfile.setImageResource(R.drawable.bg_profile);
                 tvNavUserName.setText("Đăng nhập");
                 tvNavEmail.setText("");
@@ -546,7 +509,7 @@ private void addFragMentMaps(){
         } catch (Exception e) {
             e.printStackTrace();
         }
-        }
+    }
 
 
     @Override
@@ -953,7 +916,5 @@ private void addFragMentMaps(){
         }
         return min;
     }
-
-
 }
 
