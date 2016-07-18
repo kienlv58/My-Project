@@ -17,4 +17,5 @@ public class AppConstants {
     public static final String TYPE_SEE_TRAFFIC_JAM = "TYPE_SEE_TRAFFIC_JAM";
     public static final String TYPE_SEE_ACCIDENT = "TYPE_SEE_ACCIDENT";
     public static final String TYPE_CONNETCED = "TYPE_CONNETCED";
+    public static final int REQUEST_ADD_FRIENDS = 109;
 }

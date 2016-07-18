@@ -77,15 +77,15 @@ public class FragGoogleMap extends FrgBase {
         View rootView = null;
         utilities = new Utilities(mContext);
 
-        if (utilities.isConnected()) {
-            rootView = inflater.inflate(R.layout.layout_google_map, container, false);
-            ButterKnife.bind(this, rootView);
-            initFloatingActionMenu(rootView);
-
-        } else {
-            rootView = inflater.inflate(R.layout.layout_google_map, container, false);
-            return rootView;
-        }
+//        if (utilities.isConnected()) {
+//            rootView = inflater.inflate(R.layout.layout_google_map, container, false);
+//            ButterKnife.bind(this, rootView);
+//            initFloatingActionMenu(rootView);
+//
+//        } else {
+//            rootView = inflater.inflate(R.layout.layout_google_map, container, false);
+//            return rootView;
+//        }
 //        rootView = inflater.inflate(R.layout.frg_maps, container, false);
 //        ButterKnife.bind(this, rootView);
 //        setupFab();
@@ -99,13 +99,13 @@ public class FragGoogleMap extends FrgBase {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         FragmentManager fm = getChildFragmentManager();
-        if (utilities.isConnected()){
-            fragment = (SupportMapFragment) fm.findFragmentById(R.id.map_container);
-            if (fragment == null) {
-                fragment = SupportMapFragment.newInstance();
-                fm.beginTransaction().replace(R.id.map_container, fragment).commit();
-            }
-        }
+//        if (utilities.isConnected()){
+//            fragment = (SupportMapFragment) fm.findFragmentById(R.id.map_container);
+//            if (fragment == null) {
+//                fragment = SupportMapFragment.newInstance();
+//                fm.beginTransaction().replace(R.id.map_container, fragment).commit();
+//            }
+//        }
 
     }
 

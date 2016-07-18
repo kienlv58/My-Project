@@ -16,17 +16,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import vn.k2t.traficjam.FrgBase;
 import vn.k2t.traficjam.R;
 import vn.k2t.traficjam.maps.MapFragMent;
-import vn.k2t.traficjam.model.ItemData;
 import vn.k2t.traficjam.onclick.ItemClick;
-import vn.k2t.traficjam.untilitis.AppConstants;
 import vn.k2t.traficjam.untilitis.Utilities;
 
 /**
@@ -86,60 +82,60 @@ public class FrgMaps extends FrgBase {
         return rootView;
     }
 
-    private String type = new String();
+//
+//
+//    @OnClick({R.id.action_pokemon, R.id.action_accident, R.id.action_traffic})
+//    protected void onClickChoose(FloatingActionButton button) {
+//        show();
+//
+//
+//        if (button == actionAccident) {
+//            type = AppConstants.TYPE_ACCIDENT;
+//
+//        } else if (button == actionTraffic) {
+//            type = AppConstants.TYPE_TRAFFIC_JAM;
+//
+//        } else if (button == actionPokemon) {
+//            // click.selectedItem(data, AppConstants.TYPE_ACCIDENT);
+//        }
+//    }
 
-    @OnClick({R.id.action_pokemon, R.id.action_accident, R.id.action_traffic})
-    protected void onClickChoose(FloatingActionButton button) {
-        show();
-
-
-        if (button == actionAccident) {
-            type = AppConstants.TYPE_ACCIDENT;
-
-        } else if (button == actionTraffic) {
-            type = AppConstants.TYPE_TRAFFIC_JAM;
-
-        } else if (button == actionPokemon) {
-            // click.selectedItem(data, AppConstants.TYPE_ACCIDENT);
-        }
-    }
-
-    @OnClick({R.id.action_see, R.id.action_tick})
-    protected void onClickAction(FloatingActionButton button) {
-        ItemData data = new ItemData();
-        double latitude = MapFragMent.mMap.getMyLocation().getLatitude();
-        double longtitude = MapFragMent.mMap.getMyLocation().getLongitude();
-        HashMap<String, String> hashMap = new HashMap<>();
-        hashMap.put(AppConstants.KEY_LATITUDE, latitude + "");
-        hashMap.put(AppConstants.KEY_LONGTITUDE, longtitude + "");
-        data.setmItemData(hashMap);
-        if (button == actionTick) {
-            switch (type) {
-                case AppConstants.TYPE_TRAFFIC_JAM:
-                    click.selectedItem(data, AppConstants.TYPE_TRAFFIC_JAM);
-                    menu.collapse();
-                    break;
-                case AppConstants.TYPE_ACCIDENT:
-                    click.selectedItem(data, AppConstants.TYPE_ACCIDENT);
-                    menu.collapse();
-                    break;
-
-            }
-        } else if (button == actionSee) {
-            switch (type) {
-                case AppConstants.TYPE_TRAFFIC_JAM:
-                    click.selectedItem(data, AppConstants.TYPE_SEE_TRAFFIC_JAM);
-                    menu.collapse();
-                    break;
-                case AppConstants.TYPE_ACCIDENT:
-                    click.selectedItem(data, AppConstants.TYPE_SEE_ACCIDENT);
-                    menu.collapse();
-                    break;
-
-            }
-
-        }
-    }
+//    @OnClick({R.id.action_see, R.id.action_tick})
+//    protected void onClickAction(FloatingActionButton button) {
+//        ItemData data = new ItemData();
+//        double latitude = MapFragMent.mMap.getMyLocation().getLatitude();
+//        double longtitude = MapFragMent.mMap.getMyLocation().getLongitude();
+//        HashMap<String, String> hashMap = new HashMap<>();
+//        hashMap.put(AppConstants.KEY_LATITUDE, latitude + "");
+//        hashMap.put(AppConstants.KEY_LONGTITUDE, longtitude + "");
+//        data.setmItemData(hashMap);
+//        if (button == actionTick) {
+//            switch (type) {
+//                case AppConstants.TYPE_TRAFFIC_JAM:
+//                    click.selectedItem(data, AppConstants.TYPE_TRAFFIC_JAM);
+//                    menu.collapse();
+//                    break;
+//                case AppConstants.TYPE_ACCIDENT:
+//                    click.selectedItem(data, AppConstants.TYPE_ACCIDENT);
+//                    menu.collapse();
+//                    break;
+//
+//            }
+//        } else if (button == actionSee) {
+//            switch (type) {
+//                case AppConstants.TYPE_TRAFFIC_JAM:
+//                    click.selectedItem(data, AppConstants.TYPE_SEE_TRAFFIC_JAM);
+//                    menu.collapse();
+//                    break;
+//                case AppConstants.TYPE_ACCIDENT:
+//                    click.selectedItem(data, AppConstants.TYPE_SEE_ACCIDENT);
+//                    menu.collapse();
+//                    break;
+//
+//            }
+//
+//        }
+//    }
 
     private void show() {
         actionSee.setVisibility(View.VISIBLE);

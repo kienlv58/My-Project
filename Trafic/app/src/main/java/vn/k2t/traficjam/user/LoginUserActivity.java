@@ -147,21 +147,28 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                         protected Void doInBackground(Void... params) {
                             final String uid = firebaseUser.getUid();
                             final String email = firebaseUser.getEmail();
+                            String name = firebaseUser.getDisplayName();
 
                             //String avatar = String.valueOf(firebaseUser.getPhotoUrl());
                             final String uidProvider = firebaseUser.getProviderId();
 
 
                             if (firebaseUser.getDisplayName() != null) {
-                                mUser = new UserTraffic(uid, firebaseUser.getDisplayName(), avatar, email, uidProvider, "", "", "", 1, "");
+                                mUser = new UserTraffic(uid, name, avatar, email, uidProvider, "", "", "", 1, "");
+                                mDatabase.child(AppConstants.USER).child(uid).child("uid").setValue(uid);
+                                mDatabase.child(AppConstants.USER).child(uid).child("email").setValue(email);
+                                mDatabase.child(AppConstants.USER).child(uid).child("name").setValue(name);
+                                mDatabase.child(AppConstants.USER).child(uid).child("avatar").setValue(avatar);
+                                mDatabase.child(AppConstants.USER).child(uid).child("uidProvider").setValue(uidProvider);
+                                mDatabase.child(AppConstants.USER).child(uid).child("status").setValue(1);
                                 mDatabase.child(AppConstants.USER).child(uid).setValue(mUser);
                             } else {
 
                                 //final String name;
-                                mDatabase.child(AppConstants.USER).child(uid).child("name").addValueEventListener(new ValueEventListener() {
+                                mDatabase.child(AppConstants.USER).child(uid).addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
-                                        String name = dataSnapshot.getValue().toString();
+                                        String name = dataSnapshot.child("name").getValue().toString();
                                         mUser = new UserTraffic(uid, name, avatar, email, uidProvider, "", "", "", 1, "");
                                         sqlUser.insertUser(mUser);
                                     }
@@ -172,9 +179,6 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                                 });
 
                             }
-
-
-
                             return null;
                         }
                     }.execute();

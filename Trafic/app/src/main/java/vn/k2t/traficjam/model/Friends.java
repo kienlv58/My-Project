@@ -14,6 +14,9 @@ public class Friends {
         this.status = status;
     }
 
+    public Friends() {
+    }
+
     public String getFriend_uid() {
         return friend_uid;
     }
