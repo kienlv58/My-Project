@@ -79,10 +79,14 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
             rootView = inflater.inflate(R.layout.frg_friends, container, false);
             mDatabase = FirebaseDatabase.getInstance().getReference();
             sqlUser = new SQLUser(getActivity());
-            user_uid = sqlUser.getUser().getUid();
-            if (user_uid !=  null){
+            try {
+                user_uid = sqlUser.getUser().getUid();
+                if (user_uid != null) {
 
-                getAllUser();
+                    getAllUser();
+                }
+            }catch (Exception e){
+                e.printStackTrace();
             }
             ButterKnife.bind(this, rootView);
             initView();

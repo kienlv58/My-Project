@@ -3,6 +3,7 @@ package vn.k2t.traficjam.user;
 import android.Manifest;
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -66,7 +67,7 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
     private UserTraffic mUser;
     SQLUser sqlUser;
     private Dialog dialog;
-    private String friend_uid, user_uid;
+    private String friend_uid, user_uid, _uid;
     private DatabaseReference mDatabase;
     private UserTraffic userTraffic = null;
     private Bitmap bitmap;
@@ -102,16 +103,19 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
         avatar = (CircleImageView) findViewById(R.id.profile_image);
         tvUserName = (TextView) findViewById(R.id.tvUserName);
         tvEmail = (TextView) findViewById(R.id.tvEmail);
-        if (friend_uid != null) {
-            mDatabase.child(AppConstants.USER).child(friend_uid).addValueEventListener(new ValueEventListener() {
+        if (_uid != null) {
+            mDatabase.child(AppConstants.USER).child(_uid).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     tvUserName.setText(dataSnapshot.child("name").getValue().toString());
                     tvEmail.setText(dataSnapshot.child("email").getValue().toString());
                     String imagestr = dataSnapshot.child("avatar").getValue().toString();
-                    if (imagestr.contains("http") || imagestr.equals("") || imagestr.equals(" ")) {
+                    if (imagestr.contains("http")) {
                         CommonMethod.getInstance().loadImage(imagestr, avatar);
+                    } else if (imagestr.isEmpty()) {
+                        avatar.setImageResource(R.drawable.ic_user_profile);
                     } else {
+
                         avatar.setImageBitmap(StringToBitMap(imagestr));
                     }
 
@@ -174,6 +178,13 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
             case R.id.item_logout:
                 FirebaseAuth.getInstance().signOut();
                 sqlUser.deleteUser();
+
+                SharedPreferences preferences = getApplicationContext().getSharedPreferences("my_data", MODE_PRIVATE);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString("username", "");
+                editor.commit();
+                Log.e("Profile User: ", "");
+
                 Intent intent = new Intent();
                 setResult(300, intent);
                 finish();
@@ -228,11 +239,12 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
     public void initDialog() {
         dialog = new Dialog(this, android.R.style.Theme_Holo_Dialog_NoActionBar_MinWidth);
         LayoutInflater inflater = LayoutInflater.from(this);
-        View view = inflater.inflate(R.layout.dialog_update_profile, null);
+        final View view = inflater.inflate(R.layout.dialog_update_profile, null);
         final EditText dialog_edt_name = (EditText) view.findViewById(R.id.dialog_edt_name);
         final EditText dialog_edt_phone = (EditText) view.findViewById(R.id.dialog_edt_phone);
         final Button dialog_btn_update = (Button) view.findViewById(R.id.dialog_btn_update);
-        Button dialog_btn_cancel = (Button) view.findViewById(R.id.dialog_btn_cancel);
+
+        final Button dialog_btn_cancel = (Button) view.findViewById(R.id.dialog_btn_cancel);
         dialog_image_update = (CircleImageView) view.findViewById(R.id.dialog_image_update);
         dialog_image_update.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -242,48 +254,82 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
             }
         });
         try {
-            mDatabase.child("user").child(user_uid).addValueEventListener(new ValueEventListener() {
+            mDatabase.child("user").child(_uid).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (dataSnapshot != null) {
-                        dialog_edt_name.setText(dataSnapshot.child("name").getValue().toString());
-//                        if (dataSnapshot.child("phone") != null) {
-//                            dialog_edt_phone.setText(dataSnapshot.child("phone").getValue().toString());
+                    dialog_edt_name.setText(dataSnapshot.child("name").getValue().toString());
+                    dialog_edt_phone.setText(dataSnapshot.child("phone").getValue().toString());
+                    String imagestr = dataSnapshot.child("avatar").getValue().toString();
+                    if (imagestr.contains("http")) {
+                        CommonMethod.getInstance().loadImage(imagestr, dialog_image_update);
+                    } else if (imagestr.isEmpty()) {
+                        avatar.setImageResource(R.drawable.ic_user_profile);
+                    } else {
+                        dialog_image_update.setImageBitmap(StringToBitMap(imagestr));
+//            mDatabase.child("user").child(user_uid).addValueEventListener(new ValueEventListener() {
+//                @Override
+//                public void onDataChange(DataSnapshot dataSnapshot) {
+//                    if (dataSnapshot != null) {
+//                        dialog_edt_name.setText(dataSnapshot.child("name").getValue().toString());
+////                        if (dataSnapshot.child("phone") != null) {
+////                            dialog_edt_phone.setText(dataSnapshot.child("phone").getValue().toString());
+////                        }
+//                        String imagestr = dataSnapshot.child("avatar").getValue().toString();
+//                        if (imagestr.contains("http") || imagestr.equals("") || imagestr.equals(" ")) {
+//                            CommonMethod.getInstance().loadImage(imagestr, dialog_image_update);
+//                        } else {
+//                            dialog_image_update.setImageBitmap(StringToBitMap(imagestr));
 //                        }
-                        String imagestr = dataSnapshot.child("avatar").getValue().toString();
-                        if (imagestr.contains("http") || imagestr.equals("") || imagestr.equals(" ")) {
-                            CommonMethod.getInstance().loadImage(imagestr, dialog_image_update);
-                        } else if(imagestr == null) {
+                        String imagestrs = dataSnapshot.child("avatar").getValue().toString();
+                        if (imagestrs.contains("http") || imagestrs.equals("") || imagestrs.equals(" ")) {
+                            CommonMethod.getInstance().loadImage(imagestrs, dialog_image_update);
+                        } else if(imagestrs == null) {
                             dialog_image_update.setImageResource(R.drawable.profile);
                         }
                             else {
-                                dialog_image_update.setImageBitmap(StringToBitMap(imagestr));
+                                dialog_image_update.setImageBitmap(StringToBitMap(imagestrs));
                             }
 
+//                    }
+//                }
+//
+//                @Override
+//                public void onCancelled(DatabaseError databaseError) {
+//
+//                }
+//            });
+                        dialog_btn_cancel.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                dialog.cancel();
+                            }
+                        });
+                        dialog_btn_update.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                if (bitmap != null) {
+                                    mDatabase.child(AppConstants.USER).child(user_uid).child("avatar").setValue(base64Image);
+                                }
+//                    mDatabase.child(AppConstants.USER).child(_uid).child("name").setValue(dialog_edt_name.getText().toString());
+//                    mDatabase.child(AppConstants.USER).child(_uid).child("phone").setValue(dialog_edt_phone.getText().toString());
+
+                                mUser.setName(dialog_edt_name.getText().toString());
+                                mUser.setPhone(dialog_edt_phone.getText().toString());
+                                mUser.setAvatar(base64Image);
+                                sqlUser.updateInfoUser(mUser, mUser.getUid());
+
+                                mDatabase.child(AppConstants.USER).child(user_uid).child("name").setValue(dialog_edt_name.getText().toString());
+                                mDatabase.child(AppConstants.USER).child(user_uid).child("phone").setValue(dialog_edt_phone.getText().toString());
+                                Toast.makeText(ActivityUserProfile.this, "update success", Toast.LENGTH_SHORT).show();
+                                dialog.dismiss();
+                            }
+                        });
                     }
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
 
-                }
-            });
-            dialog_btn_cancel.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    dialog.cancel();
-                }
-            });
-            dialog_btn_update.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (bitmap != null) {
-                        mDatabase.child(AppConstants.USER).child(user_uid).child("avatar").setValue(base64Image);
-                    }
-                    mDatabase.child(AppConstants.USER).child(user_uid).child("name").setValue(dialog_edt_name.getText().toString());
-                    mDatabase.child(AppConstants.USER).child(user_uid).child("phone").setValue(dialog_edt_phone.getText().toString());
-                    Toast.makeText(ActivityUserProfile.this, "update success", Toast.LENGTH_SHORT).show();
-                    dialog.dismiss();
                 }
             });
         } catch (Exception e) {
@@ -297,6 +343,7 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
 
         dialog.setCancelable(false);
         dialog.setContentView(view);
+
     }
 
     @Override

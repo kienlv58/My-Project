@@ -150,13 +150,14 @@ public class SQLUser {
         long result = databaseHelper.getWritableDatabase().delete(TABLE_USER_SHARE, "uid" + " =?", new String[]{String.valueOf(id)});
     }
 
-    public int updateInfoUser(UserTraffic mUser,int id) {
+    public int updateInfoUser(UserTraffic mUser,String id) {
         databaseHelper.openDataBase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(COLUMN_NAME, mUser.getName());
         contentValues.put(COLUMN_PHONE, mUser.getPhone());
+        contentValues.put(COLUMN_AVATAR,mUser.getAvatar());
         String[] whereAgr = new String[]{id + ""};
-        int rows = databaseHelper.getWritableDatabase().update(TABLE_USER_SHARE, contentValues, COLUMN_UID + "=?", whereAgr);
+        int rows = databaseHelper.getWritableDatabase().update(TABLE_USER, contentValues, COLUMN_UID + "=?", whereAgr);
         databaseHelper.close();
         return rows;
     }
