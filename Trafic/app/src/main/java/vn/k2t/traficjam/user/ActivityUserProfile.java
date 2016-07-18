@@ -231,7 +231,7 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
         View view = inflater.inflate(R.layout.dialog_update_profile, null);
         final EditText dialog_edt_name = (EditText) view.findViewById(R.id.dialog_edt_name);
         final EditText dialog_edt_phone = (EditText) view.findViewById(R.id.dialog_edt_phone);
-        Button dialog_btn_update = (Button) view.findViewById(R.id.dialog_btn_update);
+        final Button dialog_btn_update = (Button) view.findViewById(R.id.dialog_btn_update);
         Button dialog_btn_cancel = (Button) view.findViewById(R.id.dialog_btn_cancel);
         dialog_image_update = (CircleImageView) view.findViewById(R.id.dialog_image_update);
         dialog_image_update.setOnClickListener(new View.OnClickListener() {
@@ -253,9 +253,13 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
                         String imagestr = dataSnapshot.child("avatar").getValue().toString();
                         if (imagestr.contains("http") || imagestr.equals("") || imagestr.equals(" ")) {
                             CommonMethod.getInstance().loadImage(imagestr, dialog_image_update);
-                        } else {
-                            dialog_image_update.setImageBitmap(StringToBitMap(imagestr));
+                        } else if(imagestr == null) {
+                            dialog_image_update.setImageResource(R.drawable.profile);
                         }
+                            else {
+                                dialog_image_update.setImageBitmap(StringToBitMap(imagestr));
+                            }
+
                     }
                 }
 
