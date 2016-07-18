@@ -101,7 +101,7 @@ import vn.k2t.traficjam.user.RequestFriendActivity;
 
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener, ItemClick, LocationListener, RoutingListener {
+        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
     private static final String TAG = "MainActivity";
     @Bind(R.id.toolbar)
@@ -177,11 +177,8 @@ public class MainActivity extends AppCompatActivity
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
-            initObject();
-            getUserFromDB();
-            //getAllFriends();
-            //loadRequestFriend(mUser.getUid());
-
+        initObject();
+        getUserFromDB();
 
 
         /**
@@ -289,11 +286,6 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    private void addFragMentMaps() {
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.replace(android.R.id.content, FrgBase.newInstance(getApplicationContext())).commit();
-    }
-
     @Override
     public void onBackPressed() {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -339,7 +331,8 @@ public class MainActivity extends AppCompatActivity
 
 
         } else if (id == R.id.map) {
-            addFragMentMaps();
+            Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+            startActivity(intent);
         } else if (id == R.id.chiduong) {
         } else if (id == R.id.acticle) {
 
@@ -389,46 +382,8 @@ public class MainActivity extends AppCompatActivity
 //            }
             loadRequestFriend(mUser.getUid());
         }
-        switch (requestCode) {
-            case AppConstants.REQUEST_TAKE_PHOTO:
-                if (resultCode == RESULT_OK) {
-                    progressDialog.show();
-                    Cursor cursor = getContentResolver().query(capturedImageURI,
-                            new String[]{MediaStore.Images.Media.DATA}, null, null, null);
-                    int index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-                    cursor.moveToFirst();
-                    String capturedImageFilePath = cursor.getString(index);
-                    cursor.close();
 
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inSampleSize = 8;
-                    Bitmap bitmap = BitmapFactory.decodeFile(capturedImageFilePath, options);
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                    byte[] bytes = baos.toByteArray();
-                    String base64Image = Base64.encodeToString(bytes, Base64.DEFAULT);
 
-                    if (mUtilities.isConnected()) {
-                        progressDialog.show();
-                        newPosts.setImage(base64Image);
-                        mDatabase.child(AppConstants.POSTS).child(mUser.getUid()).setValue(newPosts);
-//                        mDatabases.child(AppConstants.POSTS).push().setValue(newPosts);
-                        switch (TYPE) {
-                            case AppConstants.TYPE_TRAFFIC_JAM:
-                                tickLocation(BitmapDescriptorFactory.HUE_RED);
-                                break;
-                            case AppConstants.TYPE_ACCIDENT:
-                                tickLocation(BitmapDescriptorFactory.HUE_GREEN);
-                                break;
-                        }
-                        progressDialog.dismiss();
-                    } else {
-                        progressDialog.dismiss();
-                        Toast.makeText(MainActivity.this, getResources().getString(R.string.erro_network), Toast.LENGTH_LONG).show();
-                    }
-                }
-                break;
-        }
     }
 
     public void loadRequestFriend(final String uid) {
@@ -518,231 +473,6 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    @Override
-    public void selectedItem(Object obj, String type) {
-        if (obj instanceof ItemData) {
-            ItemData data = (ItemData) obj;
-            switch (type) {
-                case AppConstants.TYPE_TRAFFIC_JAM:
-                    showSettingsAlert(data, type);
-                    break;
-                case AppConstants.TYPE_ACCIDENT:
-                    showSettingsAlert(data, type);
-                    break;
-                case AppConstants.TYPE_SEE_TRAFFIC_JAM:
-//                MapFragMent map = (MapFragMent) getSupportFragmentManager().findFragmentById(R.id.maps);
-//                Location location = new Location("");
-//                location.setLatitude(Double.parseDouble(data.getmItemData().get(AppConstants.KEY_LATITUDE)));
-//                location.setLongitude(Double.parseDouble(data.getmItemData().get(AppConstants.KEY_LONGTITUDE)));
-//                MapFragMent.getInstance().initCamera(location, AppConstants.TYPE_TRAFFIC_JAM);
-//                MapFragMent.getInstance().setType(AppConstants.TYPE_TRAFFIC_JAM);
-                    break;
-                case AppConstants.TYPE_SEE_ACCIDENT:
-//                MapFragMent maps = (MapFragMent) getSupportFragmentManager().findFragmentById(R.id.maps);
-//                Location locations = new Location("");
-//                locations.setLatitude(Double.parseDouble(data.getmItemData().get(AppConstants.KEY_LATITUDE)));
-//                locations.setLongitude(Double.parseDouble(data.getmItemData().get(AppConstants.KEY_LONGTITUDE)));
-//                maps.initCamera(locations, AppConstants.TYPE_ACCIDENT);
-//                maps.setType(AppConstants.TYPE_ACCIDENT);
-                    break;
-            }
-        } else if (obj instanceof Location) {
-            mCurrentLocation = (Location) obj;
-            switch (type) {
-                case AppConstants.TYPE_CONNETCED:
-                    initCamera(mCurrentLocation, AppConstants.TYPE_ALL);
-                    break;
-            }
-        }
-
-    }
-
-    private Location mCurrentLocation;
-    protected LocationManager locationManager;
-
-    private boolean checkGPS() {
-        locationManager = (LocationManager) this
-                .getSystemService(LOCATION_SERVICE);
-
-        // getting GPS status
-        boolean isGPSEnabled = locationManager
-                .isProviderEnabled(LocationManager.GPS_PROVIDER);
-        return isGPSEnabled;
-    }
-
-    public void showSettingsAlert() {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-
-        // Setting Dialog Title
-        alertDialog.setTitle("GPS is settings");
-
-        // Setting Dialog Message
-        alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?");
-
-        // Setting Icon to Dialog
-        //alertDialog.setIcon(R.drawable.delete);
-
-        // On pressing Settings button
-        alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
-            }
-        });
-
-        // on pressing cancel button
-        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        // Showing Alert Message
-        alertDialog.show();
-    }
-
-
-    public void initCamera(Location location, String type) {
-        if (!checkGPS()) {
-            showSettingsAlert();
-        } else {
-            if (location != null) {
-                CameraPosition position = CameraPosition.builder()
-                        .target(new LatLng(location.getLatitude(), location.getLongitude()))
-                        .zoom(13.5f)
-                        .bearing(0.0f)
-                        .tilt(0.0f)
-                        .build();
-
-                MapFragMent.mMap.setMapType(MAP_TYPES[1]);
-                MapFragMent.mMap.setTrafficEnabled(true);
-                MapFragMent.mMap.setMyLocationEnabled(true);
-
-
-                //getMap().getUiSettings().setZoomControlsEnabled(true);
-                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                // from = new LatLng(location.getLatitude(), location.getLongitude());
-                MarkerOptions options = new MarkerOptions().position(latLng);
-                options.title(mUtilities.getAddressFromLatLng(latLng));
-//                if (user != null) {
-//                    if (user.getAvatar() != "") {
-//                    } else {
-//                        options.icon(BitmapDescriptorFactory
-//                                .fromBitmap(BitmapFactory
-//                                        .decodeResource(getResources(), R.mipmap.ic_launcher)));
-//                    }
-//                } else {
-//                    options.icon(BitmapDescriptorFactory
-//                            .fromBitmap(BitmapFactory
-//                                    .decodeResource(getResources(), R.mipmap.ic_launcher)));
-//                }
-//                getMap().addMarker(options);
-                // LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                //MarkerOptions options = new MarkerOptions().position(latLng);
-                //options.title(getAddressFromLatLng(latLng));
-//                if (mUser != null) {
-//                    if (mUser.getAvatar() != "") {
-//                    } else {
-//                        options.icon(BitmapDescriptorFactory
-//                                .fromBitmap(BitmapFactory
-//                                        .decodeResource(getResources(), R.mipmap.ic_launcher)));
-//                    }
-//                } else {
-//                    options.icon(BitmapDescriptorFactory
-//                            .fromBitmap(BitmapFactory
-//                                    .decodeResource(getResources(), R.mipmap.ic_launcher)));
-//                }
-                //getMap().addMarker(options);
-                MapFragMent.mMap.clear();
-                //getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
-                CameraUpdate center = CameraUpdateFactory.newLatLng(latLng);
-                MapFragMent.mMap.moveCamera(center);
-                //drawCircle(location);
-                saveLocationUserFromFireBase(mCurrentLocation);
-                getAllLocationTrafficJam(type);
-                MapFragMent.mMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), null);
-
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, this);
-            } else {
-                Toast.makeText(this, R.string.can_not_get_location_of_you, Toast.LENGTH_LONG).show();
-            }
-        }
-    }
-
-    private void drawCircle(Location location) {
-        MapFragMent.mMap.addCircle(new CircleOptions()
-                .center(new LatLng(location.getLatitude(), location.getLongitude()))
-                .radius(2000).strokeWidth(2)
-                .strokeColor(Color.GRAY)
-                .fillColor(0x30ff0000));
-    }
-
-
-    private void getAllLocationTrafficJam(final String type) {
-        mDatabase.child(AppConstants.POSTS).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    Posts post = postSnapshot.getValue(Posts.class);
-                    items.add(post);
-                }
-                showAllLocationTrafficJamInRadius3000Km(items, type);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-
-    public void showAllLocationTrafficJamInRadius3000Km(ArrayList<Posts> posts, String type) {
-        MapFragMent.mMap.clear();
-        try {
-            for (Posts post : posts) {
-                double latitude = Double.parseDouble(post.getLatitude());
-                double longtitude = Double.parseDouble(post.getLongitude());
-                if (type.equals(AppConstants.TYPE_ALL)) {
-                    if (Utilities.DirectDistance(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), latitude, longtitude) < 2000d) {
-
-                        if (post.getType().equals(AppConstants.TYPE_TRAFFIC_JAM))
-                            addMarker(latitude, longtitude, BitmapDescriptorFactory.HUE_RED);
-                        else if (post.getType().equals(AppConstants.TYPE_ACCIDENT))
-                            addMarker(latitude, longtitude, BitmapDescriptorFactory.HUE_GREEN);
-
-                    }
-                } else if (post.getType().equals(AppConstants.TYPE_TRAFFIC_JAM)) {
-                    addMarker(latitude, longtitude, BitmapDescriptorFactory.HUE_RED);
-                } else if (type.equals(AppConstants.TYPE_ACCIDENT)) {
-                    addMarker(latitude, longtitude, BitmapDescriptorFactory.HUE_GREEN);
-                }
-
-            }
-        } catch (Exception ex) {
-
-        }
-    }
-
-    public void addMarker(double latitude, double longtitude, float a) {
-        MarkerOptions markerOptions = new MarkerOptions();
-        LatLng latLng = new LatLng(latitude, longtitude);
-        markerOptions.position(latLng);
-
-        markerOptions.title(mUtilities.getAddressFromLatLng(latLng));
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(a));
-        MapFragMent.mMap.addMarker(markerOptions);
-    }
-
-    private void saveLocationUserFromFireBase(final Location location) {
-        Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("latitude", location.getLatitude() + "");
-        childUpdates.put("longitude", location.getLongitude() + "");
-        if (mUser != null) {
-            mDatabase.child(AppConstants.USER).child(mUser.getUid()).updateChildren(childUpdates);
-        }
-    }
-
     public static Bitmap StringToBitMap(String image) {
         try {
             byte[] encodeByte = Base64.decode(image, Base64.DEFAULT);
@@ -754,173 +484,5 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void tickLocation(float a) {
-        MarkerOptions markerOptions = new MarkerOptions();
-        double latitude = MapFragMent.mMap.getMyLocation().getLatitude();
-        double longtitude = MapFragMent.mMap.getMyLocation().getLongitude();
-        LatLng latLng = new LatLng(latitude, longtitude);
-        markerOptions.position(latLng);
-        markerOptions.title(mUtilities.getAddressFromLatLng(latLng));
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(a));
-        MapFragMent.mMap.addMarker(markerOptions);
-    }
 
-    public void showSettingsAlert(final ItemData data, final String type) {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-
-        // Setting Dialog Title
-        //  alertDialog.setTitle("ban co muon chup anh khong");
-
-        // Setting Dialog Message
-        alertDialog.setMessage(R.string.you_want_camera);
-
-        // Setting Icon to Dialog
-        //alertDialog.setIcon(R.drawable.delete);
-
-        // On pressing Settings button
-        final double latitude = Double.parseDouble(data.getmItemData().get(AppConstants.KEY_LATITUDE).trim());
-        final double longtitude = Double.parseDouble(data.getmItemData().get(AppConstants.KEY_LONGTITUDE).trim());
-        final LatLng latLng = new LatLng(latitude, longtitude);
-        alertDialog.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                Intent intentTakePhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if (intentTakePhoto.resolveActivity(getPackageManager()) != null) {
-                    @SuppressLint("SimpleDateFormat")
-                    String date = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-                    String fileName = "TrafficJam_" + date;
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put(MediaStore.Images.Media.TITLE, fileName);
-                    capturedImageURI = getContentResolver().insert(
-                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
-                    newPosts.setLatitude(latitude + "");
-                    newPosts.setLongitude(longtitude + "");
-                    newPosts.setTitle(mUtilities.getAddressFromLatLng(latLng));
-                    newPosts.setType(type);
-                    newPosts.setUser_id(mUser.getUid());
-                    newPosts.setName(mUser.getName());
-                    newPosts.setCreated_at(Utilities.currentDate());
-                    intentTakePhoto.putExtra(MediaStore.EXTRA_OUTPUT, capturedImageURI);
-                    startActivityForResult(intentTakePhoto, AppConstants.REQUEST_TAKE_PHOTO);
-                } else {
-                    Toast.makeText(MainActivity.this, R.string.device_does_not_support_camera, Toast.LENGTH_LONG).show();
-
-                }
-            }
-        });
-
-        // on pressing cancel button
-        alertDialog.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                if (mUtilities.isConnected()) {
-                    progressDialog.show();
-
-//                    Posts posts = new Posts(mUtilities.getAddressFromLatLng(latLng), mUser.getName(), type, AppConstants.GOOD_RANK, latitude + "", longtitude + "", "", Utilities.currentDate());
-//                    mDatabase.child(AppConstants.POSTS).child(mUser.getUid()).setValue(posts);
-//
-//                    Posts posts = new Posts(mUser.getUid(), mUtilities.getAddressFromLatLng(latLng), mUser.getName(), type, AppConstants.GOOD_RANK, latitude + "", longtitude + "", "", Utilities.currentDate());
-//                    mDatabase.child(AppConstants.POSTS).push().setValue(posts);
-
-                    switch (type) {
-                        case AppConstants.TYPE_TRAFFIC_JAM:
-                            tickLocation(BitmapDescriptorFactory.HUE_RED);
-                            break;
-                        case AppConstants.TYPE_ACCIDENT:
-                            tickLocation(BitmapDescriptorFactory.HUE_GREEN);
-                            break;
-                    }
-                    progressDialog.dismiss();
-                } else {
-                    progressDialog.dismiss();
-                    Toast.makeText(MainActivity.this, getResources().getString(R.string.erro_network), Toast.LENGTH_LONG).show();
-                }
-                dialog.dismiss();
-            }
-        });
-
-        // Showing Alert Message
-        alertDialog.show();
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-
-    }
-
-    @Override
-    public void onRoutingFailure(RouteException e) {
-
-    }
-
-    @Override
-    public void onRoutingStart() {
-
-    }
-
-    @Override
-    public void onRoutingSuccess(ArrayList<Route> route, int in) {
-        CameraUpdate center = CameraUpdateFactory.newLatLng(from);
-        CameraUpdate zoom = CameraUpdateFactory.zoomTo(16);
-
-        MapFragMent.mMap.moveCamera(center);
-        if (polylines.size() > 0) {
-            for (Polyline poly : polylines) {
-                poly.remove();
-            }
-        }
-
-        polylines = new ArrayList<>();
-        //add route(s) to the map.
-        for (int i = 0; i < route.size(); i++) {
-            if (route.get(i).getLength() == findMinDestination(route)) {
-                int colorIndex = i % COLORS.length;
-                PolylineOptions polyOptions = new PolylineOptions();
-                polyOptions.color(getResources().getColor(COLORS[colorIndex]));
-                polyOptions.width(10 + i * 3);
-                polyOptions.addAll(route.get(i).getPoints());
-                Polyline polyline = MapFragMent.mMap.addPolyline(polyOptions);
-                polylines.add(polyline);
-            }
-        }
-        // Start marker
-//        MarkerOptions options = new MarkerOptions();
-//        options.position(from);
-//        options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN));
-//        mMap.addMarker(options);
-//        // End marker
-//        options = new MarkerOptions();
-//        options.position(to);
-//        options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-//        mMap.addMarker(options);
-    }
-
-    @Override
-    public void onRoutingCancelled() {
-
-    }
-
-    private int findMinDestination(ArrayList<Route> route) {
-        int min = route.get(0).getLength();
-        for (int i = 0; i < route.size(); i++) {
-            if (min > route.get(i).getLength()) {
-                min = route.get(i).getLength();
-            }
-        }
-        return min;
-    }
 }
-
