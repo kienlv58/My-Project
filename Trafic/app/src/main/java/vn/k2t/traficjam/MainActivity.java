@@ -156,11 +156,6 @@ public class MainActivity extends AppCompatActivity
     private LatLng to;
     private List<Polyline> polylines;
     private static final int[] COLORS = new int[]{R.color.colorPrimary, R.color.colorPrimary, R.color.colorPrimary, R.color.colorAccent, R.color.primary_dark_material_light};
-@Override
-    protected void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
-        MultiDex.install(this);
-    }
 
     @Override
 
