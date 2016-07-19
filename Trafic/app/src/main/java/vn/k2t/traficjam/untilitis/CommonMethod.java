@@ -1,11 +1,13 @@
 package vn.k2t.traficjam.untilitis;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.view.View;
 import android.widget.ImageView;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
@@ -21,16 +23,19 @@ public class CommonMethod {
     private static CommonMethod commonMethod;
     private ImageLoader imageLoader;
     private DisplayImageOptions options;
+    private Context context;
 
-    public static CommonMethod getInstance() {
+    public static CommonMethod getInstance(Context mContext) {
         if (commonMethod == null) {
-            commonMethod = new CommonMethod();
+            commonMethod = new CommonMethod(mContext);
         }
         return commonMethod;
     }
 
-    public CommonMethod() {
+    public CommonMethod(Context context) {
+        this.context=context;
         imageLoader = ImageLoader.getInstance();
+        imageLoader.init(ImageLoaderConfiguration.createDefault(context));
         options = new DisplayImageOptions.Builder()
                 .imageScaleType(ImageScaleType.EXACTLY)
                 .showImageOnLoading(R.drawable.bg_user_profile)

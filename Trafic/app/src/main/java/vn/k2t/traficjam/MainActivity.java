@@ -68,6 +68,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import java.io.ByteArrayOutputStream;
 import java.security.MessageDigest;
@@ -452,7 +453,7 @@ public class MainActivity extends AppCompatActivity
     public void getUserFromDB() {
         sqlUser = new SQLUser(this);
         mUser = sqlUser.getUser();
-        try {
+        //try {
             if (mUser != null) {
                 user_uid = mUser.getUid();
                 loadRequestFriend(mUser.getUid());
@@ -461,7 +462,7 @@ public class MainActivity extends AppCompatActivity
                 tvNavEmail.setText(mUser.getEmail());
                 String imagestr = mUser.getAvatar();
                 if (imagestr.contains("http")) {
-                    CommonMethod.getInstance().loadImage(imagestr, imgUserProfile);
+                    CommonMethod.getInstance(this).loadImage(imagestr, imgUserProfile);
                 } else {
                     imgUserProfile.setImageBitmap(StringToBitMap(imagestr));
                 }
@@ -470,9 +471,9 @@ public class MainActivity extends AppCompatActivity
                 tvNavUserName.setText("Đăng nhập");
                 tvNavEmail.setText("");
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
 
