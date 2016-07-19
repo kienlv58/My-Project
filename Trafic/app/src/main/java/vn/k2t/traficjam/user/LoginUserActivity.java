@@ -158,10 +158,12 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
                                 mDatabase.child(AppConstants.USER).child(uid).child("uid").setValue(uid);
                                 mDatabase.child(AppConstants.USER).child(uid).child("email").setValue(email);
                                 mDatabase.child(AppConstants.USER).child(uid).child("name").setValue(name);
-                                mDatabase.child(AppConstants.USER).child(uid).child("avatar").setValue(avatar);
+                                if (mDatabase.child(AppConstants.USER).child(uid).child("avatar").getKey().isEmpty()){
+                                    mDatabase.child(AppConstants.USER).child(uid).child("avatar").setValue(avatar);
+                                }
                                 mDatabase.child(AppConstants.USER).child(uid).child("uidProvider").setValue(uidProvider);
                                 mDatabase.child(AppConstants.USER).child(uid).child("status").setValue(1);
-                                mDatabase.child(AppConstants.USER).child(uid).setValue(mUser);
+
                             } else {
 
                                 //final String name;
@@ -280,6 +282,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
 
     //fb + firebase
     public void handeFBaccesstoken(AccessToken accessToken) {
+        String tk  =  accessToken.getToken();
         AuthCredential credential = FacebookAuthProvider.getCredential(accessToken.getToken());
         mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
@@ -293,6 +296,7 @@ public class LoginUserActivity extends AppCompatActivity implements View.OnClick
 
             }
         });
+        progressDialog.dismiss();
 
     }
 
