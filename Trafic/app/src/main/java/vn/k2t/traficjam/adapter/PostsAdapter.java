@@ -1,0 +1,87 @@
+package vn.k2t.traficjam.adapter;
+
+import android.content.Context;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import java.util.ArrayList;
+
+import de.hdodenhof.circleimageview.CircleImageView;
+import vn.k2t.traficjam.R;
+import vn.k2t.traficjam.model.Posts;
+
+/**
+ * Created by root on 12/07/2016.
+ */
+public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> {
+    private Context mContext;
+    private ArrayList<Posts> items = new ArrayList<>();
+    private LayoutInflater layoutInflater;
+
+    public PostsAdapter(Context mContext, ArrayList<Posts> items) {
+        this.mContext = mContext;
+        this.items = items;
+        layoutInflater = LayoutInflater.from(mContext);
+    }
+
+    @Override
+    public PostsAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = layoutInflater.inflate(R.layout.item_posts, parent, false);
+        return new ViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(PostsAdapter.ViewHolder holder, int position) {
+        if (items.get(position).getImage() != "") {
+//            byte[] imageAsBytes = Base64.decode(items.get(position).getImage().getBytes(), Base64.DEFAULT);
+//            holder.ivAvatar.setImageBitmap(BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length));
+        } else {
+            holder.ivAvatar.setImageResource(R.mipmap.ic_launcher);
+        }
+        holder.tvName.setText(items.get(position).getName());
+        holder.tvBody.setText(items.get(position).getTitle());
+        holder.tvTime.setText(items.get(position).getCreated_at());
+
+    }
+
+    @Override
+    public int getItemCount() {
+        return items.size();
+    }
+
+    class ViewHolder extends RecyclerView.ViewHolder {
+        //@Bind(R.id.iv_avatar)
+        CircleImageView ivAvatar;
+        //@Bind(R.id.tv_name)
+        TextView tvName;
+       // @Bind(R.id.tv_body)
+        TextView tvBody;
+       // @Bind(R.id.tv_time)
+        TextView tvTime;
+        TextView tvlocation;
+        ImageView img_status;
+        ImageView img_like;
+        ImageView img_report;
+        ImageView img_share;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+           // ButterKnife.bind(this, itemView);
+            ivAvatar= (CircleImageView) itemView.findViewById(R.id.avatar);
+            tvName= (TextView) itemView.findViewById(R.id.txtv_name);
+            tvBody= (TextView) itemView.findViewById(R.id.txtv_status);
+            tvTime= (TextView) itemView.findViewById(R.id.txtv_time);
+            tvlocation = (TextView)itemView.findViewById(R.id.txtv_location);
+            img_status = (ImageView)itemView.findViewById(R.id.img_status);
+            img_like = (ImageView)itemView.findViewById(R.id.img_like);
+            img_report = (ImageView)itemView.findViewById(R.id.img_report);
+            img_share = (ImageView)itemView.findViewById(R.id.img_share);
+        }
+    }
+
+
+}

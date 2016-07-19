@@ -1,52 +1,53 @@
 {
   "project_info": {
-    "project_number": "958934924397",
-    "firebase_url": "https://trafficjam-825b7.firebaseio.com",
-    "project_id": "trafficjam-825b7",
-    "storage_bucket": "trafficjam-825b7.appspot.com"
+    "project_number": "252388054542",
+    "firebase_url": "https://trafficjam-edd7e.firebaseio.com",
+    "project_id": "trafficjam-edd7e",
+    "storage_bucket": "trafficjam-edd7e.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:958934924397:android:89138fcbad8d5bee",
-        "android_client_info": {
-          "package_name": "vn.devk2t.com"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "958934924397-650ldnqui83rbvmb2sqdgeggeitpv42c.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyCilrqrB3As7tSXuvCvCpa3iEusKNCrqVg"
-        }
-      ],
-      "services": {
-        "analytics_service": {
-          "status": 1
-        },
-        "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:958934924397:android:3448b853cb4f1def",
+        "mobilesdk_app_id": "1:252388054542:android:3448b853cb4f1def",
         "android_client_info": {
           "package_name": "vn.k2t.traficjam"
         }
       },
       "oauth_client": [
         {
-          "client_id": "958934924397-pmpeailgfe5jdjalrn5blfr1il8iplgn.apps.googleusercontent.com",
+          "client_id": "252388054542-vnltiqtj71fdjab5r35nqgur12ti17rj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "vn.k2t.traficjam",
+            "certificate_hash": "06A0AD44A97042D76D2D6B46A6CC2C1FA38A4764"
+          }
+        },
+        {
+          "client_id": "252388054542-096s44neogj89bposfvbgan8k3af9ie6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "vn.k2t.traficjam",
+            "certificate_hash": "3A6114CF67DB531AD2321EEF2A7424D39062F70D"
+          }
+        },
+        {
+          "client_id": "252388054542-fudhstjoafvplnh2d9rtc484t1brvtkd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "vn.k2t.traficjam",
+            "certificate_hash": "48A206607487D3C0AE637F48AF7BCB4713A00B06"
+          }
+        },
+        {
+          "client_id": "252388054542-5j3hboe1mhhe8iinn7i0e8rj99jskvlu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "vn.k2t.traficjam",
+            "certificate_hash": "39AC04111BBEAF2B2C074445FCF34983CDD0B99B"
+          }
+        },
+        {
+          "client_id": "252388054542-25f825d6h8qiebc85am03aeo7topbhj8.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "vn.k2t.traficjam",
@@ -54,13 +55,13 @@
           }
         },
         {
-          "client_id": "958934924397-650ldnqui83rbvmb2sqdgeggeitpv42c.apps.googleusercontent.com",
+          "client_id": "252388054542-0nnbtc4kjsmcqpb3mdockhepkvsrl1n3.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCilrqrB3As7tSXuvCvCpa3iEusKNCrqVg"
+          "current_key": "AIzaSyD7fdkydA4eq3e6KEj2dRkiiGF1HLDveBM"
         }
       ],
       "services": {
@@ -71,7 +72,7 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "958934924397-650ldnqui83rbvmb2sqdgeggeitpv42c.apps.googleusercontent.com",
+              "client_id": "252388054542-0nnbtc4kjsmcqpb3mdockhepkvsrl1n3.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

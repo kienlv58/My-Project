@@ -5,4 +5,57 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+    <string name="facebook_app_id">488728064646819</string>
+    <string name="web_app">252388054542-0nnbtc4kjsmcqpb3mdockhepkvsrl1n3.apps.googleusercontent.com</string>
+
+    <string name="NotConnect">Lỗi kết nối. Nhấn thử lại</string>
+    <string name="msg_connect_error">LỖI KẾT NỐI</string>
+    <string name="input_email">Nhập emai</string>
+    <string name="input_forgotpass">Nhập email để lấy lại mật khẩu</string>
+    <string name="input_repass">nhập lại mật khẩu</string>
+    <string name="input_pass">nhập mật khẩu</string>
+    <string name="btn_login">Đăng nhập</string>
+    <string name="btn_register">Đăng ký</string>
+    <string name="txtv_forgot_pass">Quên mật khẩu</string>
+    <string name="txtv_register">Đăng ký</string>
+    <string name="btn_login_fb">Facebook</string>
+    <string name="btn_login_google">Google+</string>
+    <string name="erro_network">Lỗi kết nối.Vui lòng kiểm tra mạng</string>
+    <string name="erro_connect_server">Kết nối máy chủ không thành công.Vui lòng thử lại</string>
+    <string name="erro_response">Dữ liệu không đúng</string>
+    <string name="erro_validate_account">Tài khoản hoặc mật khẩu không đúng</string>
+    <string name="ask_charge_card">Xu của bạn không đủ để đăng ký gói này.Bạn có muốn nạp thêm xu ?</string>
+    <string name="title_activity_maps">Map</string>
+
+    <string name="action_clear">Clear</string>
+    <string name="action_circle">Draw Circle</string>
+    <string name="action_overlay">Draw Overlay</string>
+    <string name="action_polygon">Draw Polygon</string>
+    <string name="action_traffic">Toggle Traffic</string>
+    <string name="action_cycle_map_type">Cycle Map Type</string>
+
+    <string name="dialog_play_services_unavailable">Google Play Services are unavailable.</string>
+    <string name="dialog_download_play_services">Download Play Services</string>
+    <string name="dialog_close_program">Close Program</string>
+    <!--tuan-->
+    <string name="can_not_get_location_of_you">Chúng tôi không thể lấy vị trí hiện tại của bạn. Vui lòng kiểm tra lại GPS</string>
+    <string name="Traffic_jam">Tắc đường</string>
+    <string name="Accident">Tai nạn</string>
+
+    <string name="is_send">Đang gửi...</string>
+    <string name="loging">Đang đăng nhập...</string>
+    <string name="Email_or_password_is_malformed">Email hoặc mật khẩu không đúng định dạng</string>
+    <string name="acoount">Tài khoản hoặc mật khẩu không đúng</string>
+    <string name="login_fail">login fail</string>
+    <string name="input_search">Tìm kiếm</string>
+    <string name="contact">Contact</string>
+    <string name="you_want_camera">Bạn có muốn chụp ảnh không</string>
+    <string name="yes">Có</string>
+    <string name="no">Không</string>
+    <string name="device_does_not_support_camera">Thiết bị không hỗ trợ camera</string>
+    <string name="see">Xem</string>
+    <string name="tick">Đánh dấu</string>
+    <string name="turn_on_wifi">Ứng dụng cần truy cập wifi hoặc 3G. Bạn có muốn thiết lập cài đặt mạng không?</string>
+    <string name="btn_cancel_register">Cancel</string>
+    <string name="input_user_name">Nhập tên hiển thị</string>
 </resources>

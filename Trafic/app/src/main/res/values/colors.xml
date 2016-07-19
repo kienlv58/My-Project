@@ -1,6 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#F44336</color>
+    <color name="colorPrimaryDark">#D32F2F</color>
+    <color name="colorAccent">#009688</color>
+
+    <color name="textColorPrimary">#FFFFFF</color>
+    <color name="windowBackground">#FFFFFF</color>
+    <color name="navigationBarColor">#000000</color>
+
+    <color name="BlueColor">#3366cc</color>
+    <color name="BlueZing">#7ebd03</color>
+    <color name="BlackColor">#000000</color>
+    <color name="WhiteColor">#FFFFFF</color>
+    <color name="Brown">#DFDFDF</color>
+    <color name="RedColor">#cc181e</color>
+    <color name="GreenColor">#6da204</color>
+    <color name="BlackOverPlay">#8C000000</color>
+    <color name="BlackOverPlay1">#80000000</color>
+    <color name="OrganColor">#E65100</color>
+
+    <color name="swipe_color_1">#009933</color>
+    <color name="swipe_color_2">#FF6600</color>
+    <color name="swipe_color_3">#006600</color>
+    <color name="swipe_color_4">#CC2900</color>
+
+    <color name="background_tab_pressed">#DFDFDF</color>
+    <color name="background_tab_focus">#222222</color>
+
+    <color name="transparent">#00000000</color>
+    <color name="mediacontroller_bg_pressed">#ff53c1bd</color>
+    <color name="mediacontroller_bg">#99000000</color>
+    <color name="login_fb_color">#5c6bc0</color>
+    <color name="login_google_color">#f44336</color>
+    <color name="color_selected_club">#F1F1F1</color>
+
+    <color name="background_card">#fff</color>
+    <color name="text_black_87">#de000000</color>
+    <color name="theme_accent">#FFEB3B</color>
+    <color name="theme_primary_dark2">#006064</color>
+    <color name="half_black">#808080</color>
+    <color name="white">#fafafa</color>
+    <color name="white_pressed">#f1f1f1</color>
 </resources>

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="vn.k2t.traficjam.user.RegisterActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/WhiteColor"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/inputlayout_Email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="20dp"
+            android:focusable="false"
+            android:textColorHint="@color/Brown">
+
+            <EditText
+                android:id="@+id/edt_email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/input_email"
+                android:inputType="textEmailAddress"
+                android:singleLine="true"
+                android:textColor="@color/BlackColor"
+                android:textColorHint="@color/Brown"
+                android:textSize="15sp"
+
+                />
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/inputlayout_UserName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:focusable="false"
+            android:textColorHint="@color/Brown">
+
+            <EditText
+                android:id="@+id/edt_user_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/input_user_name"
+                android:inputType="textEmailAddress"
+                android:singleLine="true"
+                android:textColor="@color/BlackColor"
+                android:textColorHint="@color/Brown"
+                android:textSize="15sp"
+
+                />
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/inputlayout_Pass"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:textColorHint="@color/Brown">
+
+            <EditText
+                android:id="@+id/edt_pass"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/input_pass"
+                android:inputType="textPassword"
+                android:singleLine="true"
+                android:textColor="@color/BlackColor"
+                android:textColorHint="@color/RedColor"
+                android:textSize="15sp"
+
+                />
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/inputlayout_RePass"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:textColorHint="@color/Brown">
+
+            <EditText
+                android:id="@+id/edt_repass"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/input_repass"
+                android:inputType="textPassword"
+                android:singleLine="true"
+                android:textColor="@color/BlackColor"
+                android:textColorHint="@color/RedColor"
+                android:textSize="15sp"
+
+                />
+        </android.support.design.widget.TextInputLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <Button
+                android:id="@+id/btn_Cancel_Register"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                android:layout_marginTop="10dp"
+                android:layout_weight="1"
+                android:background="@drawable/list_selector_button_focused"
+                android:text="@string/btn_cancel_register"
+                android:textColor="@color/WhiteColor" />
+
+            <Button
+                android:id="@+id/btn_loginAccount"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="10dp"
+                android:layout_weight="1"
+                android:background="@drawable/list_selector_button_focused"
+                android:text="@string/btn_register"
+                android:textColor="@color/WhiteColor" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>
