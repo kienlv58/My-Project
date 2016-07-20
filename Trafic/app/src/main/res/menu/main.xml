@@ -2,9 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item
-        android:id="@+id/item_contact"
-        android:icon="@drawable/ic_contact"
-        android:title="Logout"
-        app:showAsAction="always" />
+    <!--<item-->
+        <!--android:id="@+id/item_contact"-->
+        <!--android:icon="@drawable/ic_contact"-->
+        <!--android:title="Logout"-->
+        <!--app:showAsAction="always" />-->
 </menu>

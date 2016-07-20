@@ -11,9 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -26,7 +24,6 @@ import java.util.ArrayList;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import vn.k2t.traficjam.FrgBase;
-import vn.k2t.traficjam.MainActivity;
 import vn.k2t.traficjam.R;
 import vn.k2t.traficjam.adapter.ListFriendAdapter;
 import vn.k2t.traficjam.database.queries.SQLUser;
@@ -53,8 +50,7 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
     ListView lv_listSearch;
     @Bind(R.id.edt_search)
     EditText edt_search;
-    @Bind(R.id.iv_search)
-    ImageView iv_search;
+
 
     private String user_uid;
     private ArrayList<UserTraffic> listData;
@@ -79,17 +75,18 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
             rootView = inflater.inflate(R.layout.frg_friends, container, false);
             mDatabase = FirebaseDatabase.getInstance().getReference();
             sqlUser = new SQLUser(getActivity());
+
+            ButterKnife.bind(this, rootView);
+            initView();
             try {
                 user_uid = sqlUser.getUser().getUid();
                 if (user_uid != null) {
-
                     getAllUser();
+
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
-            ButterKnife.bind(this, rootView);
-            initView();
         } else {
             super.newInstance(mContext);
             return super.onCreateView(inflater, container, savedInstanceState);
@@ -101,15 +98,16 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
     @Override
     public void onStart() {
         super.onStart();
-
-
+//        getAllUser();
 
     }
 
     private void initView() {
-        list = new ArrayList<>();
         edt_search.addTextChangedListener(this);
-
+        listFriendAdapter = new ListFriendAdapter(getActivity(), listData, 1);
+        lv_listSearch.setAdapter(listFriendAdapter);
+        listFriendAdapter.notifyDataSetChanged();
+        lv_listSearch.setOnItemClickListener(this);
     }
 
 //    public void insertFriends(String _uid) {
@@ -143,18 +141,13 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
 //    }
 
     public void getAllUser() {
-        list.clear();
+        list = new ArrayList<>();
         mDatabase.child(AppConstants.USER).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 UserTraffic userTraffic = dataSnapshot.getValue(UserTraffic.class);
+                Log.e(TAG, userTraffic.toString());
                 list.add(userTraffic);
-
-//                Log.e(TAG, list.size() + "");
-//                listFriendAdapter = new ListFriendAdapter(getActivity(), list);
-//                lv_listfriends.setAdapter(listFriendAdapter);
-//                listFriendAdapter.notifyDataSetChanged();
-
             }
 
             @Override
@@ -181,7 +174,7 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
 
     @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        Log.e("beforetextchange", s + "");
+
     }
 
     @Override
@@ -190,19 +183,11 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
         listData = new ArrayList<>();
         if (searchWithName(s + "") != null) {
             listData.addAll(searchWithName(s + ""));
-            listFriendAdapter = new ListFriendAdapter(getActivity(), listData,1);
         } else if (searchWithSdt(s + "") != null) {
             listData.addAll(searchWithSdt(s + ""));
-            listFriendAdapter = new ListFriendAdapter(getActivity(), listData,1);
         } else if (searchWithEmail(s + "") != null) {
             listData.addAll(searchWithEmail(s + ""));
-            listFriendAdapter = new ListFriendAdapter(getActivity(), listData,1);
         }
-
-        lv_listSearch.setAdapter(listFriendAdapter);
-        listFriendAdapter.notifyDataSetChanged();
-        lv_listSearch.setOnItemClickListener(this);
-
     }
 
     @Override
@@ -243,11 +228,14 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         String friend_uid = listData.get(position).getUid();
+        Log.e(TAG, "test1" + friend_uid);
         Intent intent = new Intent(getActivity(), ActivityUserProfile.class);
         intent.putExtra(KEY_FRIEND_UID, friend_uid);
         intent.putExtra(KEY_USER_UID, user_uid);
         startActivity(intent);
+        Log.e(TAG, "test2" + friend_uid);
     }
+
 
 //    public ArrayList<UserTraffic> getListFriends(String uid) {
 //        final ArrayList<UserTraffic> arrayList = new ArrayList<>();

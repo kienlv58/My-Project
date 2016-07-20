@@ -1,33 +1,18 @@
 package vn.k2t.traficjam;
 
-import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.Typeface;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.provider.Settings;
-import android.support.annotation.IdRes;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
-import android.support.multidex.MultiDex;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
@@ -43,42 +28,27 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.directions.route.Route;
-import com.directions.route.RouteException;
-import com.directions.route.RoutingListener;
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.api.model.StringList;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+<<<<<<< HEAD
+=======
 import com.google.firebase.database.ValueEventListener;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+>>>>>>> 97ae6eb523f3dca9d72ea16e5d361290e3c00587
 
-import java.io.ByteArrayOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -86,13 +56,10 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import vn.k2t.traficjam.adapter.ListFriendAdapter;
 import vn.k2t.traficjam.adapter.TabAdapter;
 import vn.k2t.traficjam.database.queries.SQLUser;
-import vn.k2t.traficjam.maps.MapFragMent;
 import vn.k2t.traficjam.maps.MapsActivity;
 import vn.k2t.traficjam.model.Friends;
-import vn.k2t.traficjam.model.ItemData;
 import vn.k2t.traficjam.model.Posts;
 import vn.k2t.traficjam.model.UserTraffic;
-import vn.k2t.traficjam.onclick.ItemClick;
 import vn.k2t.traficjam.untilitis.AppConstants;
 import vn.k2t.traficjam.untilitis.CommonMethod;
 import vn.k2t.traficjam.untilitis.Utilities;
@@ -111,14 +78,10 @@ public class MainActivity extends AppCompatActivity
     DrawerLayout drawer;
     @Bind(R.id.nav_view)
     NavigationView navigationView;
-    @Bind(R.id.nav_view_right)
-    NavigationView navigationView_Right;
     @Bind(R.id.viewPager)
     ViewPager viewPager;
     @Bind(R.id.tabLayout)
     TabLayout tabLayout;
-    @Bind(R.id.lv_listfriend)
-    ListView lv_listfriend;
     TextView tv_friend;
 
 
@@ -243,13 +206,6 @@ public class MainActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
-        navigationView_Right.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(MenuItem item) {
-                drawer.closeDrawer(GravityCompat.END);
-                return true;
-            }
-        });
         setTabFragment();
     }
 
@@ -266,9 +222,9 @@ public class MainActivity extends AppCompatActivity
                 findItem(R.id.request_friend));
         //initializeCountDrawer("");
 
-        imgUserProfile = (CircleImageView) navigationView_Right.getHeaderView(0).findViewById(R.id.profile_image_user);
-        tvNavUserName = (TextView) navigationView_Right.getHeaderView(0).findViewById(R.id.tv_nav_Name);
-        tvNavEmail = (TextView) navigationView_Right.getHeaderView(0).findViewById(R.id.tv_nav_email);
+        imgUserProfile = (CircleImageView) navigationView.getHeaderView(0).findViewById(R.id.profile_image_user);
+        tvNavUserName = (TextView) navigationView.getHeaderView(0).findViewById(R.id.tv_nav_Name);
+        tvNavEmail = (TextView) navigationView.getHeaderView(0).findViewById(R.id.tv_nav_email);
         imgUserProfile.setOnClickListener(this);
         tvNavUserName.setOnClickListener(this);
         tvNavEmail.setOnClickListener(this);
@@ -306,10 +262,10 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.item_contact) {
-            drawer.openDrawer(GravityCompat.END);
-            return true;
-        }
+//        if (id == R.id.item_contact) {
+//            drawer.openDrawer(GravityCompat.START);
+//            return true;
+//        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -357,7 +313,7 @@ public class MainActivity extends AppCompatActivity
 
                 if (mUser != null) {
                     startActivityForResult(new Intent(this, ActivityUserProfile.class), 300);
-                    drawer.closeDrawer(GravityCompat.END);
+                    drawer.closeDrawer(GravityCompat.START);
                     overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_in_left);
                 } else {
                     Intent intent = new Intent(MainActivity.this, LoginUserActivity.class);

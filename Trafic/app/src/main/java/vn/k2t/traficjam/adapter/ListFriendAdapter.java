@@ -2,10 +2,8 @@ package vn.k2t.traficjam.adapter;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,7 +21,6 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import java.util.ArrayList;
 
-import vn.k2t.traficjam.MainActivity;
 import vn.k2t.traficjam.R;
 import vn.k2t.traficjam.database.queries.SQLUser;
 import vn.k2t.traficjam.model.UserTraffic;
