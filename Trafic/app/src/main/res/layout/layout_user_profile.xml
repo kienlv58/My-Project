@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:scaleType="centerCrop"
-            android:src="@drawable/bg_profile" />
+            android:src="@drawable/bg_user_profile" />
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/profile_image"
@@ -32,7 +32,6 @@
             android:layout_below="@+id/profile_image"
             android:layout_marginTop="10dp"
             android:gravity="center"
-            android:text="Van Truong"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
             android:textColor="@android:color/black" />
 
@@ -43,7 +42,6 @@
             android:layout_below="@+id/tvUserName"
             android:layout_centerHorizontal="true"
             android:gravity="center"
-            android:text="truongcvbk@gmail.com"
             android:textAppearance="?attr/textAppearanceListItem"
             android:textColor="@android:color/black" />
 

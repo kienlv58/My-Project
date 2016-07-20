@@ -9,9 +9,41 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="vn.k2t.traficjam.user.RequestFriendActivity">
 
-    <ListView
+    <Button
+        android:id="@+id/bnt_find"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/listRQ"
-        ></ListView>
+        android:text="Tìm bạn mới" />
+
+    <TextView
+        android:id="@+id/tilte"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/bnt_find"
+        android:layout_marginTop="5dp"
+        android:background="#ba8686"
+        android:gravity="center_horizontal"
+        android:text="Loi moi ket ban"
+        android:textSize="20sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/tilte"
+        android:background="#d7b5b5">
+
+        <ListView
+            android:id="@+id/listRQ"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"></ListView>
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/txtv_nodata"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="khong co loi moi ket ban nao"
+        android:visibility="gone" />
 </RelativeLayout>

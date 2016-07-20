@@ -22,6 +22,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
@@ -39,11 +40,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-<<<<<<< HEAD
-=======
-import com.google.firebase.database.ValueEventListener;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
->>>>>>> 97ae6eb523f3dca9d72ea16e5d361290e3c00587
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -242,6 +238,7 @@ public class MainActivity extends AppCompatActivity
         viewPager.setAdapter(tabAdapter);
         tabLayout.setupWithViewPager(viewPager);
 
+
     }
 
     @Override
@@ -274,12 +271,15 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+        item.setChecked(false);
 
         if (id == R.id.profile) {
             Intent intent = new Intent(MainActivity.this, ActivityUserProfile.class);
             startActivity(intent);
             // Handle the camera action
         } else if (id == R.id.friend) {
+            viewPager.setCurrentItem(1);
+            tabLayout.setupWithViewPager(viewPager);
 
         } else if (id == R.id.request_friend) {
             Intent intent = new Intent(MainActivity.this, RequestFriendActivity.class);
@@ -292,7 +292,10 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(MainActivity.this, MapsActivity.class);
             startActivity(intent);
         } else if (id == R.id.chiduong) {
+
         } else if (id == R.id.acticle) {
+            viewPager.setCurrentItem(0);
+            tabLayout.setupWithViewPager(viewPager);
 
         }
 

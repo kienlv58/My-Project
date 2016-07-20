@@ -44,7 +44,7 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
     private static Context mContext;
     private ListFriendAdapter listFriendAdapter;
     private static DatabaseReference mDatabase;
-    private ArrayList<UserTraffic> list;
+    private ArrayList<UserTraffic> list =  new ArrayList<>();
     private SQLUser sqlUser;
     @Bind(R.id.lv_listSearch)
     ListView lv_listSearch;
@@ -53,7 +53,6 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
 
 
     private String user_uid;
-    private ArrayList<UserTraffic> listData;
 
     public FrgFriends() {
         super();
@@ -75,18 +74,19 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
             rootView = inflater.inflate(R.layout.frg_friends, container, false);
             mDatabase = FirebaseDatabase.getInstance().getReference();
             sqlUser = new SQLUser(getActivity());
+            lv_listSearch = (ListView)rootView.findViewById(R.id.lv_listSearch);
 
             ButterKnife.bind(this, rootView);
-            initView();
             try {
                 user_uid = sqlUser.getUser().getUid();
-                if (user_uid != null) {
-                    getAllUser();
-
-                }
-            } catch (Exception e) {
+            }catch (Exception e){
                 e.printStackTrace();
             }
+                if (user_uid != null) {
+                    getAllUser();
+                    initView();
+
+                }
         } else {
             super.newInstance(mContext);
             return super.onCreateView(inflater, container, savedInstanceState);
@@ -103,8 +103,9 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
     }
 
     private void initView() {
+
         edt_search.addTextChangedListener(this);
-        listFriendAdapter = new ListFriendAdapter(getActivity(), listData, 1);
+        listFriendAdapter = new ListFriendAdapter(getActivity(), list, 1);
         lv_listSearch.setAdapter(listFriendAdapter);
         listFriendAdapter.notifyDataSetChanged();
         lv_listSearch.setOnItemClickListener(this);
@@ -141,7 +142,7 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
 //    }
 
     public void getAllUser() {
-        list = new ArrayList<>();
+        list.clear();
         mDatabase.child(AppConstants.USER).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -180,13 +181,21 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-        listData = new ArrayList<>();
+//        listData = new ArrayList<>();
+//        if (searchWithName(s + "") != null) {
+//            listData.addAll(searchWithName(s + ""));
+//        } else if (searchWithSdt(s + "") != null) {
+//            listData.addAll(searchWithSdt(s + ""));
+//        } else if (searchWithEmail(s + "") != null) {
+//            listData.addAll(searchWithEmail(s + ""));
+//        }
+        list.clear();
         if (searchWithName(s + "") != null) {
-            listData.addAll(searchWithName(s + ""));
+            list.addAll(searchWithName(s + ""));
         } else if (searchWithSdt(s + "") != null) {
-            listData.addAll(searchWithSdt(s + ""));
+            list.addAll(searchWithSdt(s + ""));
         } else if (searchWithEmail(s + "") != null) {
-            listData.addAll(searchWithEmail(s + ""));
+            list.addAll(searchWithEmail(s + ""));
         }
     }
 
@@ -227,7 +236,7 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        String friend_uid = listData.get(position).getUid();
+        String friend_uid = list.get(position).getUid();
         Log.e(TAG, "test1" + friend_uid);
         Intent intent = new Intent(getActivity(), ActivityUserProfile.class);
         intent.putExtra(KEY_FRIEND_UID, friend_uid);

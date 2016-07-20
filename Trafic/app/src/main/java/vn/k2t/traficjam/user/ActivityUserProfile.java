@@ -2,6 +2,7 @@ package vn.k2t.traficjam.user;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -23,6 +24,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
@@ -40,6 +42,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.ByteArrayOutputStream;
+import java.util.zip.Inflater;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import vn.k2t.traficjam.R;
@@ -71,12 +74,19 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
     private CircleImageView dialog_image_update;
     private ImageView imageView;
     private String base64Image;
+    ProgressDialog pd;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_user_profile);
         mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        pd = new ProgressDialog(this,R.style.MyThem);
+       // pd.setCancelable(false);
+        pd.setProgressStyle(android.R.style.Widget_Material_ProgressBar_Large);
+        pd.show();
+
         sqlUser = new SQLUser(this);
         profile_btn_update = (Button) findViewById(R.id.profile_btn_update);
         profile_btn_update.setOnClickListener(this);
@@ -91,40 +101,18 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
             profile_btn_update.setEnabled(false);
             profile_btn_add.setEnabled(true);
             profile_btn_wait.setEnabled(false);
+            getProfile(friend_uid);
         } else {
             sqlUser = new SQLUser(this);
             user_uid = sqlUser.getUser().getUid();
             profile_btn_update.setEnabled(true);
             profile_btn_add.setEnabled(false);
             profile_btn_wait.setEnabled(false);
+            getProfile(user_uid);
         }
         avatar = (CircleImageView) findViewById(R.id.profile_image);
         tvUserName = (TextView) findViewById(R.id.tvUserName);
         tvEmail = (TextView) findViewById(R.id.tvEmail);
-        if (user_uid != null) {
-            mDatabase.child(AppConstants.USER).child(user_uid).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    tvUserName.setText(dataSnapshot.child("name").getValue().toString());
-                    tvEmail.setText(dataSnapshot.child("email").getValue().toString());
-                    String imagestr = dataSnapshot.child("avatar").getValue().toString();
-                    if (imagestr.contains("http")) {
-                        CommonMethod.getInstance(getApplicationContext()).loadImage(imagestr, avatar);
-                    } else if (imagestr.isEmpty()) {
-                        avatar.setImageResource(R.drawable.ic_user_profile);
-                    } else {
-
-                        avatar.setImageBitmap(StringToBitMap(imagestr));
-                    }
-
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-        }
 
         final Drawable upArrow = getResources().getDrawable(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
         upArrow.setColorFilter(getResources().getColor(R.color.WhiteColor), PorterDuff.Mode.SRC_ATOP);
@@ -164,6 +152,12 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_profile, menu);
+        MenuItem item = menu.findItem(R.id.item_logout);
+        if (friend_uid != null){
+            item.setVisible(false);
+
+        }
+
         return true;
     }
 
@@ -189,6 +183,46 @@ public class ActivityUserProfile extends AppCompatActivity implements View.OnCli
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        pd.dismiss();
+    }
+
+    public  void getProfile(String _uid){
+
+        if (_uid != null) {
+            mDatabase.child(AppConstants.USER).child(_uid).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    try {
+                        tvUserName.setText(dataSnapshot.child("name").getValue().toString());
+                        tvEmail.setText(dataSnapshot.child("email").getValue().toString());
+                        String imagestr = dataSnapshot.child("avatar").getValue().toString();
+                        if (imagestr.contains("http")) {
+                            CommonMethod.getInstance(getApplicationContext()).loadImage(imagestr, avatar);
+                        } else if (imagestr.isEmpty()) {
+                            avatar.setImageResource(R.drawable.ic_user_profile);
+                        } else {
+
+                            avatar.setImageBitmap(StringToBitMap(imagestr));
+                        }
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }finally {
+                        pd.dismiss();
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
     }
 
     @Override

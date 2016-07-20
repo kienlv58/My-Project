@@ -5,7 +5,9 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -30,6 +32,7 @@ public class RequestFriendActivity extends AppCompatActivity {
     ArrayList<UserTraffic> lisUser=new ArrayList<>();
     ListView listRQ;
     private static DatabaseReference mDatabase;
+    TextView txtv_noData;
 
 
     @Override
@@ -38,6 +41,12 @@ public class RequestFriendActivity extends AppCompatActivity {
         setContentView(R.layout.activity_request_friend);
         mDatabase = FirebaseDatabase.getInstance().getReference();
         lisRequest = MainActivity.listRequest;
+        txtv_noData = (TextView)findViewById(R.id.txtv_nodata);
+        if (lisUser.size() == 0){
+            txtv_noData.setVisibility(View.VISIBLE);
+        }else {
+            txtv_noData.setVisibility(View.GONE);
+        }
         new AsyncTask<Void,Void,Void>(){
 
             @Override
@@ -49,6 +58,11 @@ public class RequestFriendActivity extends AppCompatActivity {
             @Override
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
+                if (lisUser.size() == 0){
+                    txtv_noData.setVisibility(View.VISIBLE);
+                }else {
+                    txtv_noData.setVisibility(View.GONE);
+                }
                 adapter = new ListFriendAdapter(getApplicationContext(),lisUser,2);
                 listRQ = (ListView)findViewById(R.id.listRQ);
                 listRQ.setAdapter(adapter);
