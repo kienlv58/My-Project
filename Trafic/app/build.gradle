@@ -50,5 +50,6 @@ dependencies {
     //compile 'com.novaapps:FloatingActionMenu:1.0'
     compile 'com.getbase:floatingactionbutton:1.10.1'
     compile 'com.android.support:multidex:1.0.1'
+
 }
 

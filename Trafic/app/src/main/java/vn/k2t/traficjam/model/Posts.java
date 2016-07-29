@@ -5,30 +5,41 @@ package vn.k2t.traficjam.model;
  */
 public class Posts {
     private String user_id;
-    private String title;
     private String name;
+    private String avatar;
+    private String title;
+
     private String type;
     private String rank;
     private String latitude;
     private String longitude;
+    private String location;
     private String image;
     private String created_at;
-
+    private String like;
+    private String share;
+    private String report;
     public Posts() {
 
     }
 
-    public Posts(String user_id, String title, String name, String type, String rank, String latitude, String longitude, String image, String created_at) {
+    public Posts(String user_id, String name, String avatar, String title, String type, String rank, String latitude, String longitude, String location, String image, String created_at, String like, String share, String report) {
         this.user_id = user_id;
-        this.title = title;
         this.name = name;
+        this.avatar = avatar;
+        this.title = title;
         this.type = type;
         this.rank = rank;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.location = location;
         this.image = image;
         this.created_at = created_at;
+        this.like = like;
+        this.share = share;
+        this.report = report;
     }
+
 
     public String getUser_id() {
         return user_id;
@@ -38,20 +49,28 @@ public class Posts {
         this.user_id = user_id;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getName() {
         return name;
     }
 
-    public String getCreated_at() {
-        return created_at;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setCreated_at(String created_at) {
-        this.created_at = created_at;
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getType() {
@@ -62,23 +81,37 @@ public class Posts {
         this.type = type;
     }
 
-
-    public String getTitle() {
-        return title;
-    }
-
     public String getRank() {
         return rank;
+    }
+
+    public void setRank(String rank) {
+        this.rank = rank;
     }
 
     public String getLatitude() {
         return latitude;
     }
 
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
+    }
+
     public String getLongitude() {
         return longitude;
     }
 
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
 
     public String getImage() {
         return image;
@@ -88,23 +121,35 @@ public class Posts {
         this.image = image;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public String getCreated_at() {
+        return created_at;
     }
 
-    public void setRank(String rank) {
-        this.rank = rank;
+    public void setCreated_at(String created_at) {
+        this.created_at = created_at;
     }
 
-    public void setLatitude(String latitude) {
-        this.latitude = latitude;
+    public String getLike() {
+        return like;
     }
 
-    public void setLongitude(String longitude) {
-        this.longitude = longitude;
+    public void setLike(String like) {
+        this.like = like;
     }
 
+    public String getShare() {
+        return share;
+    }
 
+    public void setShare(String share) {
+        this.share = share;
+    }
 
+    public String getReport() {
+        return report;
+    }
 
+    public void setReport(String report) {
+        this.report = report;
+    }
 }
