@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import vn.k2t.traficjam.frgmanager.FragGoogleMap;
 import vn.k2t.traficjam.frgmanager.FrgFriends;
 import vn.k2t.traficjam.frgmanager.FrgMaps;
+import vn.k2t.traficjam.frgmanager.FrgMyFriends;
 import vn.k2t.traficjam.frgmanager.FrgNews;
 
 /**
@@ -41,7 +42,7 @@ public class TabAdapter extends FragmentPagerAdapter {
                 frg = FrgNews.newInstance(mContext);
                 break;
             case 1:
-                frg = FrgFriends.newInstance(mContext);
+                frg = FrgMyFriends.newInstance(mContext);
                 break;
             default:
                 frg = FrgNews.newInstance(mContext);

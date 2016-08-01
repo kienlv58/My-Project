@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 
 
 public class Utilities {
-    private Context mContext;
+    public Context mContext;
 
 
     public Utilities(Context mContext) {

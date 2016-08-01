@@ -58,4 +58,7 @@
     <string name="turn_on_wifi">Ứng dụng cần truy cập wifi hoặc 3G. Bạn có muốn thiết lập cài đặt mạng không?</string>
     <string name="btn_cancel_register">Cancel</string>
     <string name="input_user_name">Nhập tên hiển thị</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

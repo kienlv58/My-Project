@@ -1,5 +1,6 @@
 package vn.k2t.traficjam.frgmanager;
 
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -32,10 +33,7 @@ import vn.k2t.traficjam.untilitis.AppConstants;
 import vn.k2t.traficjam.untilitis.Utilities;
 import vn.k2t.traficjam.user.ActivityUserProfile;
 
-/**
- * Created by chung on 7/11/16.
- */
-public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnItemClickListener {
+public class FrgMyFriends extends FrgBase implements TextWatcher, AdapterView.OnItemClickListener {
     private static final String TAG = "FrgFriends";
     public static final String KEY_FRIEND_UID = "key_friend_uid";
     public static final String KEY_USER_UID = "key_user_uid";
@@ -54,7 +52,7 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
 
     private String user_uid;
 
-    public FrgFriends() {
+    public FrgMyFriends() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -71,22 +69,22 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
         View rootView = null;
         utilities = new Utilities(mContext);
         //if (utilities.isConnected()) {
-            rootView = inflater.inflate(R.layout.frg_friends, container, false);
-            mDatabase = FirebaseDatabase.getInstance().getReference();
-            sqlUser = new SQLUser(getActivity());
-            lv_listSearch = (ListView)rootView.findViewById(R.id.lv_listSearch);
+        rootView = inflater.inflate(R.layout.frg_my_friends, container, false);
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        sqlUser = new SQLUser(getActivity());
+        lv_listSearch = (ListView)rootView.findViewById(R.id.lv_listSearch);
 
-            ButterKnife.bind(this, rootView);
-            try {
-                user_uid = sqlUser.getUser().getUid();
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-                if (user_uid != null) {
-                    getAllUser();
-                    initView();
+        ButterKnife.bind(this, rootView);
+        try {
+            user_uid = sqlUser.getUser().getUid();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        if (user_uid != null) {
+            getAllUser();
+            initView();
 
-                }
+        }
 //        } else {
 //            super.newInstance(mContext);
 //            return super.onCreateView(inflater, container, savedInstanceState);
@@ -245,39 +243,4 @@ public class FrgFriends extends FrgBase implements TextWatcher, AdapterView.OnIt
         Log.e(TAG, "test2" + friend_uid);
     }
 
-
-//    public ArrayList<UserTraffic> getListFriends(String uid) {
-//        final ArrayList<UserTraffic> arrayList = new ArrayList<>();
-//        for (int i = 0; i < getListUID(uid).size(); i++) {
-//            mDatabase.child(getListUID(uid).get(i)).addChildEventListener(new ChildEventListener() {
-//                @Override
-//                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-//                    UserTraffic item = dataSnapshot.getValue(UserTraffic.class);
-//                    arrayList.add(item);
-//                }
-//
-//                @Override
-//                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-//
-//                }
-//
-//                @Override
-//                public void onChildRemoved(DataSnapshot dataSnapshot) {
-//
-//                }
-//
-//                @Override
-//                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-//
-//                }
-//
-//                @Override
-//                public void onCancelled(DatabaseError databaseError) {
-//
-//                }
-//            });
-//
-//        }
-//        return arrayList;
-//    }
 }
